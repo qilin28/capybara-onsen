@@ -1,0 +1,17 @@
+{
+  "name": "水豚温泉町",
+  "short_name": "水豚温泉町",
+  "description": "合成经营解压小游戏：帮水豚阿汤把温泉町的小食堂重新开起来",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDF6E5",
+  "theme_color": "#C7E39A",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

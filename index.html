@@ -1,0 +1,2772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>水豚温泉町</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C7E39A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="水豚温泉町">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --sky1:#C7E39A; --sky2:#AFD87E; --sky3:#9BCB6C; --sky4:#8FC163;
+  --wood:#D9BE92; --wood2:#C4A579; --woodD:#B08F62;
+  --paper:#FDF6E5; --paper2:#F7ECD5; --pline:#E8D6B2;
+  --ink:#6B4F3A; --inkL:#6B4F3A; --sub:#A18A68;
+  --lant:#F5B942; --lant2:#F0913C; --lant3:#D4762A;
+  --mint:#7ECBB4; --pink:#E88AA0; --gold:#F2C14E;
+  --grass:#DCEBBE; --grassD:#C3DC9B; --leaf:#7FB84F; --leafD:#66A038;
+  --cellBg:#F3EBD4; --boardBg:#E2EFC6;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 30%,var(--sky3) 62%,var(--sky4) 100%) fixed;
+  font-family:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  color:var(--ink);
+  display:flex; justify-content:center;
+  overflow-x:hidden;
+}
+#app{width:100%; max-width:520px; padding:0 10px calc(14px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:9px;}
+
+/* ---------- 顶部场景 ---------- */
+#scene{position:relative; margin:0 -10px; height:178px; overflow:hidden; border-bottom:3px solid var(--woodD);}
+#scene > svg{position:absolute; inset:0; width:100%; height:100%;}
+#sceneBg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 58%;}
+/* 装修改造层：按场景框百分比定位，不依赖 SVG 坐标系（背景换图也不会错位） */
+.scfx{position:absolute; pointer-events:none; z-index:2;}
+#scGlow{inset:0; background:
+  radial-gradient(circle at 26% 40%, rgba(255,196,110,.55), transparent 16%),
+  radial-gradient(circle at 41% 34%, rgba(255,196,110,.5), transparent 13%),
+  radial-gradient(circle at 55% 38%, rgba(255,196,110,.5), transparent 13%),
+  radial-gradient(circle at 68% 32%, rgba(255,196,110,.45), transparent 12%);}
+#scSign, #scGold{left:33%; top:52%; width:18%; height:12%; display:flex; align-items:center; justify-content:center;}
+.plaque{width:100%; height:100%; border-radius:5px; border:2.5px solid #7A5230;
+  background:linear-gradient(180deg,#C9873F,#A9682C); box-shadow:0 2px 0 rgba(90,60,30,.45);
+  position:relative;}
+.plaque::after{content:""; position:absolute; inset:22% 12%; border-radius:2px; background:#FFE1A8; opacity:.9;}
+.plaque.gold{background:linear-gradient(180deg,#F7CE5C,#E0A93A); border-color:#8A5F1E;
+  box-shadow:0 2px 0 rgba(120,85,25,.5), 0 0 12px rgba(255,214,120,.85);}
+.plaque.gold::after{background:#FFF6D8;}
+/* 生图背景加载成功后，隐藏手绘回退层；装修改造图层仍浮在背景之上 */
+#scene.hasbg #sceneArt, #scene.hasbg #sceneSky{display:none;}
+#sceneTop{position:absolute; top:10px; left:12px; right:12px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none;}
+#title{background:linear-gradient(180deg,#FFFDF6,var(--paper2)); border:3px solid #FFFDF5;
+  box-shadow:0 3px 0 rgba(150,120,80,.28), 0 6px 14px rgba(90,110,60,.22);
+  border-radius:16px; padding:6px 14px 7px; text-align:center;}
+#title h1{margin:0; font-size:20px; letter-spacing:3px; color:#7A5A36; font-weight:900;}
+#title span{display:inline-block; margin-top:2px; font-size:10.5px; color:#FFF6E2; letter-spacing:2px;
+  background:var(--lant2); border-radius:999px; padding:1px 10px;}
+#pills{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; align-items:flex-start; pointer-events:auto; max-width:190px; z-index:4;}
+.pill{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#FFFCF2,var(--paper));
+  border:2px solid var(--pline); box-shadow:0 2px 0 rgba(160,130,90,.25);
+  color:var(--ink); border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums;}
+.pill svg{width:15px; height:15px;}
+/* 经验条：文字压在条上，胶囊更紧凑，避免右侧伸到水豚底下 */
+#xpwrap{position:relative; width:74px; height:13px; border-radius:7px;
+  background:rgba(150,120,70,.22); overflow:hidden; flex:none;}
+#xpb{display:block; height:100%; width:0%; border-radius:7px;
+  background:linear-gradient(90deg,#9AD9C2,#7ECBB4); transition:width .35s;}
+#xpTxt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:9px; font-weight:900; color:#5C4630; letter-spacing:.3px;}
+#lvUp{position:fixed; top:38%; left:50%; transform:translate(-50%,-50%) scale(.6); z-index:75; pointer-events:none;
+  background:linear-gradient(180deg,#FBF0D8,var(--paper)),var(--grain); border:3px solid var(--lant); border-radius:22px;
+  padding:17px 34px; text-align:center; opacity:0; transition:opacity .3s, transform .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 0 0 6px rgba(255,179,92,.22), 0 18px 44px rgba(6,4,16,.5);}
+#lvUp.on{opacity:1; transform:translate(-50%,-50%) scale(1);}
+#lvUp .lvBig{font-size:28px; font-weight:900; color:#D95F38; letter-spacing:2px; white-space:nowrap;}
+#lvUp .lvSub{font-size:12px; font-weight:800; color:var(--sub); margin-top:4px;}
+#toasts{position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:70; display:flex; flex-direction:column; gap:6px; align-items:center; pointer-events:none; max-width:92vw;}
+.tchip{background:rgba(24,17,36,.92); color:#FFE7C2; border:1.5px solid rgba(255,179,92,.45); font-size:12.5px; font-weight:800;
+  padding:7px 16px; border-radius:16px; max-width:min(92vw,420px); line-height:1.55; text-align:center;
+  animation:tin .25s ease; transition:opacity .4s, transform .4s;}
+.tchip.out{opacity:0; transform:translateY(-6px);}
+@keyframes tin{0%{opacity:0; transform:translateY(-8px);}100%{opacity:1;}}
+#capyBtn{position:absolute; right:2px; bottom:-4px; width:124px; height:112px; background:none; border:none; padding:0; cursor:pointer; z-index:3;}
+#capyBtn svg{width:100%; height:100%; filter:drop-shadow(0 4px 6px rgba(90,110,60,.35));}
+#capyBtn .art{filter:drop-shadow(0 4px 6px rgba(90,110,60,.35));}
+#capyBtn .art > img{object-fit:contain;}
+#capyBtn.squish svg, #capyBtn.squish .art{animation:squish .3s ease; transform-origin:bottom center;}
+#capyCh{position:absolute; bottom:8px; left:2px;}
+.chb{background:var(--lant); color:#4A2A14; border:2px solid var(--ink); border-radius:999px; font-size:10.5px; font-weight:900; padding:0 6px; line-height:15px; box-shadow:0 2px 0 rgba(20,12,30,.4);}
+.chb.empty{background:#8B7B6B; color:#EEE2CC;}
+
+/* ---------- 订单 ---------- */
+#orders{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+.order{flex:1; min-width:0; position:relative; background:linear-gradient(180deg,#FFFDF6,var(--paper));
+  border:2.5px solid #FFFDF5; border-radius:16px; padding:7px 6px 6px; display:flex; flex-direction:column; align-items:center; gap:4px;
+  box-shadow:0 4px 10px rgba(90,120,60,.22);}
+.order .cwrap{display:flex; align-items:center; gap:5px; width:100%; justify-content:center;}
+/* 立绘自带奶油色圆底，无需再套描边与底色；仅保留圆形裁切 */
+.order .cust{width:48px; height:48px; flex:none;}
+.order .cust svg{width:100%; height:100%;}
+.order .cust .art{width:100%; height:100%;}
+.order .cust .art > img{object-fit:contain;}
+.order .cname{font-size:10.5px; font-weight:800; color:var(--sub); max-width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+/* 需求项等分卡内宽度、不换行：固定宽度会在窄屏放不下而换行，把卡片撑高一截 */
+.order .needs{display:flex; gap:6px; align-items:flex-start; justify-content:center; width:100%;}
+.need{flex:1 1 0; min-width:0; max-width:54px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;}
+.nicon{position:relative; width:100%; max-width:46px; aspect-ratio:1; background:var(--cellBg); border:2px solid #EDE0C2; border-radius:11px;}
+.need.ok .nicon{border-color:#9CC69C; background:#EFFAEF;}
+.nicon .art, .nicon svg{position:absolute; inset:8%; width:84%; height:84%;}
+.nname{font-size:9.5px; font-weight:800; line-height:1.15; color:var(--sub); text-align:center; word-break:break-all;}
+.need.ok .nname{color:#2F7B4F;}
+.need .cnt{position:absolute; bottom:-6px; right:-7px; font-size:10px; font-weight:900; background:#FFF9EC; border:1.5px solid var(--pline);
+  border-radius:999px; padding:0 5px; color:#A0522D; z-index:2;}
+.need.ok .cnt{color:#2F7B4F; border-color:#9CC69C; background:#EFFAEF;}
+.order .orow{display:flex; align-items:center; gap:4px; width:100%; justify-content:center; flex-wrap:wrap;}
+.reward{display:flex; align-items:center; gap:3px; font-size:11.5px; font-weight:900; color:#9A6B1F;}
+.reward svg{width:13px; height:13px;}
+.dv{background:linear-gradient(180deg,#9ACF63,var(--leaf)); border:none; border-bottom:3px solid var(--leafD);
+  color:#FFFDF0; font-weight:900; font-size:11.5px; border-radius:10px; padding:4px 10px; cursor:pointer; letter-spacing:1px;}
+.dv:not([disabled]):active{transform:translateY(1.5px); border-bottom-width:1.5px;}
+.dv[disabled]{filter:grayscale(.75); opacity:.55; cursor:default;}
+.dv.ready{animation:glowp 1.4s ease-in-out infinite;}
+.rf{background:none; border:none; padding:2px; cursor:pointer; color:#A08252;}
+.rf svg{width:15px; height:15px;}
+
+@media (max-width:430px){
+  .order{padding:6px 4px 5px;}
+  .order .cname{max-width:52px; font-size:10px;}
+  .order .cust{width:40px; height:40px;}
+  .order .needs{gap:4px;}
+  .nname{font-size:8.5px; line-height:1.1;}
+  .need .cnt{font-size:9px; padding:0 4px; right:-5px;}
+  .reward{font-size:10.5px;}
+  .dv{padding:3px 8px;}
+  /* 窄屏下标题会被资源胶囊挤成两行，压一压字号并给标题让位 */
+  #title{padding:5px 10px 6px;}
+  #title h1{font-size:17px; letter-spacing:1px; white-space:nowrap;}
+  #title span{font-size:9.5px; letter-spacing:1px; white-space:nowrap;}
+  #pills{max-width:150px;}
+  .pill{padding:3px 8px; font-size:11.5px;}
+  #xpwrap{width:60px;}
+}
+
+/* ---------- 棋盘 ---------- */
+#boardWrap{position:relative; width:min(100%,446px); margin:0 auto;}
+#board{display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(9,1fr); gap:5px; aspect-ratio:7/9.05;
+  padding:10px; border-radius:22px;
+  background:linear-gradient(180deg,#EDF6DC 0%,var(--boardBg) 45%,#D6E8B8 100%);
+  border:3px solid #FFFDF5;
+  box-shadow:0 8px 20px rgba(90,120,60,.25), inset 0 2px 0 rgba(255,255,255,.7);}
+.cell{position:relative; border-radius:12px; background:rgba(255,253,244,.5);
+  box-shadow:inset 0 1px 3px rgba(140,150,110,.18);}
+.cell.hov{outline:2.5px solid var(--lant); outline-offset:-1px; background:rgba(255,179,92,.16);}
+.cell.sel{outline:2.5px dashed var(--lant); outline-offset:-1px;}
+.cell.lk{background:rgba(180,190,150,.35);}
+.cell.lk svg.lki{position:absolute; inset:28%; width:44%; height:44%; color:rgba(120,140,90,.55);}
+.cell svg.it{position:absolute; inset:3%; width:94%; height:94%; pointer-events:none;}
+.art{position:relative; display:block; width:100%; height:100%;}
+/* 矢量层仅作缺图回退：默认隐藏，避免每次重建 DOM 时在贴图加载完成前闪出底色 */
+.art > svg{position:absolute; inset:0; width:100%; height:100%; display:none;}
+.art.noimg > svg{display:block;}
+.art > img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none;}
+.cell span.art.it{position:absolute; inset:2%; width:96%; height:96%; pointer-events:none;}
+.nicon .art{border-radius:8px; overflow:hidden;}
+.dxs .art{width:38px; height:38px; margin:0 auto;}
+.dxs .art > svg{width:100%; height:100%;}
+.dxs.no .art > img{display:none;}
+.cell.dim svg.it{opacity:.25;}
+.cell .chb{position:absolute; top:-5px; right:-5px; z-index:2; pointer-events:none;}
+.cell.genq svg.it{opacity:.5;}
+.cell.pop svg.it{animation:popIn .32s cubic-bezier(.34,1.56,.64,1);}
+.cell.mg svg.it{animation:mgPop .42s cubic-bezier(.34,1.56,.64,1);}
+.cell.shakeC{animation:shk .3s;}
+#lockBand{position:absolute; left:12px; right:12px; bottom:12px; height:calc(3/9.05*100% - 8px); display:flex; align-items:center; justify-content:center;
+  pointer-events:none; border-radius:12px;}
+#lockBand span{background:rgba(255,253,244,.9); color:var(--sub); font-size:11.5px; font-weight:800; letter-spacing:2px;
+  padding:4px 14px; border-radius:999px; border:1.5px dashed rgba(160,140,100,.5);}
+#ghost{position:fixed; width:56px; height:56px; margin:-28px 0 0 -28px; pointer-events:none; z-index:40; display:none; filter:drop-shadow(0 6px 8px rgba(8,6,18,.5));}
+#ghost svg{width:100%; height:100%;}
+#ghost .art{width:100%; height:100%;}
+.flyi .art{width:100%; height:100%;}
+.ckslot .art, .ckit .art, .ckbi .art, .wslot .art{width:100%; height:100%;}
+.spark{position:fixed; width:16px; height:16px; margin:-8px 0 0 -8px; pointer-events:none; z-index:41; color:var(--gold); animation:sprk .7s ease-out forwards;}
+.spark svg{width:100%; height:100%;}
+.flyi{position:fixed; width:34px; height:34px; margin:-17px 0 0 -17px; pointer-events:none; z-index:42; transition:transform .55s cubic-bezier(.5,.1,.6,1), opacity .55s;}
+.flyi svg{width:100%; height:100%;}
+.floatt{position:fixed; pointer-events:none; z-index:41; font-size:15px; font-weight:900; color:#FFE1AE;
+  text-shadow:0 2px 0 rgba(20,12,30,.6); animation:flup .9s ease-out forwards;}
+
+/* ---------- 底栏 ---------- */
+#bar{display:flex; gap:8px; justify-content:center;}
+.bbtn{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#FFFDF6,var(--paper2));
+  border:2.5px solid #FFFDF5; border-bottom-width:4px; border-bottom-color:#E3D2AE;
+  box-shadow:0 3px 0 rgba(150,170,110,.3); color:var(--ink); font-weight:900; font-size:12.5px;
+  border-radius:14px; padding:7px 15px; cursor:pointer;}
+.bbtn:active{transform:translateY(1.5px); border-bottom-width:2px;}
+.bbtn svg{width:15px; height:15px;}
+
+/* ---------- 弹层 ---------- */
+.modal{position:fixed; inset:0; z-index:60; background:rgba(12,10,24,.62); display:none; align-items:center; justify-content:center; padding:18px;}
+.modal.on{display:flex;}
+.panel{width:100%; max-width:420px; max-height:82vh; overflow:auto; background:linear-gradient(180deg,#FBF0D8,var(--paper)),var(--grain);
+  border:2.5px solid var(--pline); border-radius:20px; padding:16px 16px 18px; box-shadow:0 18px 44px rgba(6,4,16,.6);}
+.panel h2{margin:0 0 2px; font-size:17px; letter-spacing:2px;}
+.panel .psub{font-size:11.5px; color:var(--sub); margin-bottom:10px;}
+.pclose{position:sticky; float:right; top:0; background:none; border:none; color:var(--sub); cursor:pointer; padding:2px;}
+.pclose svg{width:18px; height:18px;}
+.dxh{display:flex; align-items:center; gap:6px; margin:12px 0 6px; font-size:13px; font-weight:900;}
+.dxh i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+.dxg{display:grid; grid-template-columns:repeat(4,1fr); gap:7px;}
+.dxs{background:rgba(120,86,50,.1); border:1.5px solid rgba(160,120,80,.25); border-radius:11px; padding:6px 2px 4px; text-align:center;}
+.dxs svg{width:38px; height:38px;}
+.dxs span{display:block; font-size:10px; font-weight:800; color:var(--ink); margin-top:1px;}
+.dxs.no svg{filter:brightness(.22) saturate(.3); opacity:.7;}
+.dxs.no span{color:#A89675;}
+.tstep{display:flex; align-items:center; gap:11px; margin:11px 0; background:rgba(120,86,50,.09); border-radius:13px; padding:9px 11px;}
+.tstep svg{width:40px; height:40px; flex:none;}
+.tstep b{display:block; font-size:13px;}
+.tstep p{margin:2px 0 0; font-size:11.5px; color:var(--sub); line-height:1.5;}
+.bigbtn{display:block; width:100%; margin-top:13px; background:linear-gradient(180deg,#F2895C,var(--lant2)); border:none; border-bottom:4px solid var(--lant3);
+  color:#FFF3E4; font-weight:900; font-size:15px; letter-spacing:3px; border-radius:14px; padding:11px; cursor:pointer;}
+.bigbtn:active{transform:translateY(2px); border-bottom-width:2px;}
+
+/* ---------- 底部信息卡 ---------- */
+#sheet{position:fixed; left:50%; transform:translate(-50%,120%); bottom:calc(10px + env(safe-area-inset-bottom)); width:min(94vw,430px); z-index:55;
+  background:linear-gradient(180deg,#FBF0D8,var(--paper)),var(--grain); border:2.5px solid var(--pline); border-radius:18px;
+  padding:12px 14px; box-shadow:0 14px 34px rgba(6,4,16,.55); transition:transform .28s cubic-bezier(.3,1.2,.5,1); display:flex; gap:12px; align-items:center;}
+#sheet.on{transform:translate(-50%,0);}
+#sheet .sicon{width:58px; height:58px; flex:none; background:rgba(120,86,50,.12); border-radius:13px; padding:4px;}
+#sheet .sicon svg{width:100%; height:100%;}
+#sheet .sbody{flex:1; min-width:0;}
+#sheet .sname{font-size:15px; font-weight:900;}
+#sheet .schain{font-size:11px; color:var(--sub); margin:1px 0 3px;}
+#sheet .dots{display:flex; gap:3px;}
+#sheet .dots i{width:7px; height:7px; border-radius:50%; background:rgba(120,86,50,.2);}
+#sheet .dots i.f{background:var(--lant2);}
+#sheet .sbtns{display:flex; flex-direction:column; gap:6px;}
+.sbtn{background:linear-gradient(180deg,var(--paper),var(--paper2)); border:2px solid var(--pline); border-bottom-width:3px;
+  border-radius:10px; font-size:12px; font-weight:900; color:var(--ink); padding:5px 13px; cursor:pointer; white-space:nowrap;}
+.sbtn.warn{color:#A03C2E;}
+.sbtn:active{transform:translateY(1px);}
+
+#toast{position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:70; background:rgba(24,17,36,.92); color:#FFE7C2;
+  border:1.5px solid rgba(255,179,92,.45); font-size:12.5px; font-weight:800; padding:8px 18px; border-radius:999px;
+  opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; max-width:92vw; overflow:hidden; text-overflow:ellipsis;}
+#undoChip{position:fixed; bottom:calc(76px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:56; display:none;
+  background:rgba(24,17,36,.92); color:#FFE7C2; border:1.5px solid rgba(255,179,92,.45); border-radius:999px; padding:7px 8px 7px 16px;
+  font-size:12px; font-weight:800; align-items:center; gap:9px;}
+#undoChip.on{display:flex;}
+#undoChip button{background:var(--lant); border:none; border-radius:999px; color:#4A2A14; font-weight:900; font-size:12px; padding:4px 12px; cursor:pointer;}
+
+/* ---------- 对话 ---------- */
+#dlgOv{position:fixed; inset:0; z-index:80; display:none; background:rgba(10,8,22,.38);}
+#dlgOv.on{display:block;}
+#dlg{position:absolute; left:50%; bottom:calc(16px + env(safe-area-inset-bottom)); transform:translateX(-50%);
+  width:min(94vw,470px); background:linear-gradient(180deg,#FBF0D8,var(--paper)),var(--grain);
+  border:2.5px solid var(--pline); border-radius:18px; padding:13px 15px 15px; box-shadow:0 14px 34px rgba(6,4,16,.55); cursor:pointer;}
+#dlgWho{display:flex; align-items:center; gap:8px; margin-bottom:6px; min-height:24px;}
+#dlgAva{width:54px; height:54px; flex:none;}
+#dlgAva svg{width:100%; height:100%;}
+#dlgAva.hide{display:none;}
+#dlgName{font-size:12.5px; font-weight:900; color:#9A6B1F; letter-spacing:1px;}
+#dlgTxt{min-height:44px; font-size:13.5px; line-height:1.8; font-weight:700;}
+#dlgNext{position:absolute; right:14px; bottom:9px; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
+  border-top:7px solid var(--lant2); animation:bob 1.2s ease-in-out infinite;}
+
+/* ---------- 主线目标 ---------- */
+#quest{display:flex; align-items:center; gap:7px; background:linear-gradient(180deg,#FFFCF2,var(--paper));
+  border:2px solid var(--pline); box-shadow:0 2px 0 rgba(160,130,90,.22);
+  border-radius:13px; padding:6px 11px; color:var(--ink); cursor:pointer;}
+#quest .qico{width:18px; height:18px; flex:none; color:var(--lant2);}
+#quest .qt{flex:1; min-width:0; font-size:12px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+#quest .qp{font-size:11.5px; font-weight:900; color:var(--lant3);}
+#quest.done .qp{color:var(--leafD);}
+.rf[disabled]{opacity:.28; cursor:default;}
+
+/* ---------- 经营层 ---------- */
+#bar{flex-wrap:wrap;}
+#bar .bbtn{padding:7px 12px;}
+.cell.bub .it{opacity:.85;}
+.bubOv{position:absolute; inset:2%; border-radius:50%; border:2px dashed rgba(158,216,232,.85); pointer-events:none;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.4) 0 18%, rgba(158,216,232,.12) 60%, rgba(120,190,214,.28));}
+.rrow{display:flex; align-items:center; gap:8px; background:rgba(120,86,50,.09); border-radius:13px; padding:9px 11px; margin:8px 0;}
+.rrow.isdone{opacity:.62;}
+.rinfo{flex:1; min-width:0;}
+.rinfo b{display:block; font-size:13px;}
+.rinfo span{font-size:11px; color:var(--sub);}
+.rcost{display:flex; align-items:center; gap:3px; font-size:12px; font-weight:900; color:#9A6B1F; white-space:nowrap;}
+.rcost svg{width:13px; height:13px;}
+.rdone{font-size:12px; font-weight:900; color:#2F7B4F; white-space:nowrap;}
+.rlock{color:#A08252;}
+.rlock svg{width:16px; height:16px;}
+
+/* ---------- 烹饪台与储物间 ---------- */
+/* 三块工作台等分一行；窄屏放不下时退回两列，第三块自动占满整行不留空缺 */
+#stations{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+@media (max-width:400px){
+  #stations{grid-template-columns:1fr 1fr;}
+  #stations .stTile:last-child{grid-column:1 / -1;}
+}
+.stTile{display:flex; align-items:center; gap:7px; min-width:0; text-align:left; background:linear-gradient(180deg,var(--paper),var(--paper2)),var(--grain);
+  border:2px solid var(--pline); border-bottom-width:3.5px; border-radius:14px; padding:8px 12px; cursor:pointer;
+  box-shadow:0 4px 10px rgba(10,8,22,.35); font-weight:900; font-size:12.5px; color:var(--ink); font-family:inherit;}
+.stTile:active{transform:translateY(1.5px); border-bottom-width:2px;}
+.stTile svg{width:21px; height:21px; flex:none; color:#B0763A;}
+.stTile small{display:block; font-size:9.5px; line-height:1.25; color:var(--sub); font-weight:800;}
+#cookSlots{display:flex; align-items:center; justify-content:center; gap:8px; margin:10px 0 12px;}
+.ckslot{width:56px; height:56px; border-radius:14px; background:rgba(120,86,50,.14); border:2px dashed #C9A96E; display:flex; align-items:center; justify-content:center;}
+.ckslot svg{width:46px; height:46px;}
+.ckslot.ckres{border-style:solid; background:rgba(242,193,78,.14); border-color:#D9A63C;}
+.ckq{font-size:24px; font-weight:900; color:#C9A96E;}
+.ckop{font-size:18px; font-weight:900; color:var(--sub);}
+#cookPick{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;}
+.ckit{position:relative; width:46px; height:46px; border-radius:12px; border:2px solid var(--pline); background:rgba(255,251,238,.66); cursor:pointer; padding:3px;}
+.ckit svg{width:100%; height:100%;}
+.ckit.on{border-color:#D95F38; background:rgba(242,137,92,.18); box-shadow:0 0 0 2px rgba(217,95,56,.25);}
+.ckit .cnt{position:absolute; right:-4px; bottom:-4px; font-size:9px; font-weight:900; background:#FFF9EC; border:1.5px solid var(--pline); border-radius:999px; padding:0 3px; color:#A0522D;}
+.ckbi{width:38px; height:38px; flex:none;}
+.ckbi svg{width:100%; height:100%;}
+.rrow.mys .ckbi{filter:brightness(.25) saturate(.3); opacity:.75;}
+.wslot{cursor:pointer; min-height:64px; font-family:inherit;}
+.wempty{font-size:11px; color:#B3A183; font-weight:800;}
+#cookGo[disabled]{filter:grayscale(.6); opacity:.6;}
+
+/* ---------- 扭蛋机与每日礼盒 ---------- */
+#gachaStage{display:flex; flex-direction:column; align-items:center; gap:8px; margin:6px 0 12px;
+  background:rgba(120,86,50,.08); border-radius:16px; padding:14px 10px; min-height:118px; justify-content:center;}
+#capsule{width:76px; height:76px; color:#B0763A;}
+#capsule svg{width:100%; height:100%;}
+#capsule.roll{animation:capRoll .6s ease-in-out;}
+@keyframes capRoll{
+  0%,100%{transform:rotate(0) scale(1);}
+  20%{transform:rotate(-16deg) scale(1.06);}
+  45%{transform:rotate(14deg) scale(1.06);}
+  70%{transform:rotate(-9deg) scale(1.03);}
+}
+#gachaResult{display:flex; flex-direction:column; align-items:center; gap:4px; min-height:0;}
+#gachaResult .gcard{width:84px; height:84px;}
+#gachaResult .gtx{font-size:12.5px; font-weight:900; color:var(--ink); text-align:center;}
+#gachaResult .grare{font-size:10.5px; font-weight:900; padding:1px 9px; border-radius:999px;
+  background:#EDE0C2; color:#8A6A44;}
+#gachaResult .grare.R{background:#CFE6F5; color:#2F6B90;}
+#gachaResult .grare.SR{background:linear-gradient(90deg,#FFE08A,#F5B942); color:#7A4E12;}
+#gachaResult.pop{animation:popIn .34s cubic-bezier(.34,1.56,.64,1);}
+.dxs .cnum{display:block; font-size:9.5px; font-weight:900; color:#B0763A;}
+#giftBtn{position:absolute; left:8px; bottom:6px; width:54px; height:54px; background:none; border:none;
+  padding:0; cursor:pointer; z-index:4; filter:drop-shadow(0 3px 5px rgba(90,110,60,.35));}
+#giftBtn .art{width:100%; height:100%;}
+#giftBtn.empty{opacity:.45;}
+#giftBtn #giftCh{position:absolute; top:-4px; right:-4px;}
+#giftBtn:active{transform:scale(.93);}
+/* 闪光食材：金框必须画在贴图之上（贴图不透明且铺满格子，画在 .cell 上会被盖住） */
+.cell.sh{box-shadow:0 0 9px rgba(242,193,78,.75);}
+.shOv{position:absolute; inset:0; border-radius:12px; pointer-events:none; z-index:2;
+  box-shadow:inset 0 0 0 2.5px #F2C14E;
+  background:radial-gradient(circle at 76% 18%, rgba(255,250,224,.95) 0 7%, transparent 24%),
+             radial-gradient(circle at 22% 80%, rgba(255,250,224,.85) 0 5%, transparent 20%);
+  animation:shGlow 2.2s ease-in-out infinite;}
+/* 右上角小金星：小尺寸下也能一眼认出是闪光 */
+.shOv::after{content:''; position:absolute; top:-3px; right:-3px; width:13px; height:13px;
+  background:#F2C14E; border:1.5px solid #8A5A1E; border-radius:50%;
+  box-shadow:0 0 5px rgba(242,193,78,.9);}
+@keyframes shGlow{0%,100%{opacity:.6;}50%{opacity:1;}}
+
+/* ---------- 动画 ---------- */
+@keyframes popIn{0%{transform:scale(.25)}62%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes mgPop{0%{transform:scale(.55)}55%{transform:scale(1.28)}100%{transform:scale(1)}}
+@keyframes squish{0%{transform:scale(1)}42%{transform:scale(1.08,.86)}100%{transform:scale(1)}}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes sprk{0%{transform:translate(0,0) scale(1); opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.3); opacity:0}}
+@keyframes flup{0%{transform:translateY(0); opacity:1}100%{transform:translateY(-36px); opacity:0}}
+@keyframes glowp{0%,100%{box-shadow:0 0 0 0 rgba(255,179,92,0)}50%{box-shadow:0 0 14px 3px rgba(255,179,92,.55)}}
+@keyframes sway{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
+@keyframes tw{0%,100%{opacity:.85}50%{opacity:.2}}
+@keyframes wink{0%,92%,100%{opacity:.95}96%{opacity:.35}}
+@keyframes steamup{0%{transform:translateY(4px); opacity:0}30%{opacity:.4}100%{transform:translateY(-14px); opacity:0}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.sway{animation:sway 4.2s ease-in-out infinite; }
+.tw{animation:tw 3.2s ease-in-out infinite;}
+.wink{animation:wink 5.5s ease-in-out infinite;}
+.steam{animation:steamup 3.4s ease-in-out infinite;}
+.bob{animation:bob 3.6s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<!-- ================= SVG 图标库（全部手写矢量，无 emoji） ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<radialGradient id="lg" cx=".5" cy=".5" r=".5">
+  <stop offset="0" stop-color="#FFC078" stop-opacity=".9"/><stop offset="1" stop-color="#FFC078" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#A8DCF0"/><stop offset=".45" stop-color="#C6E9F5"/>
+  <stop offset=".72" stop-color="#DCF0D6"/><stop offset="1" stop-color="#BFE09A"/>
+</linearGradient>
+<linearGradient id="hillg" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#9ECF72"/><stop offset="1" stop-color="#7FB84F"/>
+</linearGradient>
+
+<!-- ===== 蔬菜园链 ===== -->
+<symbol id="s-veg1" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="23" cy="39" rx="9" ry="12" fill="#B07A44" transform="rotate(-16 23 39)"/>
+  <ellipse cx="41" cy="37" rx="8" ry="11" fill="#C68A4E" transform="rotate(13 41 37)"/>
+  <ellipse cx="32" cy="23" rx="7" ry="9" fill="#D19A5C"/>
+  <g stroke="none"><ellipse cx="30" cy="20" rx="2.4" ry="3.4" fill="#F2D9AE" opacity=".85"/>
+  <circle cx="21" cy="34" r="1.6" fill="#8A5A2E"/><circle cx="42" cy="33" r="1.5" fill="#9A683A"/></g>
+</g></symbol>
+<symbol id="s-veg2" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M15 46 Q32 37 49 46 L48 51 Q32 57 16 51 Z" fill="#6E4529"/>
+  <path d="M32 40 V27" stroke-width="3.4" fill="none" stroke="#5F8F4A"/>
+  <path d="M32 28 Q21 27 18 14 Q31 15 32 27 Z" fill="#8CBE68"/>
+  <path d="M32 28 Q43 27 46 14 Q33 15 32 27 Z" fill="#79AE55"/>
+  <g stroke="none"><ellipse cx="24" cy="20" rx="2" ry="3" fill="#C4E4A6" opacity=".8" transform="rotate(-30 24 20)"/></g>
+</g></symbol>
+<symbol id="s-veg3" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M24 54 Q21 36 26 29 L38 29 Q43 36 40 54 Q32 58 24 54 Z" fill="#F4F8E8"/>
+  <path d="M32 30 V52" stroke="#D6DEB8" fill="none"/>
+  <path d="M21 31 Q17 12 32 10 Q47 12 43 31 Q37 24 32 27 Q27 24 21 31 Z" fill="#9CC069"/>
+  <path d="M26 15 Q31 14 33 18 M38 15 Q40 18 39 22" stroke="#7BA34C" fill="none" stroke-width="2"/>
+  <g stroke="none"><ellipse cx="27" cy="36" rx="2.2" ry="4" fill="#FFFFFF" opacity=".75"/></g>
+</g></symbol>
+<symbol id="s-veg4" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="32" cy="36" r="18" fill="#E5654E"/>
+  <path d="M17 43 A18 18 0 0 0 47 43 Q32 50 17 43 Z" fill="#C74B38" stroke="none"/>
+  <rect x="30" y="11" width="4" height="8" rx="2" fill="#557B3A"/>
+  <path d="M23 20 Q32 15 41 20 Q37 22 36 25 Q32 21 28 25 Q27 22 23 20 Z" fill="#6E9E4C"/>
+  <g stroke="none"><ellipse cx="25" cy="29" rx="4" ry="5.5" fill="#FFFFFF" opacity=".5" transform="rotate(-20 25 29)"/></g>
+</g></symbol>
+<symbol id="s-veg5" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="38" rx="20" ry="15" fill="#E58F3C"/>
+  <path d="M21 25 Q13 38 21 51 M43 25 Q51 38 43 51 M32 23.5 V52.5" stroke="#B96A24" fill="none" stroke-width="2.2"/>
+  <path d="M29 17 Q28 10 36 9 Q35 14 35 18 Z" fill="#6E4529"/>
+  <path d="M37 13 Q44 10 47 15 Q42 17 39 16" fill="#7BA34C"/>
+  <g stroke="none"><ellipse cx="23" cy="31" rx="3.5" ry="5" fill="#FFD9A0" opacity=".6" transform="rotate(-18 23 31)"/></g>
+</g></symbol>
+<symbol id="s-veg6" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="25" cy="24" r="7.5" fill="#E5654E"/>
+  <path d="M34 27 Q38 15 50 15 Q47 26 38 28 Z" fill="#9CC069"/>
+  <path d="M42 22 L46 30" stroke="#7BA34C" fill="none"/>
+  <path d="M14 30 H50 L46 52 Q32 56 18 52 Z" fill="#B08150"/>
+  <path d="M22 32 V51 M32 33 V53 M42 32 V51 M16 40 Q32 45 48 40" stroke="#8A5F38" fill="none" stroke-width="2"/>
+  <rect x="12" y="27" width="40" height="7" rx="3.5" fill="#C79B6B"/>
+</g></symbol>
+<symbol id="s-veg7" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="21" cy="24" r="6.5" fill="#E5654E"/>
+  <path d="M28 25 Q30 14 41 13 Q40 23 32 26 Z" fill="#9CC069"/>
+  <ellipse cx="44" cy="24" rx="7" ry="5.5" fill="#E58F3C"/>
+  <path d="M39 21 Q44 18 49 21" stroke="#B96A24" fill="none" stroke-width="2"/>
+  <rect x="11" y="28" width="42" height="24" rx="3" fill="#A9805A"/>
+  <path d="M24 29 V51 M40 29 V51" stroke="#8A5F38" fill="none" stroke-width="2"/>
+  <rect x="11" y="36" width="42" height="4" fill="#8A5F38" stroke="none"/>
+  <circle cx="47" cy="47" r="7" fill="#7ECBB4"/>
+  <path d="M44 48 Q47 42 51 44 Q49 49 44 48 Z" fill="#2E6E5A" stroke="none"/>
+</g></symbol>
+
+<!-- ===== 面点坊链 ===== -->
+<symbol id="s-bun1" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="17" rx="9" ry="5.5" fill="#F8F1DE"/>
+  <path d="M21 22 Q15 46 22 51 Q32 56 42 51 Q49 46 43 22 Q38 18 32 20 Q26 18 21 22 Z" fill="#EFE3CC"/>
+  <path d="M22 21 Q32 26 42 21" stroke="#C9AE7E" fill="none"/>
+  <rect x="26" y="33" width="12" height="10" rx="2" fill="#D9BE92"/>
+  <path d="M28 35 H36 M28 38 H36 M28 41 H36" stroke="#B99B66" fill="none" stroke-width="1.6" stroke-dasharray="2 2"/>
+  <g stroke="none"><circle cx="22" cy="28" r="1.3" fill="#FFF" opacity=".8"/><circle cx="41" cy="31" r="1.2" fill="#FFF" opacity=".8"/></g>
+</g></symbol>
+<symbol id="s-bun2" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="32" cy="36" r="17" fill="#F5E7C8"/>
+  <path d="M22 32 Q32 41 42 32" stroke="#D9BE92" fill="none" stroke-width="2.2"/>
+  <g stroke="none"><ellipse cx="25" cy="27" rx="4" ry="5" fill="#FFFFFF" opacity=".65" transform="rotate(-20 25 27)"/>
+  <circle cx="40" cy="26" r="1.3" fill="#FFF" opacity=".8"/><circle cx="22" cy="44" r="1.2" fill="#E4D0A4"/></g>
+</g></symbol>
+<symbol id="s-bun3" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M17 47 H47 L44 54 H20 Z" fill="#E4D2A8"/>
+  <path d="M17 47 Q16 26 32 26 Q48 26 47 47 Z" fill="#F8F1E2"/>
+  <path d="M22 41 Q32 46 42 41" stroke="#E0D0AC" fill="none" stroke-width="2"/>
+  <path d="M27 20 q3 -4 0 -8 M36 21 q3 -4 0 -7" stroke="#FFFFFF" fill="none" stroke-width="2.2" opacity=".8"/>
+  <g stroke="none"><ellipse cx="26" cy="33" rx="3.5" ry="4.5" fill="#FFFFFF" opacity=".7"/></g>
+</g></symbol>
+<symbol id="s-bun4" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M16 48 Q15 27 32 27 Q49 27 48 48 Q32 54 16 48 Z" fill="#F0DFBB"/>
+  <path d="M20 44 Q24 30 32 30 Q28 40 32 46 M32 30 Q40 32 42 44" stroke="#C9AE7E" fill="none" stroke-width="2.2"/>
+  <path d="M14 46 Q20 50 26 48 M50 46 Q44 50 38 48" stroke="#C9AE7E" fill="none" stroke-width="2"/>
+  <g stroke="none"><ellipse cx="25" cy="34" rx="3" ry="4" fill="#FFFFFF" opacity=".6"/></g>
+</g></symbol>
+<symbol id="s-bun5" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="40" rx="20" ry="10" fill="#C98A3E"/>
+  <ellipse cx="32" cy="35" rx="20" ry="10" fill="#EDBE72"/>
+  <g stroke="none">
+    <ellipse cx="24" cy="33" rx="4" ry="2.5" fill="#D9A050"/><ellipse cx="38" cy="37" rx="4.5" ry="2.5" fill="#D9A050"/>
+    <circle cx="28" cy="38" r="1.5" fill="#6E9E4C"/><circle cx="36" cy="32" r="1.5" fill="#6E9E4C"/><circle cx="44" cy="35" r="1.4" fill="#6E9E4C"/>
+    <ellipse cx="22" cy="31" rx="3.5" ry="1.8" fill="#FFE9B8" opacity=".85"/>
+  </g>
+</g></symbol>
+<symbol id="s-bun6" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M16 49 Q15 26 32 26 Q49 26 48 49 Q32 55 16 49 Z" fill="#F6EBD5"/>
+  <path d="M32 27 Q26 33 24 41 M32 27 Q32 35 32 44 M32 27 Q38 33 40 41 M32 27 Q21 31 18 38 M32 27 Q43 31 46 38" stroke="#D9BE92" fill="none" stroke-width="2"/>
+  <circle cx="32" cy="26" r="3" fill="#EADBB8"/>
+  <path d="M25 18 q3 -4 0 -7" stroke="#FFFFFF" fill="none" stroke-width="2" opacity=".75"/>
+</g></symbol>
+<symbol id="s-bun7" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="36" rx="21" ry="7" fill="#C79B6B"/>
+  <path d="M11 36 H53 V45 Q32 52 11 45 Z" fill="#A9805A"/>
+  <path d="M17 38 V46 M32 39 V49 M47 38 V46" stroke="#8A5F38" fill="none" stroke-width="2"/>
+  <circle cx="22" cy="31" r="6" fill="#F8F1E2"/><circle cx="34" cy="29" r="6.5" fill="#F8F1E2"/><circle cx="44" cy="32" r="5.5" fill="#F8F1E2"/>
+  <g stroke="none"><circle cx="22" cy="29" r="1.2" fill="#D9BE92"/><circle cx="34" cy="27" r="1.2" fill="#D9BE92"/><circle cx="44" cy="30" r="1.1" fill="#D9BE92"/></g>
+  <path d="M26 17 q3 -4 0 -7" stroke="#FFFFFF" fill="none" stroke-width="2" opacity=".75"/>
+</g></symbol>
+<symbol id="s-bun8" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="32" cy="34" r="21" fill="none" stroke="#FFD98C" stroke-width="2" opacity=".65"/>
+  <ellipse cx="32" cy="40" rx="19" ry="6.5" fill="#B98A4E"/>
+  <path d="M13 40 H51 V47 Q32 53 13 47 Z" fill="#9E7440"/>
+  <path d="M32 15 Q22 17 20 30 Q20 38 32 38 Q44 38 44 30 Q42 17 32 15 Z" fill="#F4CE8A"/>
+  <path d="M32 16 Q28 22 27 29 M32 16 Q36 22 37 29 M32 16 Q24 20 22 26 M32 16 Q40 20 42 26" stroke="#D9A85E" fill="none" stroke-width="1.8"/>
+  <path d="M27 15 Q32 11 37 15 Q35 18 32 17 Q29 18 27 15 Z" fill="#E8A23C"/>
+  <path d="M46 12 l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6 Z" fill="#FFE9B0" stroke-width="1.5"/>
+</g></symbol>
+
+<!-- ===== 蛋奶铺链 ===== -->
+<symbol id="s-d1" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M32 12 Q46 24 46 39 Q46 53 32 53 Q18 53 18 39 Q18 24 32 12 Z" fill="#E8C79A"/>
+  <g stroke="none"><circle cx="27" cy="30" r="1.4" fill="#C9A570"/><circle cx="37" cy="36" r="1.3" fill="#C9A570"/><circle cx="30" cy="44" r="1.2" fill="#C9A570"/>
+  <ellipse cx="27" cy="24" rx="3.4" ry="5" fill="#FFF" opacity=".55" transform="rotate(-16 27 24)"/></g>
+</g></symbol>
+<symbol id="s-d2" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12 30 Q12 46 32 46 Q52 46 52 30 L48 30 Q48 42 32 42 Q16 42 16 30 Z" fill="#F4E6C8"/>
+  <ellipse cx="32" cy="30" rx="20" ry="6.5" fill="#FBF3DC"/>
+  <ellipse cx="32" cy="30" rx="15" ry="4.6" fill="#FDF7EA" stroke="none"/>
+  <circle cx="32" cy="29.5" r="6.5" fill="#F8D975"/>
+  <g stroke="none"><ellipse cx="30" cy="27.5" rx="2" ry="1.4" fill="#FCE9A8"/></g>
+</g></symbol>
+<symbol id="s-d3" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M15 34 Q12 22 24 18 Q30 10 40 15 Q52 14 51 26 Q56 36 46 42 Q42 52 30 49 Q16 50 15 34 Z" fill="#FBF5E8"/>
+  <circle cx="33" cy="32" r="8.5" fill="#F5C84C"/>
+  <g stroke="none"><ellipse cx="30.5" cy="29" rx="2.6" ry="1.8" fill="#FBE29A"/><ellipse cx="22" cy="26" rx="3" ry="2" fill="#FFF" opacity=".7"/></g>
+</g></symbol>
+<symbol id="s-d4" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M25 20 L25 13 H39 V20 L43 28 V50 Q43 54 39 54 H25 Q21 54 21 50 V28 Z" fill="#F4F8F6"/>
+  <rect x="23.5" y="10" width="17" height="5" rx="2.5" fill="#E8734A"/>
+  <path d="M21 34 H43 V44 H21 Z" fill="#9FD2C8" stroke="none"/>
+  <path d="M21 34 H43 M21 44 H43" fill="none" stroke-width="2"/>
+  <g stroke="none"><ellipse cx="26.5" cy="26" rx="1.8" ry="4" fill="#FFF" opacity=".8"/></g>
+</g></symbol>
+<symbol id="s-d5" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M18 46 H46 L43 52 H21 Z" fill="#E4D2A8"/>
+  <path d="M20 46 Q16 38 24 36 Q20 28 30 27 Q28 18 36 20 Q44 18 42 27 Q50 30 44 36 Q50 40 44 46 Z" fill="#FBF3E4"/>
+  <path d="M27 33 Q32 30 37 33 M24 40 Q32 36 40 40" stroke="#E2D2B4" fill="none" stroke-width="2"/>
+  <g stroke="none"><ellipse cx="27" cy="25" rx="2.6" ry="1.8" fill="#FFF" opacity=".85"/></g>
+</g></symbol>
+<symbol id="s-d6" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M10 44 L54 30 L54 48 L10 48 Z" fill="#F2C14E"/>
+  <path d="M10 44 L54 30 L50 27 L10 40 Z" fill="#F8D975"/>
+  <g stroke="none"><circle cx="24" cy="44" r="2.6" fill="#D9A63C"/><circle cx="38" cy="40" r="2.2" fill="#D9A63C"/><circle cx="46" cy="43" r="1.8" fill="#D9A63C"/><circle cx="31" cy="37" r="1.6" fill="#E4B54A"/></g>
+</g></symbol>
+<symbol id="s-d7" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="32" cy="34" r="20" fill="none" stroke="#FFD98C" stroke-width="2" opacity=".65"/>
+  <ellipse cx="32" cy="38" rx="18" ry="7" fill="#D9A63C"/>
+  <path d="M14 30 Q14 24 32 24 Q50 24 50 30 L50 38 Q50 44 32 44 Q14 44 14 38 Z" fill="#F2C14E"/>
+  <ellipse cx="32" cy="30" rx="18" ry="6.5" fill="#F8D975"/>
+  <g stroke="none"><circle cx="25" cy="30" r="2" fill="#E4B54A"/><circle cx="38" cy="31.5" r="1.6" fill="#E4B54A"/></g>
+  <path d="M48 14 l1.5 3.2 3.2 1.5 -3.2 1.5 -1.5 3.2 -1.5 -3.2 -3.2 -1.5 3.2 -1.5 Z" fill="#FFE9B0" stroke-width="1.5"/>
+</g></symbol>
+
+<!-- ===== 暖心料理链（烹饪产物） ===== -->
+<symbol id="s-k1" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12 40 Q12 22 32 22 Q52 22 52 40 Z" fill="#EDBE72"/>
+  <path d="M12 40 Q32 48 52 40 Q52 46 32 50 Q12 46 12 40 Z" fill="#D9A050"/>
+  <path d="M18 34 Q26 30 32 34 Q40 30 46 34" stroke="#C98A3E" fill="none" stroke-width="2"/>
+  <g stroke="none"><ellipse cx="32" cy="40" rx="8" ry="3" fill="#F5C84C"/><circle cx="24" cy="38" r="1.4" fill="#6E9E4C"/><circle cx="40" cy="39" r="1.3" fill="#6E9E4C"/>
+  <ellipse cx="22" cy="28" rx="3.4" ry="2" fill="#FBE0A8" opacity=".9"/></g>
+</g></symbol>
+<symbol id="s-k2" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M10 32 Q10 46 32 46 Q54 46 54 32 L50 32 Q50 42 32 42 Q14 42 14 32 Z" fill="#F4E6C8"/>
+  <ellipse cx="32" cy="32" rx="21" ry="7" fill="#FBF3DC"/>
+  <g stroke="none">
+    <ellipse cx="24" cy="31" rx="5" ry="3.4" fill="#E5654E"/><ellipse cx="40" cy="32" rx="4.4" ry="3" fill="#E5654E"/>
+    <ellipse cx="32" cy="29" rx="4.6" ry="3" fill="#F5C84C"/><ellipse cx="45" cy="28.5" rx="3.6" ry="2.4" fill="#F8D975"/><ellipse cx="18" cy="28.5" rx="3.2" ry="2.2" fill="#F8D975"/>
+    <circle cx="30" cy="34" r="1.2" fill="#6E9E4C"/><circle cx="37" cy="28" r="1.1" fill="#6E9E4C"/>
+  </g>
+  <path d="M26 18 q3 -3.5 0 -7" stroke="#FFFFFF" fill="none" stroke-width="2" opacity=".75"/>
+</g></symbol>
+<symbol id="s-k3" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M40 18 Q48 12 54 16 Q50 24 42 23 Z" fill="#9CC069"/>
+  <path d="M13 49 Q12 24 32 24 Q52 24 51 49 Q32 56 13 49 Z" fill="#F6EBD5"/>
+  <path d="M32 25 Q25 32 23 41 M32 25 Q32 34 32 44 M32 25 Q39 32 41 41 M32 25 Q19 30 16 38 M32 25 Q45 30 48 38" stroke="#D9BE92" fill="none" stroke-width="2"/>
+  <circle cx="32" cy="25" r="3" fill="#EADBB8"/>
+  <path d="M24 16 q3 -4 0 -7" stroke="#FFFFFF" fill="none" stroke-width="2" opacity=".75"/>
+</g></symbol>
+<symbol id="s-k4" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12 30 Q12 47 32 47 Q52 47 52 30 L48 30 Q48 43 32 43 Q16 43 16 30 Z" fill="#E8955C"/>
+  <ellipse cx="32" cy="30" rx="20" ry="6.5" fill="#F2A96E"/>
+  <ellipse cx="32" cy="30" rx="15" ry="4.4" fill="#F5C08A" stroke="none"/>
+  <path d="M26 29 Q30 25 34 29 Q38 32 42 29" stroke="#FBF3E4" fill="none" stroke-width="3"/>
+  <path d="M28 18 q3 -3.5 0 -7 M37 19 q3 -3.5 0 -7" stroke="#FFFFFF" fill="none" stroke-width="2" opacity=".75"/>
+</g></symbol>
+<symbol id="s-k5" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="36" rx="21" ry="7" fill="#C79B6B"/>
+  <path d="M11 36 H53 V45 Q32 52 11 45 Z" fill="#A9805A"/>
+  <path d="M17 38 V46 M32 39 V49 M47 38 V46" stroke="#8A5F38" fill="none" stroke-width="2"/>
+  <circle cx="23" cy="30" r="6" fill="#F8EDD2"/><circle cx="35" cy="28" r="6.5" fill="#F8EDD2"/><circle cx="45" cy="31" r="5.5" fill="#F8EDD2"/>
+  <path d="M23 33 q2 4 0 7 M35 32 q2 4 0 6" stroke="#F2C14E" fill="none" stroke-width="2.4"/>
+  <g stroke="none"><circle cx="23" cy="28" r="1.4" fill="#E8C07A"/><circle cx="35" cy="26" r="1.4" fill="#E8C07A"/><circle cx="45" cy="29" r="1.2" fill="#E8C07A"/></g>
+</g></symbol>
+
+<!-- ===== 幸福甜品链（烹饪产物） ===== -->
+<symbol id="s-t1" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="48" rx="21" ry="5.5" fill="#F4E6C8"/>
+  <path d="M18 46 Q16 28 24 24 Q28 21 32 21 Q36 21 40 24 Q48 28 46 46 Q32 51 18 46 Z" fill="#F5D98C"/>
+  <path d="M22 25 Q32 19 42 25 Q44 29 43 33 Q32 28 21 33 Q20 29 22 25 Z" fill="#B96A24"/>
+  <path d="M40 27 q3 4 2 8" stroke="#8A4E1A" fill="none" stroke-width="2"/>
+  <g stroke="none"><ellipse cx="26" cy="30" rx="2.6" ry="4" fill="#FBEBB8" opacity=".8"/></g>
+</g></symbol>
+<symbol id="s-t2" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M14 30 L20 44 Q32 50 44 44 L50 30 Q48 26 44 28 L42 25 Q38 22 36 25 L32 22 L28 25 Q26 22 22 25 L20 28 Q16 26 14 30 Z" fill="#E8C07A"/>
+  <path d="M20 33 Q20 44 32 44 Q44 44 44 33 Q44 28 32 28 Q20 28 20 33 Z" fill="#F5C84C"/>
+  <ellipse cx="32" cy="33" rx="9" ry="5.5" fill="#F8D975" stroke="none"/>
+  <g stroke="none"><ellipse cx="28" cy="31" rx="2.6" ry="1.6" fill="#FBE9A8"/></g>
+</g></symbol>
+<symbol id="s-t3" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M18 44 H46 V50 Q32 54 18 50 Z" fill="#E88AA0"/>
+  <path d="M18 44 Q16 36 22 34 Q20 26 28 26 Q30 20 36 22 Q42 20 42 27 Q48 28 46 35 Q50 38 46 44 Z" fill="#FBF3E4"/>
+  <path d="M24 38 Q32 34 40 38" stroke="#E8D8BC" fill="none" stroke-width="2"/>
+  <g stroke="none"><circle cx="26" cy="30" r="1.2" fill="#F2E2C4"/><circle cx="36" cy="28" r="1.1" fill="#F2E2C4"/><ellipse cx="28" cy="26" rx="2.4" ry="1.6" fill="#FFF" opacity=".85"/></g>
+</g></symbol>
+<symbol id="s-t4" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <ellipse cx="32" cy="40" rx="21" ry="10" fill="#E2A957"/>
+  <path d="M11 40 Q11 34 15 33 Q13 30 18 29 Q17 26 22 27 Q22 23 27 25 Q28 21 32 23 Q36 21 37 25 Q42 23 42 27 Q47 26 46 29 Q51 30 49 33 Q53 34 53 40 Q32 48 11 40 Z" fill="#EDBE72"/>
+  <ellipse cx="32" cy="36" rx="12" ry="5" fill="#E58F3C"/>
+  <path d="M28 15 Q28 10 34 9 Q33 13 33 16 Z" fill="#6E4529"/>
+  <g stroke="none"><ellipse cx="23" cy="32" rx="3" ry="1.8" fill="#F8DFB0" opacity=".9"/></g>
+</g></symbol>
+<symbol id="s-t5" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M17 46 H47 L44 52 H20 Z" fill="#E4D2A8"/>
+  <path d="M17 46 Q15 24 32 22 Q49 24 47 46 Z" fill="#6E5F96"/>
+  <path d="M20 38 Q32 33 44 38" stroke="#8A7BB4" fill="none" stroke-width="2.4"/>
+  <g stroke="none" fill="#F2E2BE">
+    <circle cx="25" cy="31" r="1.3"/><circle cx="35" cy="28" r="1.1"/><circle cx="40" cy="34" r="1.2"/><circle cx="29" cy="41" r="1"/><circle cx="38" cy="42" r="1.1"/>
+    <path d="M32 24 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1 Z"/>
+  </g>
+  <path d="M25 20 Q32 15 39 20" stroke="#FBF3E4" fill="none" stroke-width="3"/>
+</g></symbol>
+
+<!-- ===== 生成器 ===== -->
+<symbol id="g-basket" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M30 22 V13 M30 17 Q23 16 21 9 Q29 10 30 16 M30 15 Q36 13 39 8 Q38 15 31 17" stroke="#5F8F4A" fill="#8CBE68"/>
+  <path d="M44 24 Q47 19 52 19 Q50 24 46 25 Z" fill="#8CBE68"/>
+  <ellipse cx="32" cy="27" rx="18" ry="5" fill="#6E4529"/>
+  <path d="M13 28 H51 L47 51 Q32 55 17 51 Z" fill="#B08150"/>
+  <path d="M21 30 V50 M32 31 V52 M43 30 V50 M15 38 Q32 43 49 38" stroke="#8A5F38" fill="none" stroke-width="2"/>
+  <rect x="11" y="25" width="42" height="7" rx="3.5" fill="#C79B6B"/>
+</g></symbol>
+<symbol id="g-flour" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M50 30 Q56 22 55 12 M55 12 Q50 14 50 20 M55 12 Q58 16 56 21" stroke="#D9A94E" fill="none" stroke-width="2.2"/>
+  <ellipse cx="52" cy="24" rx="2.5" ry="4" fill="#E8C87A" transform="rotate(18 52 24)"/>
+  <path d="M18 20 Q12 46 20 52 Q32 58 44 52 Q52 46 46 20 Z" fill="#E8D9BC"/>
+  <path d="M18 20 Q16 14 22 13 H42 Q48 14 46 20 Q38 24 32 23 Q26 24 18 20 Z" fill="#D9BE92"/>
+  <path d="M24 34 Q32 30 40 34" stroke="#C9AE7E" fill="none" stroke-width="2"/>
+  <rect x="26" y="36" width="12" height="11" rx="2" fill="#F6E7C9"/>
+  <path d="M29 40 H35 M29 43 H35" stroke="#B99B66" fill="none" stroke-width="1.6"/>
+  <g stroke="none"><circle cx="22" cy="28" r="1.3" fill="#FFF" opacity=".8"/></g>
+</g></symbol>
+
+<symbol id="g-dairy" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M20 24 L20 15 H26 V24 M30 22 L30 12 H36 V22 M40 24 L40 15 H46 V24" fill="#F4F8F6"/>
+  <rect x="21" y="11" width="4" height="4" rx="2" fill="#E8734A"/><rect x="31" y="8" width="4" height="4" rx="2" fill="#7ECBB4"/><rect x="41" y="11" width="4" height="4" rx="2" fill="#E8734A"/>
+  <path d="M12 24 H52 V50 Q32 55 12 50 Z" fill="#A9805A"/>
+  <path d="M12 30 H52 M22 24 V52 M42 24 V52" stroke="#8A5F38" fill="none" stroke-width="2"/>
+  <rect x="10" y="21" width="44" height="6" rx="3" fill="#C79B6B"/>
+  <path d="M26 39 Q32 35 38 39 Q38 45 32 46 Q26 45 26 39 Z" fill="#F4F8F6"/>
+  <path d="M28 41 Q32 39 36 41" stroke="#9FD2C8" fill="none" stroke-width="2"/>
+</g></symbol>
+
+<!-- ===== 水豚阿汤（Q 版大头身：大眼睛双高光 + 重腮红 + 扒桶沿小爪） ===== -->
+<symbol id="g-capy" viewBox="0 0 140 120"><g stroke="#4A3226" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+  <path class="steam" d="M38 58 q4 -7 0 -13" stroke="#F6F1E4" fill="none" stroke-width="4" opacity=".4"/>
+  <path class="steam" d="M104 56 q4 -7 0 -13" stroke="#F6F1E4" fill="none" stroke-width="4" opacity=".35" style="animation-delay:1.4s"/>
+  <path d="M65 14 q0 -8 5 -11 q2 6 -1 11" fill="#A8825C"/>
+  <path d="M38 52 Q38 16 70 16 Q102 16 102 52 Q102 76 70 76 Q38 76 38 52 Z" fill="#C09A72"/>
+  <circle cx="46" cy="24" r="6" fill="#A8825C"/><circle cx="94" cy="24" r="6" fill="#A8825C"/>
+  <circle cx="46" cy="24" r="2.4" fill="#8A6A48" stroke="none"/><circle cx="94" cy="24" r="2.4" fill="#8A6A48" stroke="none"/>
+  <path d="M44 21 Q70 6 96 21 L93 31 Q70 21 47 31 Z" fill="#F6F1E4"/>
+  <path d="M55 23 Q70 16 85 23" stroke="#D9CBAE" fill="none" stroke-width="2"/>
+  <circle cx="92" cy="16" r="6.5" fill="#F5A623"/>
+  <path d="M90 10.5 q3 -3 6 -2" stroke="#557B3A" fill="none" stroke-width="2.4"/>
+  <ellipse cx="70" cy="59" rx="17" ry="12" fill="#E3C79E"/>
+  <g stroke="none" fill="#4A3226"><ellipse cx="64.5" cy="55" rx="1.8" ry="2.4"/><ellipse cx="75.5" cy="55" rx="1.8" ry="2.4"/></g>
+  <path d="M63 64 Q66.5 67 70 64 Q73.5 67 77 64" stroke="#4A3226" fill="none" stroke-width="2.2"/>
+  <g stroke="none">
+    <circle cx="52" cy="45" r="6" fill="#3A2A20"/><circle cx="88" cy="45" r="6" fill="#3A2A20"/>
+    <circle cx="54" cy="43" r="2.2" fill="#FFF"/><circle cx="90" cy="43" r="2.2" fill="#FFF"/>
+    <circle cx="50.5" cy="47.5" r="1" fill="#FFF" opacity=".85"/><circle cx="86.5" cy="47.5" r="1" fill="#FFF" opacity=".85"/>
+    <ellipse cx="43" cy="55" rx="5.5" ry="3.4" fill="#F0A48E" opacity=".8"/><ellipse cx="97" cy="55" rx="5.5" ry="3.4" fill="#F0A48E" opacity=".8"/>
+  </g>
+  <ellipse cx="70" cy="80" rx="42" ry="9" fill="#9FD2C8"/>
+  <path d="M38 78 Q54 84 70 82 Q86 84 102 78" stroke="#C9E9E0" fill="none" stroke-width="2.4"/>
+  <path d="M28 80 L112 80 L106 112 Q70 118 34 112 Z" fill="#8A5A3B"/>
+  <path d="M46 82 V112 M70 83 V114 M94 82 V112" stroke="#6E4529" fill="none" stroke-width="2.4"/>
+  <rect x="27" y="90" width="86" height="7" rx="3.5" fill="#5F3D24"/>
+  <rect x="48" y="73" width="15" height="14" rx="7" fill="#C09A72"/>
+  <rect x="77" y="73" width="15" height="14" rx="7" fill="#C09A72"/>
+  <path d="M53 85 v-5 M58 85.5 v-5 M82 85 v-5 M87 85.5 v-5" stroke="#8A6A48" fill="none" stroke-width="1.6"/>
+</g></symbol>
+<symbol id="c-capy" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+  <rect width="64" height="64" fill="#F2E3C4" stroke="none"/>
+  <path d="M29 11 q0 -6 4 -8 q1 4 -1 8" fill="#A8825C"/>
+  <path d="M12 38 Q12 12 32 12 Q52 12 52 38 Q52 55 32 55 Q12 55 12 38 Z" fill="#C09A72"/>
+  <circle cx="18" cy="18" r="4.2" fill="#A8825C"/><circle cx="46" cy="18" r="4.2" fill="#A8825C"/>
+  <path d="M16 16 Q32 6 48 16 L46 23 Q32 15 18 23 Z" fill="#F6F1E4"/>
+  <circle cx="45" cy="12" r="4.5" fill="#F5A623"/>
+  <ellipse cx="32" cy="43" rx="12" ry="8.5" fill="#E3C79E"/>
+  <g stroke="none" fill="#4A3226"><ellipse cx="28.5" cy="40" rx="1.4" ry="1.8"/><ellipse cx="35.5" cy="40" rx="1.4" ry="1.8"/></g>
+  <path d="M27 47 Q29.5 49.5 32 47 Q34.5 49.5 37 47" stroke="#4A3226" fill="none" stroke-width="1.8"/>
+  <g stroke="none">
+    <circle cx="20" cy="34" r="4.2" fill="#3A2A20"/><circle cx="44" cy="34" r="4.2" fill="#3A2A20"/>
+    <circle cx="21.5" cy="32.5" r="1.6" fill="#FFF"/><circle cx="45.5" cy="32.5" r="1.6" fill="#FFF"/>
+    <ellipse cx="15" cy="42" rx="3.8" ry="2.5" fill="#F0A48E" opacity=".8"/><ellipse cx="49" cy="42" rx="3.8" ry="2.5" fill="#F0A48E" opacity=".8"/>
+  </g>
+</g></symbol>
+
+<!-- ===== 客人头像 ===== -->
+<symbol id="c-rabbit" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+  <rect x="0" y="0" width="64" height="64" fill="#EFE0BC" stroke="none"/>
+  <ellipse cx="24" cy="14" rx="6" ry="13" fill="#F4EBDD" transform="rotate(-10 24 14)"/>
+  <ellipse cx="40" cy="14" rx="6" ry="13" fill="#F4EBDD" transform="rotate(10 40 14)"/>
+  <ellipse cx="24.5" cy="15" rx="2.6" ry="8" fill="#F2C8CF" stroke="none" transform="rotate(-10 24.5 15)"/>
+  <ellipse cx="39.5" cy="15" rx="2.6" ry="8" fill="#F2C8CF" stroke="none" transform="rotate(10 39.5 15)"/>
+  <circle cx="32" cy="38" r="19" fill="#F4EBDD"/>
+  <path d="M23 36 a4 4 0 0 1 8 0 M35 36 a4 4 0 0 1 8 0" stroke="#3A2A20" fill="none" stroke-width="2.6"/>
+  <path d="M30 44 L34 44 L32 47 Z" fill="#E88AA0"/>
+  <g stroke="none"><ellipse cx="20" cy="43" rx="3.5" ry="2.4" fill="#E8A08A" opacity=".7"/><ellipse cx="44" cy="43" rx="3.5" ry="2.4" fill="#E8A08A" opacity=".7"/></g>
+  <path d="M14 56 Q32 48 50 56 L50 64 H14 Z" fill="#E88AA0"/>
+</g></symbol>
+<symbol id="c-panda" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+  <rect x="0" y="0" width="64" height="64" fill="#DCEAE2" stroke="none"/>
+  <circle cx="17" cy="17" r="8" fill="#3D3733"/><circle cx="47" cy="17" r="8" fill="#3D3733"/>
+  <circle cx="32" cy="36" r="20" fill="#F7F4EC"/>
+  <ellipse cx="24" cy="33" rx="6" ry="7.5" fill="#3D3733" transform="rotate(-12 24 33)"/>
+  <ellipse cx="40" cy="33" rx="6" ry="7.5" fill="#3D3733" transform="rotate(12 40 33)"/>
+  <g stroke="none"><circle cx="24.5" cy="32" r="2.2" fill="#FFF"/><circle cx="39.5" cy="32" r="2.2" fill="#FFF"/>
+  <circle cx="25" cy="32.5" r="1.1" fill="#3A2A20"/><circle cx="39" cy="32.5" r="1.1" fill="#3A2A20"/></g>
+  <path d="M29 43 Q32 46 35 43" stroke="#3A2A20" fill="none"/>
+  <ellipse cx="32" cy="41" rx="2.6" ry="1.9" fill="#3D3733"/>
+  <path d="M13 57 Q32 49 51 57 L51 64 H13 Z" fill="#7ECBB4"/>
+</g></symbol>
+<symbol id="c-shiba" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+  <rect x="0" y="0" width="64" height="64" fill="#F2DFC2" stroke="none"/>
+  <path d="M15 22 L21 8 L29 18 Z" fill="#C97F44"/><path d="M49 22 L43 8 L35 18 Z" fill="#C97F44"/>
+  <circle cx="32" cy="37" r="19" fill="#DE9A5C"/>
+  <path d="M20 42 Q22 32 32 32 Q42 32 44 42 Q44 52 32 53 Q20 52 20 42 Z" fill="#F6E8D2" stroke="none"/>
+  <path d="M14 25 Q32 15 50 25 L48 33 Q32 26 16 33 Z" fill="#5B7B9E"/>
+  <path d="M24 20 H40" stroke="#48688A" fill="none" stroke-width="2"/>
+  <path d="M22 38 a4 4 0 0 1 7 0 M35 38 a4 4 0 0 1 7 0" stroke="#3A2A20" fill="none" stroke-width="2.6"/>
+  <ellipse cx="32" cy="44" rx="2.6" ry="2" fill="#3D3733"/>
+  <path d="M28 49 Q32 52 36 49" stroke="#3A2A20" fill="none"/>
+</g></symbol>
+<symbol id="c-hedge" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+  <rect x="0" y="0" width="64" height="64" fill="#E4D8EC" stroke="none"/>
+  <path d="M12 34 L18 22 L24 30 L30 18 L36 30 L42 22 L48 34 Z" fill="#8A5F38"/>
+  <circle cx="32" cy="40" r="17" fill="#E8CBA4"/>
+  <path d="M15 30 Q32 18 49 30 L46 38 Q32 30 18 38 Z" fill="#B77E9E"/>
+  <circle cx="49" cy="34" r="3.4" fill="#B77E9E"/>
+  <circle cx="25" cy="41" r="5" fill="none" stroke-width="2"/><circle cx="39" cy="41" r="5" fill="none" stroke-width="2"/>
+  <path d="M30 41 H34" stroke-width="2" fill="none"/>
+  <g stroke="none"><circle cx="25" cy="41" r="1.4" fill="#3A2A20"/><circle cx="39" cy="41" r="1.4" fill="#3A2A20"/></g>
+  <path d="M29 50 Q32 52 35 50" stroke="#3A2A20" fill="none"/>
+</g></symbol>
+
+<!-- ===== 界面图标 ===== -->
+<symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#F2C14E" stroke="#4A3226" stroke-width="2"/>
+  <circle cx="12" cy="12" r="5.6" fill="none" stroke="#C9932E" stroke-width="1.8"/>
+  <ellipse cx="9" cy="8" rx="1.8" ry="2.6" fill="#FFE9B0" transform="rotate(-24 9 8)"/></symbol>
+<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M4 18 Q4 6 20 5 Q19 20 8 20 Q6 20 4 18 Z" fill="#7ECBB4" stroke="#3E7B6A" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M7 17 Q12 12 17 8" stroke="#3E7B6A" stroke-width="1.6" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2 L14.2 9.8 L22 12 L14.2 14.2 L12 22 L9.8 14.2 L2 12 L9.8 9.8 Z" fill="currentColor"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 5 Q9 3.5 12 5.5 Q15 3.5 20 5 V18.5 Q15 17 12 19 Q9 17 4 18.5 Z"/><path d="M12 5.5 V19"/></g></symbol>
+<symbol id="i-snd" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 9.5 v5 h3.5 L13 19 V5 L7.5 9.5 Z"/><path d="M16.5 8.5 a5 5 0 0 1 0 7"/></g></symbol>
+<symbol id="i-sndoff" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 9.5 v5 h3.5 L13 19 V5 L7.5 9.5 Z"/><path d="M16.5 9.5 l4.5 5 M21 9.5 l-4.5 5"/></g></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+  <path d="M6 6 L18 18 M18 6 L6 18"/></g></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M19.5 12 a7.5 7.5 0 1 1 -2.2 -5.3"/><path d="M19.8 2.8 V7.2 H15.4"/></g></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8 10.5 V7.5 a4 4 0 0 1 8 0 v3"/></g></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="9"/><path d="M9.5 9.5 a2.5 2.5 0 1 1 3.6 2.2 q-1.1.6 -1.1 1.8"/><circle cx="12" cy="16.8" r=".4" fill="currentColor"/></g></symbol>
+<symbol id="card-lantern" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#C9CBD6"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-crane" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F0A06A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-pin" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F2C14E"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-cat" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F6F1E4"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-geta" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#C79B6B"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-fan" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F2B8C8"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-duck" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F5C842"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-turtle" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#8FBF6A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="card-moon" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#E8D89A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="i-capsule" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="8.6" fill="#FFF3D6" stroke="currentColor" stroke-width="2"/>
+  <path d="M3.6 12 A8.6 8.6 0 0 1 20.4 12 Z" fill="#F0913C" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M3.4 12 H20.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="9" cy="8" r="1.5" fill="#FFF6E2"/>
+</symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5 L14.9 8.6 L21.5 9.5 L16.7 14.1 L17.9 20.7 L12 17.5 L6.1 20.7 L7.3 14.1 L2.5 9.5 L9.1 8.6 Z" fill="#F2C14E" stroke="#8A5A1E" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<symbol id="i-hammer" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 20.5 L11.5 13"/><path d="M10.5 7 L14.5 3 Q19.5 4.2 21 9 L18.5 11.5 L15 8 Z"/><path d="M13 11.5 L15.5 9"/></g></symbol>
+<symbol id="i-bag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M5 8.5 H19 L17.8 20 Q17.6 21.5 16 21.5 H8 Q6.4 21.5 6.2 20 Z"/><path d="M9 11 V6.8 a3 3 0 0 1 6 0 V11"/></g></symbol>
+<symbol id="s-chest" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+  <rect x="12" y="27" width="40" height="25" rx="4" fill="#C9853F"/>
+  <rect x="10" y="19" width="44" height="12" rx="5" fill="#D9954A"/>
+  <path d="M28 19 Q32 14 36 19 M24 19 Q27 12 32 13 M40 19 Q37 12 32 13" stroke="#F2C14E" fill="none" stroke-width="2.4"/>
+  <rect x="28.5" y="19" width="7" height="33" fill="#F2C14E" stroke-width="2"/>
+  <circle cx="32" cy="34" r="4.5" fill="#FFE9B0"/>
+  <path d="M50 12 l1.3 2.8 2.8 1.3 -2.8 1.3 -1.3 2.8 -1.3 -2.8 -2.8 -1.3 2.8 -1.3 Z" fill="#FFE9B0" stroke-width="1.5"/>
+</g></symbol>
+<symbol id="i-pot" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4.5 10.5 H19.5 V16.5 Q19.5 20 16 20 H8 Q4.5 20 4.5 16.5 Z"/><path d="M2.5 10.5 H21.5"/><path d="M8.5 7 q1.8 -1.8 3.5 0 q1.8 1.8 3.5 0"/></g></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 8 L12 4 L20 8 V16.5 L12 20.5 L4 16.5 Z"/><path d="M4 8 L12 12 L20 8 M12 12 V20.5"/></g></symbol>
+<symbol id="i-scroll" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M7 4 H18.5 Q20.5 4 20.5 6.5 Q20.5 9 18.5 9 H9"/><path d="M7 4 Q4.5 4 4.5 6.5 V17.5 Q4.5 20 7 20 H16.5 Q19 20 19 17.5 V9"/><path d="M8.5 12.5 H15 M8.5 16 H13.5"/></g></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M9 11.5 V4.5 a1.5 1.5 0 0 1 3 0 V10 m0 -3 a1.5 1.5 0 0 1 3 0 V11 m0 -2 a1.5 1.5 0 0 1 3 0 V14 q0 6 -5.5 6 Q9 20 7.5 16.5 L5.5 12.5 a1.4 1.4 0 0 1 2.4 -1.4 L9 12.6"/></g></symbol>
+</defs>
+</svg>
+
+<div id="app">
+  <!-- 场景 -->
+  <div id="scene">
+    <img id="sceneBg" src="art/scene/town.png?v=3" alt=""
+         onload="this.parentNode.classList.add('hasbg')"
+         onerror="this.style.display='none'">
+    <svg viewBox="0 0 390 178" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <rect id="sceneSky" width="390" height="178" fill="url(#skyg)"/>
+      <g id="sceneArt" transform="translate(0,28)">
+      <g fill="#FFFFFF" opacity=".92">
+        <g class="tw"><ellipse cx="52" cy="26" rx="19" ry="10"/><ellipse cx="38" cy="30" rx="13" ry="8"/><ellipse cx="68" cy="31" rx="14" ry="8"/></g>
+        <g class="tw" style="animation-delay:1.8s"><ellipse cx="196" cy="18" rx="17" ry="9"/><ellipse cx="182" cy="22" rx="12" ry="7"/><ellipse cx="211" cy="22" rx="12" ry="7"/></g>
+        <g class="tw" style="animation-delay:3.2s"><ellipse cx="330" cy="30" rx="16" ry="8.5"/><ellipse cx="318" cy="34" rx="11" ry="6.5"/><ellipse cx="343" cy="33" rx="11" ry="6.5"/></g>
+      </g>
+      <path d="M0 92 Q54 60 112 86 Q170 54 232 88 Q296 62 390 84 V150 H0 Z" fill="#8FC163"/>
+      <path d="M0 104 Q60 82 124 102 Q188 78 250 104 Q312 84 390 100 V150 H0 Z" fill="url(#hillg)"/>
+      <g>
+        <ellipse cx="26" cy="92" rx="20" ry="17" fill="#7BB24C"/><ellipse cx="26" cy="86" rx="14" ry="12" fill="#8CC65C"/>
+        <ellipse cx="96" cy="86" rx="17" ry="15" fill="#74A946"/><ellipse cx="96" cy="81" rx="12" ry="10" fill="#88C158"/>
+        <ellipse cx="300" cy="88" rx="19" ry="16" fill="#7BB24C"/><ellipse cx="300" cy="82" rx="13" ry="11" fill="#8CC65C"/>
+        <ellipse cx="368" cy="94" rx="17" ry="14" fill="#74A946"/><ellipse cx="368" cy="89" rx="11" ry="9" fill="#88C158"/>
+      </g>
+      <g fill="#C8905A">
+        <rect x="130" y="86" width="52" height="26" rx="5"/><rect x="206" y="82" width="58" height="30" rx="5"/>
+      </g>
+      <g fill="#E8734A">
+        <path d="M124 88 H188 L182 78 H130 Z"/><path d="M200 84 H270 L263 73 H207 Z"/>
+      </g>
+      <g fill="#FFE9B0">
+        <rect class="wink" x="140" y="94" width="12" height="11" rx="2.5"/><rect x="160" y="94" width="12" height="11" rx="2.5" opacity=".9"/>
+        <rect class="wink" x="218" y="91" width="13" height="12" rx="2.5" style="animation-delay:2.4s"/><rect x="240" y="91" width="13" height="12" rx="2.5" opacity=".9"/>
+      </g>
+      <g fill="#FFF3D0">
+        <circle cx="60" cy="118" r="3.6"/><circle cx="78" cy="126" r="3"/><circle cx="286" cy="120" r="3.4"/><circle cx="342" cy="128" r="3"/>
+        <circle cx="16" cy="126" r="3.2"/>
+      </g>
+      <g fill="#F7C948">
+        <circle cx="60" cy="118" r="1.5"/><circle cx="78" cy="126" r="1.3"/><circle cx="286" cy="120" r="1.4"/><circle cx="342" cy="128" r="1.3"/>
+        <circle cx="16" cy="126" r="1.3"/>
+      </g>
+      <path d="M-4 30 Q195 58 394 20" stroke="#C8905A" stroke-width="2.4" fill="none"/>
+      <g class="sway" style="transform-origin:70px 45px">
+        <circle cx="70" cy="58" r="17" fill="url(#lg)" opacity=".6"/>
+        <path d="M70 45 v4" stroke="#241A10" stroke-width="2"/>
+        <rect x="62" y="49" width="16" height="21" rx="7" fill="#E8734A" stroke="#3A2417" stroke-width="2"/>
+        <rect x="65" y="46.5" width="10" height="4" rx="2" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.6"/>
+        <rect x="65" y="69.5" width="10" height="3.6" rx="1.8" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.6"/>
+        <path d="M66 52 v14 M74 52 v14" stroke="#B34A28" stroke-width="1.6"/>
+        <path d="M70 73 v5" stroke="#B34A28" stroke-width="1.8"/><circle cx="70" cy="80" r="1.8" fill="#F2C14E"/>
+      </g>
+      <g class="sway" style="transform-origin:168px 56px; animation-delay:1.3s">
+        <circle cx="168" cy="68" r="15" fill="url(#lg)" opacity=".55"/>
+        <path d="M168 56 v4" stroke="#241A10" stroke-width="2"/>
+        <rect x="161" y="60" width="14" height="18" rx="6" fill="#E8734A" stroke="#3A2417" stroke-width="2"/>
+        <rect x="163.5" y="57.5" width="9" height="3.6" rx="1.8" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
+        <rect x="163.5" y="77.5" width="9" height="3.2" rx="1.6" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
+        <path d="M164.5 62 v12 M171.5 62 v12" stroke="#B34A28" stroke-width="1.4"/>
+        <path d="M168 81 v4" stroke="#B34A28" stroke-width="1.6"/><circle cx="168" cy="87" r="1.6" fill="#F2C14E"/>
+      </g>
+      <g class="sway" style="transform-origin:258px 52px; animation-delay:.6s">
+        <circle cx="258" cy="64" r="15" fill="url(#lg)" opacity=".55"/>
+        <path d="M258 52 v4" stroke="#241A10" stroke-width="2"/>
+        <rect x="251" y="56" width="14" height="18" rx="6" fill="#E8734A" stroke="#3A2417" stroke-width="2"/>
+        <rect x="253.5" y="53.5" width="9" height="3.6" rx="1.8" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
+        <rect x="253.5" y="73.5" width="9" height="3.2" rx="1.6" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
+        <path d="M254.5 58 v12 M261.5 58 v12" stroke="#B34A28" stroke-width="1.4"/>
+        <path d="M258 77 v4" stroke="#B34A28" stroke-width="1.6"/><circle cx="258" cy="83" r="1.6" fill="#F2C14E"/>
+      </g>
+      <rect y="138" width="390" height="12" fill="#D9BE92"/>
+      <path d="M0 138 H390" stroke="#C0A171" stroke-width="2"/>
+      <path d="M40 138 v12 M110 138 v12 M180 138 v12 M250 138 v12 M320 138 v12" stroke="#C0A171" stroke-width="1.6" opacity=".8"/>
+    </g>
+</svg>
+    <div id="sceneTop">
+      <div id="title"><h1>水豚温泉町</h1><span>汤屋食堂篇</span></div>
+      <div id="pills">
+        <div class="pill"><svg><use href="#i-coin"/></svg><b id="coinN">0</b></div>
+        <div class="pill"><svg><use href="#i-star"/></svg><b id="starN">0</b></div>
+        <div class="pill">Lv <b id="lvN">1</b><span id="xpwrap"><span id="xpb"></span><span id="xpTxt"></span></span></div>
+      </div>
+    </div>
+    <div id="scGlow" class="scfx"></div>
+    <div id="scSign" class="scfx"><span class="plaque"></span></div>
+    <div id="scGold" class="scfx"><span class="plaque gold"></span></div>
+    <button id="giftBtn" aria-label="门口的礼盒">
+      <span class="art"><svg><use href="#s-chest"/></svg><img src="art/items/chest.png?v=4" alt="" onerror="artFail(this)"></span>
+      <span id="giftCh" class="chb">1</span>
+    </button>
+    <button id="capyBtn" class="bob" aria-label="阿汤">
+      <span class="art"><svg><use href="#g-capy"/></svg><img src="art/chars/capy.png?v=3" alt="" onerror="artFail(this)"></span>
+      <span id="capyCh" class="chb">15</span>
+    </button>
+  </div>
+
+  <!-- 订单 -->
+  <div id="orders"></div>
+
+  <!-- 主线目标 -->
+  <div id="quest"><svg class="qico"><use href="#i-scroll"/></svg><span class="qt" id="qTxt"></span><span class="qp" id="qP"></span></div>
+
+  <!-- 灶台与储物间 -->
+  <div id="stations">
+    <button class="stTile" id="cookBtn"><svg><use href="#i-pot"/></svg><span>烹饪台<small>两样食材，试出新菜谱</small></span></button>
+    <button class="stTile" id="wareBtn"><svg><use href="#i-box"/></svg><span>储物间<small>暂存食材，腾出棋盘</small></span></button>
+    <button class="stTile" id="gachaBtn"><svg><use href="#i-capsule"/></svg><span>扭蛋机<small>碰碰运气，收集小玩意</small></span></button>
+  </div>
+
+  <!-- 棋盘 -->
+  <div id="boardWrap">
+    <div id="board"></div>
+    <div id="lockBand"><span>整修中 · 装修后开放</span></div>
+  </div>
+
+  <!-- 底栏 -->
+  <div id="bar">
+    <button class="bbtn" id="renoBtn"><svg><use href="#i-hammer"/></svg>装修</button>
+    <button class="bbtn" id="shopBtn"><svg><use href="#i-bag"/></svg>商店</button>
+    <button class="bbtn" id="dexBtn"><svg><use href="#i-book"/></svg>图鉴</button>
+    <button class="bbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">音效</span></button>
+    <button class="bbtn" id="helpBtn"><svg><use href="#i-help"/></svg>玩法</button>
+  </div>
+</div>
+
+<div id="ghost"><span class="art"><svg><use id="ghostUse" href="#s-veg1"/></svg><img id="ghostImg" src="art/items/veg1.png?v=3" alt="" onerror="artFail(this)"></span></div>
+
+<!-- 信息卡 -->
+<div id="sheet">
+  <div class="sicon"><span class="art"><svg><use id="shUse" href="#s-veg1"/></svg><img id="shImg" src="art/items/veg1.png?v=3" alt="" onerror="artFail(this)"></span></div>
+  <div class="sbody">
+    <div class="sname" id="shName"></div>
+    <div class="schain" id="shChain"></div>
+    <div class="dots" id="shDots"></div>
+  </div>
+  <div class="sbtns" id="shBtns"></div>
+</div>
+
+<!-- 图鉴 -->
+<div id="dexM" class="modal"><div class="panel">
+  <button class="pclose" data-close="dexM"><svg><use href="#i-close"/></svg></button>
+  <h2>汤屋食堂图鉴</h2><div class="psub" id="dexSub"></div>
+  <div id="dexBody"></div>
+</div></div>
+
+<!-- 装修 -->
+<div id="renoM" class="modal"><div class="panel">
+  <button class="pclose" data-close="renoM"><svg><use href="#i-close"/></svg></button>
+  <h2>店铺装修</h2><div class="psub" id="renoSub"></div>
+  <div id="renoBody"></div>
+</div></div>
+
+<!-- 商店 -->
+<div id="shopM" class="modal"><div class="panel">
+  <button class="pclose" data-close="shopM"><svg><use href="#i-close"/></svg></button>
+  <h2>杂货商店</h2><div class="psub">狸猫货郎的小摊，金币换好物</div>
+  <div id="shopBody"></div>
+</div></div>
+
+<!-- 扭蛋机 -->
+<div id="gachaM" class="modal"><div class="panel">
+  <button class="pclose" data-close="gachaM"><svg><use href="#i-close"/></svg></button>
+  <h2>温泉町扭蛋机</h2><div class="psub" id="gachaSub"></div>
+  <div id="gachaStage"><div id="capsule"><svg><use href="#i-capsule"/></svg></div><div id="gachaResult"></div></div>
+  <button class="bigbtn" id="gachaGo">扭一次</button>
+  <div class="dxh" style="margin-top:14px"><i style="background:#F0913C"></i>收藏册</div>
+  <div id="cardBody" class="dxg"></div>
+</div></div>
+
+<!-- 烹饪台 -->
+<div id="cookM" class="modal"><div class="panel">
+  <button class="pclose" data-close="cookM"><svg><use href="#i-close"/></svg></button>
+  <h2>烹饪台</h2><div class="psub">选两样食材放上灶台，也许能做出新菜。失败不消耗食材，放心尝试</div>
+  <div id="cookSlots">
+    <span class="ckslot" id="ckA"></span><span class="ckop">+</span>
+    <span class="ckslot" id="ckB"></span><span class="ckop">=</span>
+    <span class="ckslot ckres" id="ckR"></span>
+  </div>
+  <button class="bigbtn" id="cookGo" disabled>开火烹饪</button>
+  <div class="dxh"><i style="background:#E8955C"></i>棋盘上的食材</div>
+  <div id="cookPick"></div>
+  <div class="dxh"><i style="background:#E8A0C0"></i>菜谱集</div>
+  <div id="cookBook"></div>
+</div></div>
+
+<!-- 储物间 -->
+<div id="wareM" class="modal"><div class="panel">
+  <button class="pclose" data-close="wareM"><svg><use href="#i-close"/></svg></button>
+  <h2>储物间</h2><div class="psub">四个格子暂存食材，点一下取回棋盘</div>
+  <div id="wareGrid" class="dxg"></div>
+</div></div>
+
+<!-- 玩法说明 -->
+<div id="tut" class="modal"><div class="panel">
+  <h2>欢迎来到水豚温泉町</h2><div class="psub">和阿汤一起，把巷子里的小食堂经营起来吧</div>
+  <div class="tstep"><svg><use href="#g-basket"/></svg><div><b>1. 生成食材</b><p>点击棋盘上的菜篮子、面粉袋，或摸摸右上角泡温泉的阿汤，都会掉落食材。补货次数用完后会随时间恢复，离线也照常补货。</p></div></div>
+  <div class="tstep"><svg><use href="#i-hand"/></svg><div><b>2. 拖动合成</b><p>把两个相同的物品拖到一起，就会合成更高级的一份。等级越高越值钱，图鉴也会同步收录。</p></div></div>
+  <div class="tstep"><svg><use href="#c-rabbit"/></svg><div><b>3. 交付订单</b><p>上方是街坊们的订单，备齐所需物品点交付即可获得金币与经验。订单永不过期，随时来随时走，进度自动保存。</p></div></div>
+  <button class="bigbtn" id="tutGo">开始经营</button>
+</div></div>
+
+<!-- 对话 -->
+<div id="dlgOv"><div id="dlg">
+  <div id="dlgWho"><span id="dlgAva"><span class="art"><svg><use id="dlgAvaUse" href="#c-capy"/></svg><img id="dlgAvaImg" src="art/chars/capy.png?v=3" alt="" onerror="artFail(this)"></span></span><span id="dlgName"></span></div>
+  <div id="dlgTxt"></div><span id="dlgNext"></span>
+</div></div>
+
+<div id="lvUp"><div class="lvBig" id="lvBig"></div><div class="lvSub" id="lvSub"></div></div>
+<div id="toasts"></div>
+<div id="toast"></div>
+<div id="undoChip"><span id="undoTx"></span><button id="undoBtn">撤销</button></div>
+
+<script>
+'use strict';
+/* ================= 数据表 ================= */
+var COLS = 7, ROWS = 9, OPEN = 6;
+var CHAINS = {
+  veg: { n: '蔬菜园', color: '#8CBE68', items: ['veg1','veg2','veg3','veg4','veg5','veg6','veg7'] },
+  bun: { n: '面点坊', color: '#E8C07A', items: ['bun1','bun2','bun3','bun4','bun5','bun6','bun7','bun8'] },
+  dairy: { n: '蛋奶铺', color: '#F2D06B', items: ['d1','d2','d3','d4','d5','d6','d7'] },
+  cook1: { n: '暖心料理', color: '#E8955C', cooked: 1, items: ['k1','k2','k3','k4','k5'] },
+  cook2: { n: '幸福甜品', color: '#E8A0C0', cooked: 1, items: ['t1','t2','t3','t4','t5'] }
+};
+var BASECH = ['veg','bun','dairy'];
+var ITEM_NAMES = {
+  veg1:'种子', veg2:'嫩芽', veg3:'小白菜', veg4:'番茄', veg5:'南瓜', veg6:'蔬菜篮', veg7:'有机菜盒',
+  bun1:'面粉', bun2:'面团', bun3:'馒头', bun4:'花卷', bun5:'葱油饼', bun6:'肉包', bun7:'小笼包', bun8:'蟹黄灌汤包',
+  d1:'鸡蛋', d2:'蛋液', d3:'煎蛋', d4:'牛奶', d5:'奶油', d6:'芝士', d7:'黄金芝士',
+  k1:'鸡蛋灌饼', k2:'番茄炒蛋', k3:'菜肉大包', k4:'南瓜奶露', k5:'芝士小笼',
+  t1:'焦糖布丁', t2:'香酥蛋挞', t3:'云朵舒芙蕾', t4:'南瓜派', t5:'星空慕斯'
+};
+var ITEMS = {};
+Object.keys(CHAINS).forEach(function(ck){
+  CHAINS[ck].items.forEach(function(id, i){
+    ITEMS[id] = { chain: ck, tier: i + 1, val: i + 1 + (CHAINS[ck].cooked ? 3 : 0), n: ITEM_NAMES[id], sym: 's-' + id };
+  });
+});
+var RECIPES = [
+  { r:'k1', a:'bun5', b:'d2',   hint:'酥脆饼皮遇上流动的金黄' },
+  { r:'k2', a:'veg4', b:'d3',   hint:'红与黄的国民经典' },
+  { r:'k3', a:'bun6', b:'veg6', hint:'实在的面点装满一篮鲜蔬' },
+  { r:'k4', a:'veg5', b:'d5',   hint:'圆滚滚的甜与丝滑相遇' },
+  { r:'k5', a:'bun7', b:'d6',   hint:'笼屉里的拉丝惊喜' },
+  { r:'t1', a:'d2',   b:'d4',   hint:'蛋与奶的温柔凝固' },
+  { r:'t2', a:'bun2', b:'d5',   hint:'面团抱住一朵云' },
+  { r:'t3', a:'d1',   b:'d5',   hint:'会呼吸的蛋奶云朵' },
+  { r:'t4', a:'veg5', b:'bun1', hint:'面粉里藏进一轮小太阳' },
+  { r:'t5', a:'d6',   b:'d5',   hint:'芝士与奶油的星空之约' }
+];
+var GENS = {
+  basket: { n:'菜篮子', sym:'g-basket', cap:10, regen:90,  drops:[['veg1',.8],['veg2',.2]], desc:'点击掉落蔬菜园食材' },
+  flour:  { n:'面粉袋', sym:'g-flour',  cap:10, regen:90,  drops:[['bun1',.8],['bun2',.2]], desc:'点击掉落面点坊食材' },
+  dairy:  { n:'奶箱',   sym:'g-dairy',  cap:10, regen:100, drops:[['d1',.8],['d2',.2]],     desc:'点击掉落蛋奶铺食材' },
+  capy:   { n:'阿汤',   sym:'g-capy',   cap:15, regen:60,  drops:[['veg1',.34],['bun1',.33],['d1',.33]], desc:'摸摸水豚，随机掉落基础食材' }
+};
+var CUSTS = {
+  rabbit:{ n:'兔子小姐', sym:'c-rabbit' }, panda:{ n:'熊猫大叔', sym:'c-panda' },
+  shiba:{ n:'柴犬快递员', sym:'c-shiba' }, hedge:{ n:'刺猬奶奶', sym:'c-hedge' }
+};
+var CUST_IDS = Object.keys(CUSTS);
+var SAVE_KEY = 'wonsen1';
+
+/* ================= 剧情数据 ================= */
+var CUST_LINES = {
+  rabbit: { intro:['咦，这家店……亮灯了？你好呀，我是住在坡上的兔子。','刚路过就闻到香味，脚就自己拐进来了。可以给我做一份吗？'],
+    thanks:'和记忆里外婆做的，是同一个味道。', more:['今天也来啦，老位子还空着吗？','坡上的风好大，就想吃口热乎的。','下次我带朋友一起来。'] },
+  panda: { intro:['哟，新店长？我以前常来你外婆这儿吃面。','她的手艺是这条街一绝……先看看你的吧。'],
+    thanks:'嗯……有点她当年的意思了。', more:['竹子吃腻了，还是面点实在。','年轻人，火候别急。','这店有人气了，是好事。'] },
+  shiba: { intro:['您的包裹——啊不对，今天是我自己来的！','跑了一整天，饿扁了。吃得快的话，我给你讲镇上的新鲜事！'],
+    thanks:'呼……满血复活！这一趟跑得值。', more:['温泉街那边又开了家新铺子。','刺猬奶奶总念叨你外婆呢。','吃饱了，继续送件去咯！'] },
+  hedge: { intro:['灯又亮起来了，真好啊。','奶奶我牙口不好，想吃点软软的、热热的。'],
+    thanks:'好孩子……和她一样，手是暖的。', more:['慢慢做，奶奶不赶时间。','这条巷子，热闹起来才像话。','改天给你讲讲外婆年轻时的事。'] }
+};
+var STORY_INTRO = [
+  {c:null, t:'暮色落进山谷，温泉町的灯笼一盏一盏亮了起来。'},
+  {c:null, t:'巷子最深处，有一间蒙尘多年的小食堂。门口的木牌，字迹早已模糊。'},
+  {c:'capy', t:'呼……走了好远的路，这里就是外婆信里写的那间店吧。'},
+  {c:'capy', t:'灶台还能用，锅也都在，就是到处都是灰呀。'},
+  {c:'capy', t:'先把菜篮子和面粉袋摆出来。从今天起，这里就是我的食堂啦！'}
+];
+var STORY_MERGE = [
+  {c:'capy', t:'哇，两份一样的食材合在一起，变成更好的了！'},
+  {c:'capy', t:'外婆的笔记写的是真的……照这个法子，一定能把店重新开起来。'}
+];
+var STORY_DELIVER = [
+  {c:'capy', t:'开张第一单，做成了！'},
+  {c:'capy', t:'客人吃得开心的样子……好像连门口的灯笼都更亮了一点。'}
+];
+var QUESTS = [
+  { t:'掸掸灰：点生成器补充食材（3 次）', type:'gen', n:3, coins:15,
+    story:[{c:'capy', t:'柜台擦好了。食材嘛……就拜托这两位老伙计啦。'}] },
+  { t:'试试手艺：完成一次合成', type:'merge', n:1, coins:15,
+    story:[{c:'capy', t:'手感回来了。接下来，就等客人上门了。'}] },
+  { t:'重新开张：交付第一份订单', type:'deliver', n:1, coins:25,
+    story:[{c:'capy', t:'要把这个味道，一直一直做下去。'}] },
+  { t:'小有名气：累计交付 5 份订单', type:'deliver', n:5, coins:40,
+    story:[{c:null, t:'食堂的香气顺着巷子飘出去，街坊们开始口耳相传。'},{c:'capy', t:'客人越来越多了……外婆，你看到了吗？'}] },
+  { t:'攒下积蓄：金币达到 200', type:'coins', n:200, coins:0,
+    story:[{c:'capy', t:'积蓄攒得差不多了。交订单能攒星星，用星星和金币把店修起来吧！'}] },
+  { t:'开火试灶：在烹饪台发现第一道菜谱', type:'cook', n:1, coins:30,
+    story:[{c:'capy', t:'原来两种食材能做出全新的菜！外婆的笔记后面，还有好多空白页……'}] },
+  { t:'写满菜单：发现 5 道菜谱', type:'cook', n:5, coins:80,
+    story:[{c:null, t:'食堂的菜单，一页一页地写满起来。'}] },
+  { t:'焕然一新：完成一项装修', type:'reno', n:1, coins:30,
+    story:[{c:'capy', t:'店里有一点点不一样了。要一件一件，把它修回外婆在时的样子。'}] },
+  { t:'重整旗鼓：完成全部九项装修', type:'reno', n:9, coins:200,
+    story:[{c:null, t:'汤屋食堂，重新开张。巷子里的灯，从此每晚都亮着。'}] },
+  { t:'试试手气：在扭蛋机扭一次', type:'gacha', n:1, coins:30,
+    story:[{c:'capy', t:'咔啦——扭蛋机转起来了！里面都是温泉町的小玩意，攒齐一套据说会交好运。'}] },
+];
+
+/* ================= 装修与商店 ================= */
+var RENO = [
+  { id:'sign',    n:'修好店招',      star:12, coins:80,  fx:'每单奖励星星 +1',
+    story:[{c:'capy', t:'店招亮起来了！这样大家远远就能看到啦。'}] },
+  { id:'lantern', n:'擦亮门口的灯笼', star:8,  coins:60,  fx:'生成器回充速度 +10%',
+    story:[{c:'capy', t:'灯笼一亮，感觉食材都新鲜得更快了。'}] },
+  { id:'floor1',  n:'修理地板（一）', star:10, coins:100, fx:'开放新一排格子（泡泡开荒）',
+    story:[{c:'capy', t:'地板修好一段，能摆的东西更多了。咦，泡泡里好像裹着东西？'}] },
+  { id:'tables',  n:'添置餐桌',      star:15, coins:120, fx:'订单金币 +10%',
+    story:[{c:'hedge', t:'有桌子坐着吃，才像个店嘛。'}] },
+  { id:'chime',   n:'挂上风铃',      star:12, coins:90,  fx:'生成器充能上限 +2',
+    story:[{c:'capy', t:'叮铃……风一吹，干活都更有劲了。'}] },
+  { id:'floor2',  n:'修理地板（二）', star:18, coins:150, fx:'再开放一排格子', pre:'floor1',
+    story:[{c:'capy', t:'店里越来越宽敞了！'}] },
+  { id:'photo',   n:'挂上外婆的照片', star:20, coins:150, fx:'图鉴发现奖励翻倍',
+    story:[{c:'capy', t:'外婆，看着我把店开下去吧。'},{c:null, t:'照片里的老水豚，笑得很温柔。'}] },
+  { id:'floor3',  n:'修理地板（三）', star:25, coins:220, fx:'开放最后一排格子', pre:'floor2',
+    story:[{c:'capy', t:'整个店堂都亮堂起来了！'}] },
+  { id:'gold',    n:'挂上金字招牌',  star:40, coins:400, fx:'汤屋食堂章节完成', preAll:1,
+    story:[{c:null, t:'金字招牌挂上的那天，整条巷子的街坊都来道贺。'},
+           {c:'capy', t:'这只是开始。听说后山的温泉汤屋，也荒了很久了……'},
+           {c:null, t:'（第二章 温泉汤屋 将在后续版本开放。）'}] }
+];
+/* ================= 扭蛋（概率盲盒） ================= */
+var CARDS = {
+  lantern:{n:'石灯笼', r:'R'},  crane:{n:'纸鹤',   r:'R'},  pin:{n:'小风车', r:'R'},
+  cat:{n:'招财猫',     r:'R'},  geta:{n:'小木屐', r:'R'},  fan:{n:'团扇',   r:'R'},
+  duck:{n:'金鸭子',    r:'SR'}, turtle:{n:'温泉神龟', r:'SR'}, moon:{n:'月见兔', r:'SR'}
+};
+var GACHA_COST = 100;      // 金币；有扭蛋券时优先用券
+var SHINY_RATE = 0.05;     // 闪光食材掉落概率
+
+var SHOP = [
+  { id:'pack1',  n:'食材小推车', coins:60,  d:'随机 3 份 1-2 级食材' },
+  { id:'pack2',  n:'进阶食盒',   coins:150, d:'随机 2 份 3-4 级食材' },
+  { id:'coffee', n:'能量焙茶',   coins:50,  d:'立即回满全部生成器补货' }
+];
+
+/* ================= 状态 ================= */
+var S = null;
+function now(){ return Date.now(); }
+function initNew(){
+  var t = now();
+  S = {
+    v:1, coins:50, xp:0, level:1, mute:false, tut:false,
+    dex:['veg1','veg2','bun1'],
+    board: new Array(COLS*ROWS).fill(null),
+    gens: {},
+    orders:[null,null,null], sold:null,
+    story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0},
+    stars:0, reno:[], store:[null,null,null,null],
+    cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
+  };
+  Object.keys(GENS).forEach(function(g2){ S.gens[g2] = { ch:GENS[g2].cap, last:t }; });
+  S.board[16] = { t:'g', gid:'basket' };
+  S.board[18] = { t:'g', gid:'flour' };
+  S.board[14] = { t:'g', gid:'dairy' };
+  S.board[23] = { t:'i', id:'veg1' }; S.board[24] = { t:'i', id:'veg1' }; S.board[25] = { t:'i', id:'veg2' };
+  S.board[30] = { t:'i', id:'bun1' }; S.board[31] = { t:'i', id:'bun1' };
+  for (var i=0;i<3;i++) S.orders[i] = genOrder(i);
+}
+
+/* ================= 存档 ================= */
+function save(){
+  try{
+    var cells = [];
+    S.board.forEach(function(c,i){
+      if(!c) return;
+      if(c.t==='g') cells.push([i,'g',c.gid]);
+      else if(c.t==='b') cells.push([i,'b',c.id]);
+      else if(c.t==='c') cells.push([i,'c',0]);
+      else cells.push(c.s ? [i,'i',c.id,1] : [i,'i',c.id]);   // 第 4 位 = 闪光标记
+    });
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      v:1, coins:S.coins, xp:S.xp, level:S.level, mute:S.mute, tut:S.tut, dex:S.dex,
+      cells:cells, gens:S.gens, orders:S.orders, t:now(),
+      story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat,
+      stars:S.stars, reno:S.reno, store:S.store,
+      cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
+    }));
+  }catch(e){}
+}
+function load(){
+  var raw = null;
+  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){}
+  if(!raw) return false;
+  var d;
+  try{ d = JSON.parse(raw); }catch(e){ return false; }
+  if(!d || d.v !== 1) return false;
+  S = {
+    v:1, coins:d.coins||0, xp:d.xp||0, level:d.level||1, mute:!!d.mute, tut:!!d.tut,
+    dex: Array.isArray(d.dex) ? d.dex : ['veg1'],
+    board: new Array(COLS*ROWS).fill(null),
+    gens: d.gens || {}, orders: Array.isArray(d.orders) ? d.orders : [null,null,null], sold:null,
+    story: d.story || {intro:0, merge:0, deliver:0},
+    met: Array.isArray(d.met) ? d.met : [],
+    thx: Array.isArray(d.thx) ? d.thx : [],
+    quest: d.quest || {i:0, p:0},
+    stat: d.stat || {deliver:0},
+    stars: d.stars || 0,
+    reno: Array.isArray(d.reno) ? d.reno : [],
+    store: Array.isArray(d.store) ? d.store.slice(0,4) : [null,null,null,null],
+    cards: (d.cards && typeof d.cards === 'object') ? d.cards : {},
+    tickets: d.tickets || 0,
+    dexS: Array.isArray(d.dexS) ? d.dexS : [],
+    gift: (d.gift && d.gift.last) ? d.gift : {last:today(), stock:1}
+  };
+  while(S.store.length < 4) S.store.push(null);
+  Object.keys(GENS).forEach(function(g){
+    if(!S.gens[g]) S.gens[g] = { ch:GENS[g].cap, last:now() };
+  });
+  S.quest.i = Math.min(S.quest.i, QUESTS.length);
+  (d.cells||[]).forEach(function(c){
+    var i = c[0];
+    if(i<0 || i>=COLS*ROWS) return;
+    if(c[1]==='g') S.board[i] = {t:'g', gid:c[2]};
+    else if(c[1]==='b') S.board[i] = {t:'b', id:c[2]};
+    else if(c[1]==='c') S.board[i] = {t:'c'};
+    else S.board[i] = c[3] ? {t:'i', id:c[2], s:1} : {t:'i', id:c[2]};
+  });
+  for(var i=0;i<3;i++){
+    var o = S.orders[i];
+    if(!o || !o.c || !Array.isArray(o.needs)) S.orders[i] = genOrder(i);
+    else if(!o.rf) o.rf = 0;
+  }
+  var hasDairy = false;
+  for(var di=0; di<S.board.length; di++){
+    var dc = S.board[di];
+    if(dc && dc.t==='g' && dc.gid==='dairy') hasDairy = true;
+  }
+  if(!hasDairy){
+    var dIdx = nearestEmpty(14);
+    if(dIdx >= 0){
+      S.board[dIdx] = { t:'g', gid:'dairy' };
+      toast('新到货：奶箱已经摆进店里');
+    }
+  }
+  var gained = regen(now());
+  if(gained > 0) toast('离线期间生成器补货 +' + gained);
+  return true;
+}
+
+/* ================= 装修效果 ================= */
+function renoHas(id){ return S && S.reno && S.reno.indexOf(id) >= 0; }
+function capOf(gid){ return GENS[gid].cap + (renoHas('chime') ? 2 : 0); }
+function regenIv(gid){ return GENS[gid].regen * (renoHas('lantern') ? 0.9 : 1); }
+function openRows(){
+  return 6 + (renoHas('floor1')?1:0) + (renoHas('floor2')?1:0) + (renoHas('floor3')?1:0);
+}
+
+/* ================= 生成器与回充 ================= */
+function regen(t){
+  var total = 0;
+  Object.keys(GENS).forEach(function(g){
+    var st = S.gens[g], cap = capOf(g);
+    if(st.ch >= cap){ st.last = t; return; }
+    var per = regenIv(g) * 1000;
+    var gained = Math.floor((t - st.last) / per);
+    if(gained > 0){
+      var add = Math.min(gained, cap - st.ch);
+      st.ch += add; total += add;
+      st.last = st.ch >= cap ? t : st.last + gained * per;
+    }
+  });
+  return total;
+}
+function pickDrop(drops){
+  var x = Math.random(), acc = 0;
+  for(var i=0;i<drops.length;i++){ acc += drops[i][1]; if(x < acc) return drops[i][0]; }
+  return drops[0][0];
+}
+function genCellIdx(gid){
+  for(var i=0;i<S.board.length;i++){
+    var c = S.board[i];
+    if(c && c.t==='g' && c.gid===gid) return i;
+  }
+  return 3;
+}
+function nearestEmpty(from){
+  var fr = Math.floor(from/COLS), fc = from%COLS;
+  var best = -1, bd = 1e9;
+  var rows = openRows();
+  for(var r=0;r<rows;r++) for(var c=0;c<COLS;c++){
+    var i = r*COLS+c;
+    if(S.board[i]) continue;
+    var d = Math.abs(r-fr)*1.01 + Math.abs(c-fc);
+    if(d < bd){ bd = d; best = i; }
+  }
+  return best;
+}
+function tapGen(gid){
+  regen(now());
+  var cfg = GENS[gid], st = S.gens[gid];
+  if(st.ch <= 0){
+    var wait = Math.max(1, Math.ceil(regenIv(gid) - (now() - st.last)/1000));
+    toast(cfg.n + '补货中，约 ' + wait + ' 秒后 +1');
+    sfx('err'); return false;
+  }
+  var origin = gid==='capy' ? 3 : genCellIdx(gid);
+  var idx = nearestEmpty(origin);
+  if(idx < 0){ toast('棋盘满了，先合成腾腾地方吧'); shakeBoard(); sfx('err'); return false; }
+  var wasFull = st.ch >= capOf(gid);
+  st.ch--; if(wasFull) st.last = now();
+  var id = pickDrop(cfg.drops);
+  var shiny = rollShiny();
+  S.board[idx] = mkItem(id, shiny);
+  discover(id);
+  if(shiny) discoverShiny(id);
+  rCell(idx); fxPop(idx); rBadges(); rOrders(); sfx(shiny ? 'coin' : 'tap');
+  if(gid==='capy') capySquish();
+  checkQuest('gen');
+  save();
+  return true;
+}
+
+/* ================= 闪光变体 ================= */
+function today(){
+  var d = new Date();
+  return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
+}
+function rollShiny(){ return Math.random() < SHINY_RATE ? 1 : 0; }
+function mkItem(id, shiny){
+  var c = { t:'i', id:id };
+  if(shiny) c.s = 1;
+  return c;
+}
+/* 闪光首次收录：独立于普通图鉴，奖励更高 */
+function discoverShiny(id){
+  if(S.dexS.indexOf(id) >= 0) return;
+  S.dexS.push(id);
+  var bonus = ITEMS[id].val * 20;
+  S.coins += bonus;
+  toast('闪光图鉴收录：' + ITEMS[id].n + '，奖励 ' + bonus + ' 金币');
+  sfx('coin'); rPills();
+}
+
+/* ================= 扭蛋 ================= */
+function cardIds(rarity){
+  return Object.keys(CARDS).filter(function(k){ return CARDS[k].r === rarity; });
+}
+function gachaPull(force){
+  if(S.tickets <= 0 && S.coins < GACHA_COST){
+    toast('金币不够，扭一次要 ' + GACHA_COST); sfx('err'); return null;
+  }
+  var byTicket = S.tickets > 0;
+  if(byTicket) S.tickets--; else S.coins -= GACHA_COST;
+
+  var r = force;
+  if(!r){
+    var x = Math.random();
+    r = x < 0.62 ? 'N' : (x < 0.93 ? 'R' : 'SR');
+  }
+  var res = { rarity:r, byTicket:byTicket };
+  if(r === 'N'){
+    // 安慰奖：一半金币，一半食材
+    if(Math.random() < 0.5){
+      res.coins = 40 + Math.floor(Math.random() * 51);
+      S.coins += res.coins;
+      res.text = '小惊喜：' + res.coins + ' 金币';
+    } else {
+      res.items = grantItems(2, 1, 3);
+      if(res.items.length){
+        res.text = '小惊喜：' + res.items.map(function(o){ return o.n; }).join('、');
+      } else {
+        res.coins = 60; S.coins += 60;
+        res.text = '棋盘满了，换成 60 金币';
+      }
+    }
+  } else {
+    var pool = cardIds(r);
+    var id = pool[Math.floor(Math.random() * pool.length)];
+    res.card = id;
+    res.dup = (S.cards[id] || 0) > 0;
+    S.cards[id] = (S.cards[id] || 0) + 1;
+    if(res.dup){
+      res.coins = (r === 'SR') ? 200 : 60;
+      S.coins += res.coins;
+      res.text = '重复的' + CARDS[id].n + '，折算 ' + res.coins + ' 金币';
+    } else {
+      res.text = '获得新卡：' + CARDS[id].n;
+    }
+    checkCardSets();
+  }
+  sfx(r === 'N' ? 'sell' : 'level');
+  checkQuest('gacha');
+  rPills(); rOrders(); save();
+  return res;
+}
+/* 集齐奖励：R 全六张 / SR 全三张 */
+function checkCardSets(){
+  S.setDone = S.setDone || {};
+  var got = function(list){ return list.every(function(k){ return (S.cards[k]||0) > 0; }); };
+  if(!S.setDone.R && got(cardIds('R'))){
+    S.setDone.R = 1; S.coins += 300;
+    toast('集齐全部普通卡，奖励 300 金币');
+  }
+  if(!S.setDone.SR && got(cardIds('SR'))){
+    S.setDone.SR = 1; S.coins += 500;
+    toast('集齐全部稀有卡，奖励 500 金币');
+    showStory([{c:'capy', t:'金鸭子、神龟、月见兔……三件都凑齐了！外婆说过，集齐它们的人会交上好运。'}]);
+  }
+}
+
+/* ================= 每日礼盒 ================= */
+function dayDiff(a, b){
+  var pa = a.split('-'), pb = b.split('-');
+  var ta = Date.UTC(+pa[0], +pa[1]-1, +pa[2]), tb = Date.UTC(+pb[0], +pb[1]-1, +pb[2]);
+  return Math.round((tb - ta) / 86400000);
+}
+function refillGift(){
+  if(!S.gift) S.gift = { last:today(), stock:1 };
+  var d = dayDiff(S.gift.last, today());
+  if(d > 0){
+    S.gift.stock = Math.min(3, S.gift.stock + d);
+    S.gift.last = today();
+  }
+}
+function openGift(){
+  refillGift();
+  if(S.gift.stock <= 0){ toast('礼盒明天再来，不急'); sfx('err'); return false; }
+  S.gift.stock--;
+  var x = Math.random();
+  if(x < 0.50){
+    var c = 50 + Math.floor(Math.random() * 71);
+    S.coins += c;
+    toast('门口的礼盒：' + c + ' 金币');
+  } else if(x < 0.85){
+    var got = grantItems(2, 1, 3);
+    toast(got.length ? ('门口的礼盒：' + got.map(function(o){return o.n;}).join('、'))
+                     : '棋盘满了，礼盒先留着（未消耗）');
+    if(!got.length) S.gift.stock++;   // 放不下就不算开过
+  } else {
+    S.tickets++;
+    toast('门口的礼盒：扭蛋券 x1');
+  }
+  sfx('coin'); rGift(); rPills(); rOrders(); save();
+  return true;
+}
+/* 给玩家发若干随机基础食材（走闪光判定），返回实际发出的清单 */
+function grantItems(n, loTier, hiTier){
+  var out = [];
+  for(var k = 0; k < n; k++){
+    var ck = BASECH[Math.floor(Math.random() * BASECH.length)];
+    var chain = CHAINS[ck].items;
+    var tier = loTier + Math.floor(Math.random() * (hiTier - loTier + 1));
+    tier = Math.min(tier, chain.length);
+    var id = chain[tier - 1];
+    var idx = nearestEmpty(24);
+    if(idx < 0) break;
+    var shiny = rollShiny();
+    S.board[idx] = mkItem(id, shiny);
+    rCell(idx); fxPop(idx);
+    discover(id);
+    if(shiny) discoverShiny(id);
+    out.push({ id:id, n:(shiny ? '闪光' : '') + ITEMS[id].n, s:shiny });
+  }
+  return out;
+}
+
+/* ================= 棋盘逻辑 ================= */
+function isOpen(i){ return i>=0 && i<COLS*ROWS && Math.floor(i/COLS) < openRows(); }
+function countItem(id){
+  var n = 0;
+  S.board.forEach(function(c){ if(c && c.t==='i' && c.id===id) n++; });
+  return n;
+}
+function tryMove(a, b){
+  if(a===b) return 'none';
+  if(!isOpen(a) || !isOpen(b)) return 'bounce';
+  var A = S.board[a];
+  if(!A || A.t!=='i') return 'none';
+  var B = S.board[b];
+  if(!B){
+    S.board[b] = A; S.board[a] = null;
+    rCell(a); rCell(b); save();
+    return 'move';
+  }
+  if((B.t==='i' || B.t==='b') && B.id===A.id){
+    var it = ITEMS[A.id], chain = CHAINS[it.chain].items;
+    if(it.tier >= chain.length){ toast('已经是本链最高级啦'); return 'bounce'; }
+    // 闪光与普通不能互合，避免"洗掉"闪光
+    if((A.s?1:0) !== (B.s?1:0)){ toast('闪光食材只能和闪光的合成哦'); return 'bounce'; }
+    var nid = chain[it.tier];
+    var shiny = A.s ? 1 : 0;
+    if(B.t==='b') toast('泡泡破了，救出了里面的食材');
+    S.board[a] = null; S.board[b] = mkItem(nid, shiny);
+    rCell(a); rCell(b);
+    var nt = ITEMS[nid].tier;
+    fxMerge(b); floatText(b, '+' + nt);
+    addXp(nt); discover(nid);
+    if(shiny) discoverShiny(nid);
+    sfx('merge', nt);
+    if(!S.story.merge){ S.story.merge = 1; showStory(STORY_MERGE, meetCheck); }
+    else meetCheck();
+    checkQuest('merge');
+    rOrders(); save();
+    return 'merge';
+  }
+  return 'bounce';
+}
+function sellAt(idx){
+  var c = S.board[idx];
+  if(!c || c.t!=='i') return false;
+  var price = ITEMS[c.id].val * (c.s ? 4 : 2);
+  S.sold = { idx:idx, id:c.id, price:price, t:now(), s:(c.s?1:0) };
+  S.board[idx] = null;
+  S.coins += price;
+  rCell(idx); rPills(); rOrders(); closeSheet(); sfx('sell');
+  showUndo('已出售 ' + (c.s?'闪光':'') + ITEMS[c.id].n + '，+' + price + ' 金币');
+  checkQuest('coins');
+  save();
+  return true;
+}
+function undoSell(){
+  var s = S.sold;
+  if(!s || now() - s.t > 5200) return false;
+  var idx = !S.board[s.idx] ? s.idx : nearestEmpty(s.idx);
+  if(idx < 0){ toast('棋盘满了，无法撤销'); return false; }
+  S.board[idx] = { t:'i', id:s.id };
+  S.coins -= s.price; S.sold = null;
+  rCell(idx); rPills(); rOrders(); hideUndo(); save();
+  return true;
+}
+
+/* ================= 图鉴 / 经验 ================= */
+function discover(id){
+  if(S.dex.indexOf(id) >= 0) return;
+  S.dex.push(id);
+  var bonus = ITEMS[id].val * 10 * (renoHas('photo') ? 2 : 1);
+  S.coins += bonus;
+  toast('图鉴新收录：' + ITEMS[id].n + '，奖励 ' + bonus + ' 金币');
+  rPills(); checkQuest('coins');
+  if(el('dexM') && el('dexM').classList && el('dexM').classList.contains('on')) rDex();
+}
+function xpNeed(l){ return 25 + Math.round(10 * Math.pow(l, 1.65)); }
+var lvUpTimer = null;
+function levelFx(from, to){
+  var b = el('lvUp'); if(!b || !b.classList) return;
+  if(el('lvBig')) el('lvBig').textContent = (to - from === 1) ? '升级 Lv ' + to : '连升到 Lv ' + to;
+  if(el('lvSub')) el('lvSub').textContent = '生成器补货全部回满';
+  b.classList.remove('on');
+  b.classList.add('on');
+  if(lvUpTimer) clearTimeout(lvUpTimer);
+  lvUpTimer = setTimeout(function(){ if(b.classList) b.classList.remove('on'); }, 2000);
+}
+function addXp(n){
+  var from = S.level;
+  S.xp += n;
+  while(S.xp >= xpNeed(S.level)){
+    S.xp -= xpNeed(S.level);
+    S.level++;
+    Object.keys(GENS).forEach(function(g){ S.gens[g].ch = capOf(g); S.gens[g].last = now(); });
+  }
+  if(S.level > from){
+    levelFx(from, S.level);
+    toast('等级提升至 Lv ' + S.level + '，生成器补货全部回满');
+    sfx('level'); rBadges();
+  }
+  rPills();
+}
+
+/* ================= 订单 ================= */
+function genOrder(slot){
+  var used = [];
+  for(var i=0;i<3;i++) if(i!==slot && S && S.orders && S.orders[i]) used.push(S.orders[i].c);
+  var pool = CUST_IDS.filter(function(c){ return used.indexOf(c) < 0; });
+  var cust = pool[Math.floor(Math.random()*pool.length)] || CUST_IDS[0];
+  var level = S ? S.level : 1;
+  var cap = Math.min(2 + Math.floor(level/2), 6);
+  var kinds = (level>=3 && Math.random()<.45) ? 2 : 1;
+  var needs = [], usedIds = [];
+  var cookedKnown = (S && S.dex) ? S.dex.filter(function(id){
+    return ITEMS[id] && CHAINS[ITEMS[id].chain] && CHAINS[ITEMS[id].chain].cooked;
+  }) : [];
+  if(level >= 5 && cookedKnown.length && Math.random() < .25){
+    var cid = cookedKnown[Math.floor(Math.random()*cookedKnown.length)];
+    needs.push([cid, 1]); usedIds.push(cid);
+    kinds = 1;
+  }
+  for(var k=0;k<kinds;k++){
+    var ck = BASECH[Math.floor(Math.random()*BASECH.length)];
+    var chain = CHAINS[ck].items;
+    var tier = 2 + Math.floor(Math.pow(Math.random(), 1.7) * (cap - 1));
+    tier = Math.min(tier, chain.length);
+    var id = chain[tier-1];
+    if(usedIds.indexOf(id) >= 0){ k--; continue; }
+    usedIds.push(id);
+    var cnt = (tier<=3 && Math.random()<.35) ? 2 : 1;
+    needs.push([id, cnt]);
+  }
+  return { c:cust, needs:needs, rf:0 };
+}
+function howToGet(id){
+  var it = ITEMS[id], ch = CHAINS[it.chain];
+  if(ch.cooked){
+    var rc = null;
+    for(var i=0;i<RECIPES.length;i++) if(RECIPES[i].r === id) rc = RECIPES[i];
+    if(!rc) return it.n + '：在烹饪台试出配方';
+    if(S.dex.indexOf(id) >= 0)
+      return it.n + '：烹饪台用 ' + ITEMS[rc.a].n + ' + ' + ITEMS[rc.b].n + ' 做出来';
+    return it.n + '：还没发现配方，去烹饪台试试（提示：' + rc.hint + '）';
+  }
+  if(it.tier === 1){
+    for(var g in GENS){
+      for(var k=0;k<GENS[g].drops.length;k++)
+        if(GENS[g].drops[k][0] === id) return it.n + '：点' + GENS[g].n + '就能掉落';
+    }
+  }
+  return it.n + '：两个' + ITEM_NAMES[ch.items[it.tier - 2]] + '合成得到（' + ch.n + ' 第 ' + it.tier + ' 级）';
+}
+function orderReward(o){
+  var coins = 0, xp = 0;
+  o.needs.forEach(function(nd){ coins += ITEMS[nd[0]].val * 8 * nd[1]; xp += ITEMS[nd[0]].val * 3 * nd[1]; });
+  if(renoHas('tables')) coins = Math.round(coins * 1.1);
+  return { coins:coins, xp:xp };
+}
+function starsOf(o){
+  var ts = 0;
+  o.needs.forEach(function(nd){ ts += ITEMS[nd[0]].val * nd[1]; });
+  return 1 + (ts>=8?1:0) + (ts>=14?1:0) + (renoHas('sign')?1:0);
+}
+function canDeliver(o){
+  if(!o) return false;
+  for(var i=0;i<o.needs.length;i++){
+    if(countItem(o.needs[i][0]) < o.needs[i][1]) return false;
+  }
+  return true;
+}
+function deliver(slot){
+  var o = S.orders[slot];
+  if(!canDeliver(o)){ sfx('err'); return false; }
+  var cells = [], shinyUsed = 0;
+  o.needs.forEach(function(nd){
+    var k = nd[1];
+    // 先挑闪光（交付有加成），不够再补普通
+    for(var pass=0; pass<2 && k>0; pass++){
+      for(var i=S.board.length-1; i>=0 && k>0; i--){
+        var c = S.board[i];
+        if(!c || c.t!=='i' || c.id!==nd[0]) continue;
+        if(pass===0 ? !c.s : !!c.s) continue;
+        if(c.s) shinyUsed++;
+        cells.push(i); k--;
+      }
+    }
+  });
+  fxFly(cells, slot);
+  cells.forEach(function(i){ S.board[i] = null; rCell(i); });
+  var rw = orderReward(o);
+  var st = starsOf(o);
+  // 闪光加成：每份闪光食材额外给一份等值金币
+  var shinyBonus = 0;
+  if(shinyUsed){
+    o.needs.forEach(function(nd){ shinyBonus += ITEMS[nd[0]].val * 8; });
+    shinyBonus = Math.round(shinyBonus / o.needs.length) * shinyUsed;
+    rw.coins += shinyBonus;
+  }
+  S.coins += rw.coins;
+  S.stars += st;
+  addXp(rw.xp);
+  S.stat.deliver++;
+  if(Math.random() < 0.15){
+    var ci = nearestEmpty(cells.length ? cells[0] : 24);
+    if(ci >= 0){
+      S.board[ci] = {t:'c'};
+      rCell(ci); fxPop(ci);
+      toast(CUSTS[o.c].n + '留下了一个小礼盒');
+    }
+  }
+  var ms = CUST_LINES[o.c] ? CUST_LINES[o.c].more : null;
+  if(ms && S.thx.indexOf(o.c) >= 0 && Math.random() < .5){
+    toast(CUSTS[o.c].n + '：' + ms[Math.floor(Math.random()*ms.length)]);
+  }
+  toast(CUSTS[o.c].n + '很满意，+' + rw.coins + ' 金币、+' + rw.xp + ' 经验、+' + st + ' 星星'
+        + (shinyBonus ? '（闪光加成 +' + shinyBonus + '）' : ''));
+  if(cells.length) floatText(cells[0], '+' + rw.xp + ' 经验');
+  sfx('coin');
+  if(!S.story.deliver){ S.story.deliver = 1; showStory(STORY_DELIVER); }
+  if(CUST_LINES[o.c] && S.thx.indexOf(o.c) < 0){
+    S.thx.push(o.c);
+    showStory([{c:o.c, t:CUST_LINES[o.c].thanks}]);
+  }
+  S.orders[slot] = genOrder(slot);
+  checkQuest('deliver'); checkQuest('coins');
+  meetCheck();
+  rOrders(); rPills(); save();
+  return true;
+}
+/* ================= 装修 / 商店 / 礼盒 ================= */
+function renoCanBuy(r){
+  if(renoHas(r.id)) return 'done';
+  if(r.pre && !renoHas(r.pre)) return 'lock';
+  if(r.preAll && S.reno.length < RENO.length - 1) return 'lock';
+  if(S.stars < r.star || S.coins < r.coins) return 'poor';
+  return 'ok';
+}
+function buyReno(id){
+  var r = null;
+  for(var i=0;i<RENO.length;i++) if(RENO[i].id===id) r = RENO[i];
+  if(!r) return false;
+  var can = renoCanBuy(r);
+  if(can !== 'ok'){
+    if(can === 'poor') toast('星星或金币还不够');
+    else if(can === 'lock') toast('要先完成前置的装修项');
+    sfx('err'); return false;
+  }
+  S.stars -= r.star; S.coins -= r.coins;
+  S.reno.push(id);
+  if(id==='floor1') openRow(6);
+  if(id==='floor2') openRow(7);
+  if(id==='floor3') openRow(8);
+  if(id==='chime') Object.keys(GENS).forEach(function(g){ S.gens[g].ch = Math.min(S.gens[g].ch + 2, capOf(g)); });
+  toast('装修完成：' + r.n);
+  sfx('level');
+  rAll(); rLockBand(); rReno(); rScene();
+  showStory(r.story);
+  checkQuest('reno');
+  save();
+  return true;
+}
+function openRow(row){
+  var pool = ['veg1','veg2','veg3','bun1','bun2','bun3'];
+  for(var c=0;c<COLS;c++){
+    var i = row*COLS + c;
+    if(cellEls[i] && cellEls[i].className !== undefined) cellEls[i].className = 'cell';
+    if(c === 1 || c === 5){ S.board[i] = null; }
+    else S.board[i] = { t:'b', id: pool[Math.floor(Math.random()*pool.length)] };
+    rCell(i);
+  }
+}
+function rLockBand(){
+  var lb = el('lockBand'); if(!lb || !lb.style) return;
+  var locked = ROWS - openRows();
+  if(locked <= 0){ lb.style.display = 'none'; return; }
+  lb.style.display = '';
+  lb.style.height = 'calc(' + locked + '/9.05*100% - 8px)';
+}
+function buyShop(id){
+  var it = null;
+  for(var i=0;i<SHOP.length;i++) if(SHOP[i].id===id) it = SHOP[i];
+  if(!it) return false;
+  if(S.coins < it.coins){ toast('金币不够'); sfx('err'); return false; }
+  if(id==='coffee'){
+    S.coins -= it.coins;
+    Object.keys(GENS).forEach(function(g){ S.gens[g].ch = capOf(g); S.gens[g].last = now(); });
+    toast('热茶下肚，生成器补货全部回满'); sfx('level');
+    rBadges(); rPills(); save(); return true;
+  }
+  var n = id==='pack1' ? 3 : 2;
+  var picks = [];
+  for(var k=0;k<n;k++){
+    var ck = Math.random()<.5 ? 'veg' : 'bun';
+    var tier = id==='pack1' ? 1+Math.floor(Math.random()*2) : 3+Math.floor(Math.random()*2);
+    picks.push(CHAINS[ck].items[tier-1]);
+  }
+  var spots = [];
+  for(var k2=0;k2<picks.length;k2++){
+    var idx = nearestEmpty(24);
+    if(idx < 0) break;
+    S.board[idx] = { t:'i', id:picks[k2] };
+    spots.push(idx);
+  }
+  if(!spots.length){ toast('棋盘满了，放不下新食材'); sfx('err'); return false; }
+  S.coins -= it.coins;
+  spots.forEach(function(i2){ rCell(i2); fxPop(i2); discover(S.board[i2].id); });
+  toast(it.n + '送到，获得 ' + spots.length + ' 份食材');
+  sfx('coin'); rPills(); rOrders(); save();
+  return true;
+}
+function openChest(idx){
+  var c = S.board[idx];
+  if(!c || c.t !== 'c') return false;
+  S.board[idx] = null; rCell(idx);
+  var got = 10 + Math.floor(Math.random()*21);
+  S.coins += got;
+  var names = [];
+  for(var k=0;k<2;k++){
+    var ck = Math.random()<.5 ? 'veg' : 'bun';
+    var id2 = CHAINS[ck].items[Math.floor(Math.random()*3)];
+    var i2 = nearestEmpty(idx);
+    if(i2 >= 0){
+      S.board[i2] = { t:'i', id:id2 };
+      rCell(i2); fxPop(i2); discover(id2);
+      names.push(ITEMS[id2].n);
+    }
+  }
+  fxMerge(idx);
+  toast('礼盒开出 ' + got + ' 金币' + (names.length ? '和' + names.join('、') : ''));
+  sfx('coin'); rPills(); rOrders(); checkQuest('coins'); save();
+  return true;
+}
+
+/* ================= 烹饪台 ================= */
+var cookSel = [null, null];
+function findRecipe(a, b){
+  if(!a || !b) return null;
+  for(var i=0;i<RECIPES.length;i++){
+    var r = RECIPES[i];
+    if((r.a===a && r.b===b) || (r.a===b && r.b===a)) return r;
+  }
+  return null;
+}
+function consumeOne(id){
+  for(var i=S.board.length-1;i>=0;i--){
+    var c = S.board[i];
+    if(c && c.t==='i' && c.id===id){ S.board[i]=null; rCell(i); return i; }
+  }
+  return -1;
+}
+function doCook(){
+  var a = cookSel[0], b = cookSel[1];
+  if(!a || !b) return 'none';
+  var enough = a===b ? countItem(a)>=2 : (countItem(a)>=1 && countItem(b)>=1);
+  if(!enough){ toast('棋盘上的食材不够了'); sfx('err'); return 'lack'; }
+  var r = findRecipe(a, b);
+  if(!r){
+    toast('这两样好像凑不到一起……换个搭配试试？');
+    sfx('err'); rCook();
+    return 'fail';
+  }
+  var ia = consumeOne(a); consumeOne(b);
+  var idx = nearestEmpty(ia >= 0 ? ia : 24);
+  if(idx < 0) idx = ia;
+  S.board[idx] = { t:'i', id:r.r };
+  rCell(idx); fxMerge(idx);
+  var isNew = S.dex.indexOf(r.r) < 0;
+  discover(r.r);
+  addXp(ITEMS[r.r].val);
+  sfx('merge', ITEMS[r.r].val);
+  toast('烹饪成功：' + ITEMS[r.r].n);
+  if(isNew){
+    showStory([{c:'capy', t:'新菜谱：' + ITEMS[r.r].n + '！快记进外婆的笔记里。'}]);
+    checkQuest('cook');
+  }
+  cookSel = [null, null];
+  rCook(); rOrders(); save();
+  return r.r;
+}
+function ckToggle(id){
+  if(cookSel[0]===id){ cookSel[0]=cookSel[1]; cookSel[1]=null; }
+  else if(cookSel[1]===id){ cookSel[1]=null; }
+  else if(!cookSel[0]) cookSel[0]=id;
+  else if(!cookSel[1]) cookSel[1]=id;
+  else cookSel[1]=id;
+  rCook();
+}
+
+/* ================= 储物间 ================= */
+function storePut(idx){
+  var c = S.board[idx];
+  if(!c || c.t!=='i') return false;
+  var slot = -1;
+  for(var i=0;i<S.store.length;i++) if(!S.store[i]){ slot = i; break; }
+  if(slot < 0){ toast('储物间满了'); sfx('err'); return false; }
+  S.store[slot] = c.id;
+  S.board[idx] = null;
+  rCell(idx); closeSheet(); rOrders(); toast('已存入储物间'); sfx('sell'); save();
+  return true;
+}
+function storeTake(slot){
+  var id = S.store[slot];
+  if(!id) return false;
+  var idx = nearestEmpty(24);
+  if(idx < 0){ toast('棋盘满了，先腾个空位'); sfx('err'); return false; }
+  S.store[slot] = null;
+  S.board[idx] = { t:'i', id:id };
+  rCell(idx); fxPop(idx); rWare(); rOrders(); sfx('tap'); save();
+  return true;
+}
+
+function refreshOrder(slot){
+  var o = S.orders[slot];
+  if(o && o.rf >= 1){ toast('这位客人已经换过一次单啦，先做完这单吧'); sfx('err'); return false; }
+  if(S.coins < 10){ toast('金币不足，换单需要 10 金币'); sfx('err'); return false; }
+  S.coins -= 10;
+  S.orders[slot] = genOrder(slot);
+  S.orders[slot].rf = 1;
+  toast('换了一单。每位客人只肯换一次哦');
+  rOrders(); rPills(); sfx('sell');
+  meetCheck();
+  save();
+  return true;
+}
+
+/* ================= 对话引擎 ================= */
+var dlgQ = [], dlgIdx = 0, dlgTimer = null, dlgDone = null, dlgTyping = false, dlgFull = '';
+function dlgOpen(){
+  var o = el('dlgOv');
+  return !!(o && o.classList && o.classList.contains('on'));
+}
+function showStory(lines, done){
+  if(!lines || !lines.length){ if(done) done(); return; }
+  if(dlgOpen()){
+    dlgQ = dlgQ.concat(lines);
+    if(done){
+      var pd = dlgDone;
+      dlgDone = function(){ if(pd) pd(); done(); };
+    }
+    return;
+  }
+  dlgQ = lines.slice(); dlgIdx = 0; dlgDone = done || null;
+  var o = el('dlgOv');
+  if(!o || !o.classList){ dlgQ = []; if(done) done(); return; }
+  o.classList.add('on');
+  dlgLine();
+}
+function dlgLine(){
+  var ln = dlgQ[dlgIdx];
+  var ava = el('dlgAva'), name = el('dlgName'), use = el('dlgAvaUse');
+  if(ln.c){
+    if(ava && ava.classList) ava.classList.remove('hide');
+    var sym = ln.c === 'capy' ? 'c-capy' : (CUSTS[ln.c] ? CUSTS[ln.c].sym : 'c-capy');
+    if(use) use.setAttribute('href', '#' + sym);
+    var aimg = el('dlgAvaImg');
+    if(aimg){
+      aimg.style.display = '';
+      resetFallback(aimg);
+      aimg.setAttribute('src', artSrc('chars', sym.replace(/^c-/, '')));
+    }
+    if(name) name.textContent = ln.c === 'capy' ? '阿汤' : (CUSTS[ln.c] ? CUSTS[ln.c].n : '');
+  } else {
+    if(ava && ava.classList) ava.classList.add('hide');
+    if(name) name.textContent = '';
+  }
+  dlgFull = ln.t; dlgTyping = true;
+  var t = el('dlgTxt'); if(t) t.textContent = '';
+  var i = 0;
+  if(dlgTimer) clearInterval(dlgTimer);
+  dlgTimer = setInterval(function(){
+    i++;
+    if(t) t.textContent = dlgFull.slice(0, i);
+    if(i >= dlgFull.length){ clearInterval(dlgTimer); dlgTimer = null; dlgTyping = false; }
+  }, 34);
+}
+function dlgTap(){
+  if(!dlgQ.length) return;
+  if(dlgTyping){
+    if(dlgTimer){ clearInterval(dlgTimer); dlgTimer = null; }
+    dlgTyping = false;
+    var t = el('dlgTxt'); if(t) t.textContent = dlgFull;
+    return;
+  }
+  dlgIdx++;
+  if(dlgIdx < dlgQ.length){ dlgLine(); sfx('tap'); return; }
+  var o = el('dlgOv'); if(o && o.classList) o.classList.remove('on');
+  dlgQ = [];
+  var d = dlgDone; dlgDone = null;
+  if(d) d();
+}
+
+/* ================= 主线目标（外婆的笔记） ================= */
+function questCur(){ return S.quest.i < QUESTS.length ? QUESTS[S.quest.i] : null; }
+function checkQuest(type){
+  var q = questCur(); if(!q) return;
+  if(q.type === 'coins'){
+    if(S.coins >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'reno'){
+    S.quest.p = S.reno.length;
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'cook'){
+    S.quest.p = cookedCount();
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type !== type){ rQuest(); return; }
+  S.quest.p++;
+  if(S.quest.p >= q.n) questDone(); else rQuest();
+}
+function questDone(){
+  var q = QUESTS[S.quest.i];
+  S.quest.i++; S.quest.p = 0;
+  if(q.coins){ S.coins += q.coins; rPills(); }
+  toast('目标达成：' + q.t.split('：')[0] + (q.coins ? '，奖励 ' + q.coins + ' 金币' : ''));
+  sfx('level');
+  rQuest();
+  showStory(q.story);
+  var nq = questCur();
+  if(nq && nq.type === 'coins' && S.coins >= nq.n) questDone();
+  else if(nq && nq.type === 'reno' && S.reno.length >= nq.n) questDone();
+  else if(nq && nq.type === 'cook' && cookedCount() >= nq.n) questDone();
+}
+function cookedCount(){
+  return S.dex.filter(function(id){
+    return ITEMS[id] && CHAINS[ITEMS[id].chain] && CHAINS[ITEMS[id].chain].cooked;
+  }).length;
+}
+function rQuest(){
+  var qt = el('qTxt'), qp = el('qP'), qb = el('quest');
+  var q = questCur();
+  if(!q){
+    if(qt) qt.textContent = '外婆的笔记：序章完成，后续故事随装修更新';
+    if(qp) qp.textContent = '';
+    if(qb && qb.classList) qb.classList.add('done');
+    return;
+  }
+  if(qb && qb.classList) qb.classList.remove('done');
+  if(qt) qt.textContent = '外婆的笔记：' + q.t;
+  if(qp) qp.textContent = q.type === 'coins' ? Math.min(S.coins, q.n) + '/' + q.n
+    : q.type === 'reno' ? S.reno.length + '/' + q.n
+    : S.quest.p + '/' + q.n;
+}
+
+/* ================= 客人初见 ================= */
+function meetCheck(){
+  if(!S.story.intro) return;
+  for(var i=0;i<3;i++){
+    var o = S.orders[i];
+    if(o && CUST_LINES[o.c] && S.met.indexOf(o.c) < 0){
+      S.met.push(o.c);
+      var cid = o.c;
+      showStory(CUST_LINES[cid].intro.map(function(t){ return {c:cid, t:t}; }));
+      save();
+      return;
+    }
+  }
+}
+
+/* ================= 渲染 ================= */
+function el(id){ return document.getElementById(id); }
+var ART_VER = '5';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
+function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
+/* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
+function artUse(sym, cls, dir){
+  var name = sym.replace(/^(s|g|c|card)-/, '');   // s- 物品 / g- 生成器 / c- 角色 / card- 扭蛋卡
+  return '<span class="art ' + (cls||'') + '">' + svgUse(sym) +
+    '<img src="' + artSrc(dir||'items', name) + '" alt="" onerror="artFail(this)"></span>';
+}
+/* 贴图加载失败时亮出矢量回退层（父级打 noimg 标记） */
+function artFail(img){
+  if(!img) return;
+  img.style.display = 'none';
+  var p = img.parentNode;
+  if(p && p.classList) p.classList.add('noimg');
+}
+/* 动态换图前清掉失败标记，让新图有机会正常显示 */
+function resetFallback(img){
+  if(!img) return;
+  img.style.display = '';
+  var p = img.parentNode;
+  if(p && p.classList) p.classList.remove('noimg');
+}
+function itemArt(id, cls){ return artUse(ITEMS[id].sym, cls, 'items'); }
+var cellEls = [];
+function buildBoard(){
+  var b = el('board'); if(!b) return;
+  var html = '';
+  for(var i=0;i<COLS*ROWS;i++){
+    html += '<div class="cell' + (isOpen(i)?'':' lk') + '" data-i="' + i + '"></div>';
+  }
+  b.innerHTML = html;
+  cellEls = [];
+  for(var j=0;j<COLS*ROWS;j++) cellEls.push(b.querySelector ? b.querySelector('[data-i="' + j + '"]') : null);
+}
+function rCell(i){
+  var e = cellEls[i]; if(!e) return;
+  var c = S.board[i];
+  if(!isOpen(i)){ e.innerHTML = svgUse('i-lock','lki'); return; }
+  if(!c){ e.innerHTML = ''; e.className = 'cell'; return; }
+  if(c.t === 'g'){
+    var st = S.gens[c.gid], cfg = GENS[c.gid];
+    e.className = 'cell' + (st.ch<=0 ? ' genq' : '');
+    e.innerHTML = artUse(cfg.sym,'it','chars') + '<span class="chb' + (st.ch<=0?' empty':'') + '">' + st.ch + '</span>';
+  } else if(c.t === 'b'){
+    e.className = 'cell bub';
+    e.innerHTML = itemArt(c.id,'it') + '<span class="bubOv"></span>';
+  } else if(c.t === 'c'){
+    e.className = 'cell chest';
+    e.innerHTML = artUse('s-chest','it','items');
+  } else {
+    e.className = 'cell' + (c.s ? ' sh' : '');
+    e.innerHTML = itemArt(c.id,'it') + (c.s ? '<span class="shOv"></span>' : '');
+  }
+}
+function rAllCells(){ for(var i=0;i<COLS*ROWS;i++) rCell(i); }
+function rBadges(){
+  for(var i=0;i<COLS*ROWS;i++){
+    var c = S.board[i];
+    if(c && c.t==='g') rCell(i);
+  }
+  rCapy();
+}
+function rCapy(){
+  var b = el('capyCh'); if(!b) return;
+  var st = S.gens.capy;
+  b.textContent = st.ch;
+  b.className = 'chb' + (st.ch<=0 ? ' empty' : '');
+}
+function rPills(){
+  if(el('coinN')) el('coinN').textContent = S.coins;
+  if(el('starN')) el('starN').textContent = S.stars;
+  if(el('lvN')) el('lvN').textContent = S.level;
+  if(el('xpb') && el('xpb').style) el('xpb').style.width = Math.min(100, Math.round(S.xp / xpNeed(S.level) * 100)) + '%';
+  if(el('xpTxt')) el('xpTxt').textContent = S.xp + '/' + xpNeed(S.level);
+}
+function rOrders(){
+  var wrap = el('orders'); if(!wrap) return;
+  var html = '';
+  for(var i=0;i<3;i++){
+    var o = S.orders[i];
+    if(!o){ html += '<div class="order"></div>'; continue; }
+    var ok = canDeliver(o);
+    var rw = orderReward(o);
+    var needsH = '';
+    o.needs.forEach(function(nd){
+      var have = Math.min(countItem(nd[0]), nd[1]);
+      needsH += '<div class="need' + (have>=nd[1]?' ok':'') + '" data-need="' + nd[0] + '">' +
+        '<span class="nicon">' + itemArt(nd[0]) +
+        '<span class="cnt">' + have + '/' + nd[1] + '</span></span>' +
+        '<span class="nname">' + ITEMS[nd[0]].n + '</span></div>';
+    });
+    html += '<div class="order" data-slot="' + i + '">' +
+      '<div class="cwrap"><div class="cust">' + artUse(CUSTS[o.c].sym,'','chars') + '</div>' +
+      '<span class="cname">' + CUSTS[o.c].n + '</span></div>' +
+      '<div class="needs">' + needsH + '</div>' +
+      '<div class="orow"><span class="reward">' + svgUse('i-coin') + '+' + rw.coins + '</span>' +
+      '<button class="dv' + (ok?' ready':'') + '" data-dv="' + i + '"' + (ok?'':' disabled') + '>交付</button>' +
+      '<button class="rf" data-rf="' + i + '"' + (o.rf ? ' disabled' : '') + ' title="花 10 金币换一单，每单限一次">' + svgUse('i-refresh') + '</button></div></div>';
+  }
+  wrap.innerHTML = html;
+}
+function rDex(){
+  var body = el('dexBody'); if(!body) return;
+  var total = 0, got = 0, html = '';
+  Object.keys(CHAINS).forEach(function(ck){
+    var ch = CHAINS[ck];
+    html += '<div class="dxh"><i style="background:' + ch.color + '"></i>' + ch.n + '</div><div class="dxg">';
+    ch.items.forEach(function(id){
+      total++;
+      var has = S.dex.indexOf(id) >= 0;
+      if(has) got++;
+      html += '<div class="dxs' + (has?'':' no') + '">' + itemArt(id) +
+        '<span>' + (has ? ITEMS[id].n : '？？？') + '</span></div>';
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html;
+  if(el('dexSub')) el('dexSub').textContent = '已收录 ' + got + ' / ' + total + ' 种，首次合成新物品有金币奖励';
+}
+function rReno(){
+  var body = el('renoBody'); if(!body) return;
+  var html = '';
+  RENO.forEach(function(r){
+    var can = renoCanBuy(r);
+    var cost = '<span class="rcost">' + svgUse('i-star') + r.star + ' ' + svgUse('i-coin') + r.coins + '</span>';
+    var btn;
+    if(can==='done') btn = '<span class="rdone">已完成</span>';
+    else if(can==='lock') btn = '<span class="rlock">' + svgUse('i-lock') + '</span>';
+    else btn = '<button class="dv" data-reno="' + r.id + '"' + (can==='poor' ? ' disabled' : '') + '>装修</button>';
+    html += '<div class="rrow' + (can==='done'?' isdone':'') + '"><div class="rinfo"><b>' + r.n + '</b><span>' + r.fx + '</span></div>' + cost + btn + '</div>';
+  });
+  body.innerHTML = html;
+  if(el('renoSub')) el('renoSub').textContent = '已完成 ' + S.reno.length + ' / ' + RENO.length + ' 项，交付订单可获得星星';
+}
+function rShop(){
+  var body = el('shopBody'); if(!body) return;
+  var html = '';
+  SHOP.forEach(function(s2){
+    html += '<div class="rrow"><div class="rinfo"><b>' + s2.n + '</b><span>' + s2.d + '</span></div>' +
+      '<span class="rcost">' + svgUse('i-coin') + s2.coins + '</span>' +
+      '<button class="dv" data-shop="' + s2.id + '"' + (S.coins < s2.coins ? ' disabled' : '') + '>购买</button></div>';
+  });
+  body.innerHTML = html;
+}
+function rCook(){
+  var sa = el('ckA'), sb = el('ckB'), sr = el('ckR');
+  if(sa) sa.innerHTML = cookSel[0] ? itemArt(cookSel[0]) : '';
+  if(sb) sb.innerHTML = cookSel[1] ? itemArt(cookSel[1]) : '';
+  var r = findRecipe(cookSel[0], cookSel[1]);
+  if(sr) sr.innerHTML = (r && S.dex.indexOf(r.r) >= 0) ? itemArt(r.r) : '<span class="ckq">?</span>';
+  var go = el('cookGo');
+  if(go) go.disabled = !(cookSel[0] && cookSel[1]);
+  var pick = el('cookPick');
+  if(pick){
+    var ids = [], seen = {};
+    S.board.forEach(function(c){ if(c && c.t==='i' && !seen[c.id]){ seen[c.id]=1; ids.push(c.id); } });
+    var html = '';
+    ids.forEach(function(id){
+      var selN = (cookSel[0]===id?1:0) + (cookSel[1]===id?1:0);
+      html += '<button class="ckit' + (selN?' on':'') + '" data-ck="' + id + '">' + itemArt(id) +
+        '<span class="cnt">x' + countItem(id) + '</span></button>';
+    });
+    pick.innerHTML = html || '<div class="psub">棋盘上还没有食材，先去生成一些吧</div>';
+  }
+  var book = el('cookBook');
+  if(book){
+    var h2 = '';
+    RECIPES.forEach(function(rc){
+      var has = S.dex.indexOf(rc.r) >= 0;
+      h2 += '<div class="rrow' + (has?'':' mys') + '"><span class="ckbi">' + itemArt(rc.r) + '</span>' +
+        '<div class="rinfo"><b>' + (has ? ITEMS[rc.r].n : '？？？') + '</b><span>' +
+        (has ? ('配方：' + ITEMS[rc.a].n + ' + ' + ITEMS[rc.b].n) : ('线索：' + rc.hint)) + '</span></div>' +
+        (has ? '<span class="rdone">已解锁</span>' : '') + '</div>';
+    });
+    book.innerHTML = h2;
+  }
+}
+function rWare(){
+  var gd = el('wareGrid'); if(!gd) return;
+  var html = '';
+  for(var i=0;i<S.store.length;i++){
+    var id = S.store[i];
+    html += '<button class="dxs wslot" data-ws="' + i + '">' +
+      (id ? itemArt(id) + '<span>' + ITEMS[id].n + '</span>' : '<span class="wempty">空位</span>') + '</button>';
+  }
+  gd.innerHTML = html;
+}
+function rScene(){
+  var sg = el('scSign'); if(sg && sg.style) sg.style.display = (renoHas('sign') && !renoHas('gold')) ? '' : 'none';
+  var gg = el('scGold'); if(gg && gg.style) gg.style.display = renoHas('gold') ? '' : 'none';
+  var lg2 = el('scGlow'); if(lg2 && lg2.style) lg2.style.display = renoHas('lantern') ? '' : 'none';
+}
+/* 扭蛋弹窗：费用行 + 结果区 + 收藏册 */
+function rGacha(){
+  var sub = el('gachaSub');
+  if(sub) sub.textContent = S.tickets > 0
+    ? ('扭蛋券 x' + S.tickets + '，优先使用；用完后每次 ' + GACHA_COST + ' 金币')
+    : ('每次 ' + GACHA_COST + ' 金币，也可用扭蛋券');
+  var go = el('gachaGo');
+  if(go) go.disabled = (S.tickets <= 0 && S.coins < GACHA_COST);
+  rCards();
+}
+function rCards(){
+  var body = el('cardBody'); if(!body) return;
+  var html = '';
+  Object.keys(CARDS).forEach(function(id){
+    var n = S.cards[id] || 0, c = CARDS[id];
+    html += '<div class="dxs' + (n ? '' : ' no') + '">' + artUse('card-' + id, '', 'cards') +
+      '<span>' + (n ? c.n : '？？？') + '</span>' +
+      '<span class="cnum">' + (n ? (c.r + ' x' + n) : c.r) + '</span></div>';
+  });
+  body.innerHTML = html;
+}
+function showGachaResult(res){
+  var box = el('gachaResult'); if(!box || !res) return;
+  var cap = el('capsule');
+  if(cap && cap.classList){
+    cap.classList.remove('roll'); void cap.offsetWidth; cap.classList.add('roll');
+  }
+  box.innerHTML = '';
+  setTimeout(function(){
+    var html = '';
+    if(res.card){
+      html += '<span class="grare ' + res.rarity + '">' + res.rarity + '</span>';
+      html += artUse('card-' + res.card, 'gcard', 'cards');
+    }
+    html += '<span class="gtx">' + res.text + '</span>';
+    box.innerHTML = html;
+    box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
+    rGacha(); rPills();
+  }, 600);
+}
+function rGift(){
+  var b = el('giftBtn'), c = el('giftCh');
+  if(!b) return;
+  refillGift();
+  if(c) c.textContent = S.gift.stock;
+  if(b.classList) b.classList.toggle('empty', S.gift.stock <= 0);
+}
+function rAll(){ rAllCells(); rPills(); rOrders(); rCapy(); rQuest(); rLockBand(); rScene(); rGift(); }
+
+/* ================= 信息卡 ================= */
+var sheetIdx = -1;
+function openSheet(idx){
+  var c = S.board[idx]; if(!c) return;
+  sheetIdx = idx;
+  var sh = el('sheet'); if(!sh) return;
+  var use = el('shUse');
+  var shImg = el('shImg');
+  var setArt = function(sym, dir){
+    if(use) use.setAttribute('href', '#' + sym);
+    if(shImg){
+      shImg.style.display = '';
+      resetFallback(shImg);
+      shImg.setAttribute('src', artSrc(dir, sym.replace(/^[sgc]-/, '')));
+    }
+  };
+  if(c.t === 'i'){
+    var it = ITEMS[c.id], chain = CHAINS[it.chain];
+    setArt(it.sym, 'items');
+    if(el('shName')) el('shName').textContent = it.n;
+    var nxt = it.tier < chain.items.length ? '下一级：' + ITEM_NAMES[chain.items[it.tier]] : '本链最高级';
+    if(el('shChain')) el('shChain').textContent = chain.n + ' · ' + it.tier + ' 级 · ' + nxt;
+    var dots = '';
+    for(var i=1;i<=chain.items.length;i++) dots += '<i class="' + (i<=it.tier?'f':'') + '"></i>';
+    if(el('shDots')) el('shDots').innerHTML = dots;
+    var hasSlot = false;
+    for(var si=0; si<S.store.length; si++) if(!S.store[si]) hasSlot = true;
+    if(el('shBtns')) el('shBtns').innerHTML =
+      '<button class="sbtn warn" id="shSell">出售 +' + (it.val*2) + '</button>' +
+      (hasSlot ? '<button class="sbtn" id="shStore">存入储物间</button>' : '') +
+      '<button class="sbtn" id="shClose">关闭</button>';
+    if(el('shSell')) el('shSell').onclick = function(){ sellAt(sheetIdx); };
+    if(el('shStore')) el('shStore').onclick = function(){ storePut(sheetIdx); };
+  } else if(c.t === 'b'){
+    var bit = ITEMS[c.id];
+    setArt(bit.sym, 'items');
+    if(el('shName')) el('shName').textContent = '泡泡里的' + bit.n;
+    if(el('shChain')) el('shChain').textContent = '被泡泡困住了：把一个相同的' + bit.n + '拖上来，就能合成救出它';
+    if(el('shDots')) el('shDots').innerHTML = '';
+    if(el('shBtns')) el('shBtns').innerHTML = '<button class="sbtn" id="shClose">关闭</button>';
+  } else {
+    var cfg = GENS[c.gid], st = S.gens[c.gid];
+    setArt(cfg.sym, 'chars');
+    if(el('shName')) el('shName').textContent = cfg.n;
+    if(el('shChain')) el('shChain').textContent = cfg.desc + ' · 补货 ' + st.ch + '/' + capOf(c.gid) + ' · 每 ' + Math.round(regenIv(c.gid)) + ' 秒回 1';
+    if(el('shDots')) el('shDots').innerHTML = '';
+    if(el('shBtns')) el('shBtns').innerHTML = '<button class="sbtn" id="shClose">关闭</button>';
+  }
+  if(el('shClose')) el('shClose').onclick = closeSheet;
+  sh.classList.add('on');
+  if(cellEls[idx] && cellEls[idx].classList) cellEls[idx].classList.add('sel');
+}
+function closeSheet(){
+  var sh = el('sheet');
+  if(sh) sh.classList.remove('on');
+  if(sheetIdx>=0 && cellEls[sheetIdx] && cellEls[sheetIdx].classList) cellEls[sheetIdx].classList.remove('sel');
+  sheetIdx = -1;
+}
+
+/* ================= 特效 ================= */
+function canFx(){ return typeof document !== 'undefined' && typeof document.createElement === 'function' && typeof document.body === 'object' && document.body; }
+function cellCenter(i){
+  var e = cellEls[i];
+  if(!e || !e.getBoundingClientRect) return null;
+  var r = e.getBoundingClientRect();
+  return { x: r.left + r.width/2, y: r.top + r.height/2 };
+}
+function fxPop(i){
+  var e = cellEls[i]; if(!e || !e.classList) return;
+  e.classList.remove('pop'); void (e.offsetWidth);
+  e.classList.add('pop');
+  setTimeout(function(){ if(e.classList) e.classList.remove('pop'); }, 350);
+}
+function fxMerge(i){
+  var e = cellEls[i]; if(!e || !e.classList) return;
+  e.classList.remove('mg'); void (e.offsetWidth);
+  e.classList.add('mg');
+  setTimeout(function(){ if(e.classList) e.classList.remove('mg'); }, 460);
+  if(!canFx()) return;
+  try{
+    var p = cellCenter(i); if(!p) return;
+    for(var k=0;k<5;k++){
+      var s = document.createElement('span');
+      s.className = 'spark';
+      s.style.left = p.x + 'px'; s.style.top = p.y + 'px';
+      s.style.setProperty('--dx', (Math.random()*72-36) + 'px');
+      s.style.setProperty('--dy', (-16 - Math.random()*46) + 'px');
+      s.innerHTML = svgUse('i-spark');
+      document.body.appendChild(s);
+      (function(sp){ setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 750); })(s);
+    }
+  }catch(e2){}
+}
+function floatText(i, txt){
+  if(!canFx()) return;
+  try{
+    var p = cellCenter(i); if(!p) return;
+    var f = document.createElement('div');
+    f.className = 'floatt';
+    f.style.left = (p.x - 12) + 'px'; f.style.top = (p.y - 28) + 'px';
+    f.textContent = txt;
+    document.body.appendChild(f);
+    setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); }, 950);
+  }catch(e){}
+}
+function fxFly(cells, slot){
+  if(!canFx()) return;
+  try{
+    var ords = el('orders');
+    var card = ords && ords.querySelector ? ords.querySelector('[data-slot="' + slot + '"]') : null;
+    if(!card || !card.getBoundingClientRect) return;
+    var tr = card.getBoundingClientRect();
+    var tx = tr.left + tr.width/2, ty = tr.top + tr.height/2;
+    cells.forEach(function(i, k){
+      var c = S.board[i]; if(!c || c.t!=='i') return;
+      var p = cellCenter(i); if(!p) return;
+      var fl = document.createElement('div');
+      fl.className = 'flyi';
+      fl.style.left = p.x + 'px'; fl.style.top = p.y + 'px';
+      fl.innerHTML = itemArt(c.id);
+      document.body.appendChild(fl);
+      setTimeout(function(){
+        fl.style.transform = 'translate(' + (tx-p.x) + 'px,' + (ty-p.y) + 'px) scale(.35)';
+        fl.style.opacity = '0';
+      }, 20 + k*70);
+      setTimeout(function(){ if(fl.parentNode) fl.parentNode.removeChild(fl); }, 700 + k*70);
+    });
+  }catch(e){}
+}
+function shakeBoard(){
+  var b = el('board'); if(!b || !b.classList) return;
+  b.classList.remove('shakeC'); void (b.offsetWidth ? b.offsetWidth : 0);
+  b.classList.add('shakeC');
+  setTimeout(function(){ if(b.classList) b.classList.remove('shakeC'); }, 350);
+}
+function capySquish(){
+  var b = el('capyBtn'); if(!b || !b.classList) return;
+  b.classList.remove('squish'); void (b.offsetWidth ? b.offsetWidth : 0);
+  b.classList.add('squish');
+  setTimeout(function(){ if(b.classList) b.classList.remove('squish'); }, 330);
+  rCapy();
+}
+
+/* ================= 提示 ================= */
+var toastTimer = null;
+function toast(msg){
+  if(canFx()){
+    try{
+      var box = el('toasts');
+      if(box && box.appendChild){
+        var c = document.createElement('div');
+        c.className = 'tchip';
+        c.textContent = msg;
+        box.appendChild(c);
+        while(box.children && box.children.length > 3) box.removeChild(box.children[0]);
+        setTimeout(function(){ if(c.classList) c.classList.add('out'); }, 2000);
+        setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); }, 2450);
+        return;
+      }
+    }catch(e){}
+  }
+  var t = el('toast'); if(!t) return;
+  t.textContent = msg;
+  if(t.style) t.style.opacity = 1;
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ if(t.style) t.style.opacity = 0; }, 2100);
+}
+var undoTimer = null;
+function showUndo(msg){
+  var c = el('undoChip'); if(!c) return;
+  if(el('undoTx')) el('undoTx').textContent = msg;
+  c.classList.add('on');
+  if(undoTimer) clearTimeout(undoTimer);
+  undoTimer = setTimeout(hideUndo, 5000);
+}
+function hideUndo(){
+  var c = el('undoChip');
+  if(c) c.classList.remove('on');
+  S.sold = null;
+}
+
+/* ================= 音效（WebAudio 五声音阶，无音频文件） ================= */
+var actx = null;
+var PENT = [523.25, 587.33, 659.25, 783.99, 880];
+function audioInit(){
+  if(actx) return;
+  try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+}
+function tone(f, dur, vol, type, delay){
+  if(S.mute || !actx) return;
+  try{
+    var t0 = actx.currentTime + (delay||0);
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(f, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  }catch(e){}
+}
+function sfx(kind, tier){
+  if(S.mute || !actx) return;
+  if(kind==='tap'){ tone(392, .09, .08, 'triangle'); }
+  else if(kind==='merge'){
+    var f = PENT[(tier||1) % PENT.length];
+    tone(f, .16, .12, 'sine'); tone(f*2, .12, .05, 'sine', .06);
+  }
+  else if(kind==='coin'){ tone(1318, .09, .09, 'sine'); tone(1568, .12, .09, 'sine', .08); }
+  else if(kind==='level'){ tone(523,.12,.1,'sine'); tone(659,.12,.1,'sine',.11); tone(784,.12,.1,'sine',.22); tone(1046,.2,.1,'sine',.33); }
+  else if(kind==='sell'){ tone(330, .1, .07, 'triangle'); }
+  else if(kind==='err'){ tone(150, .12, .07, 'triangle'); }
+}
+
+/* ================= 输入 ================= */
+var drag = null;
+function bindInput(){
+  var board = el('board');
+  if(!board || !board.addEventListener) return;
+  board.addEventListener('pointerdown', function(e){
+    audioInit();
+    var cell = e.target && e.target.closest ? e.target.closest('.cell') : null;
+    if(!cell) return;
+    var idx = +cell.getAttribute('data-i');
+    if(!isOpen(idx)) return;
+    var c = S.board[idx];
+    if(!c) return;
+    e.preventDefault();
+    drag = { from: idx, x0: e.clientX, y0: e.clientY, moved: false, isItem: c.t==='i', id: c.t==='i' ? c.id : null, over: -1 };
+    try{ board.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  board.addEventListener('pointermove', function(e){
+    if(!drag) return;
+    var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if(!drag.moved && dx*dx + dy*dy < 64) return;
+    if(!drag.isItem) return;
+    if(!drag.moved){
+      drag.moved = true;
+      var g = el('ghost');
+      if(g && g.style){
+        var u = el('ghostUse');
+        if(u) u.setAttribute('href', '#' + ITEMS[drag.id].sym);
+        var gi = el('ghostImg');
+        if(gi){
+          gi.style.display = '';
+          resetFallback(gi);
+          gi.setAttribute('src', artSrc('items', drag.id));
+        }
+        g.style.display = 'block';
+      }
+      if(cellEls[drag.from] && cellEls[drag.from].classList) cellEls[drag.from].classList.add('dim');
+      closeSheet();
+    }
+    var gh = el('ghost');
+    if(gh && gh.style){ gh.style.left = e.clientX + 'px'; gh.style.top = e.clientY + 'px'; }
+    var tgt = hitCell(e.clientX, e.clientY);
+    if(tgt !== drag.over){
+      if(drag.over >= 0 && cellEls[drag.over] && cellEls[drag.over].classList) cellEls[drag.over].classList.remove('hov');
+      drag.over = tgt;
+      if(tgt >= 0 && tgt !== drag.from && cellEls[tgt] && cellEls[tgt].classList) cellEls[tgt].classList.add('hov');
+    }
+  });
+  var endDrag = function(e){
+    if(!drag) return;
+    var d = drag; drag = null;
+    if(d.over >= 0 && cellEls[d.over] && cellEls[d.over].classList) cellEls[d.over].classList.remove('hov');
+    var g = el('ghost');
+    if(g && g.style) g.style.display = 'none';
+    if(cellEls[d.from] && cellEls[d.from].classList) cellEls[d.from].classList.remove('dim');
+    if(!d.moved){
+      var c = S.board[d.from];
+      if(c && c.t==='g') tapGen(c.gid);
+      else if(c && c.t==='c') openChest(d.from);
+      else if(c && (c.t==='i' || c.t==='b')) openSheet(d.from);
+      return;
+    }
+    var tgt = hitCell(e.clientX, e.clientY);
+    if(tgt < 0 || tgt === d.from) return;
+    var res = tryMove(d.from, tgt);
+    if(res === 'bounce'){
+      var te = cellEls[tgt];
+      if(te && te.classList){
+        te.classList.add('shakeC');
+        setTimeout(function(){ if(te.classList) te.classList.remove('shakeC'); }, 320);
+      }
+      sfx('err');
+    } else if(res === 'move'){ sfx('sell'); }
+  };
+  board.addEventListener('pointerup', endDrag);
+  board.addEventListener('pointercancel', function(){
+    if(drag){
+      var g = el('ghost');
+      if(g && g.style) g.style.display = 'none';
+      if(cellEls[drag.from] && cellEls[drag.from].classList) cellEls[drag.from].classList.remove('dim');
+      if(drag.over>=0 && cellEls[drag.over] && cellEls[drag.over].classList) cellEls[drag.over].classList.remove('hov');
+      drag = null;
+    }
+  });
+}
+function hitCell(x, y){
+  var b = el('board');
+  if(!b || !b.getBoundingClientRect) return -1;
+  var r = b.getBoundingClientRect();
+  if(x < r.left || x > r.right || y < r.top || y > r.bottom) return -1;
+  var col = Math.floor((x - r.left) / (r.width / COLS));
+  var row = Math.floor((y - r.top) / (r.height / ROWS));
+  col = Math.max(0, Math.min(COLS-1, col));
+  row = Math.max(0, Math.min(ROWS-1, row));
+  var i = row*COLS + col;
+  return isOpen(i) ? i : -1;
+}
+function bindUi(){
+  if(el('capyBtn')) el('capyBtn').onclick = function(){ audioInit(); tapGen('capy'); };
+  if(el('dexBtn')) el('dexBtn').onclick = function(){ rDex(); el('dexM').classList.add('on'); };
+  if(el('helpBtn')) el('helpBtn').onclick = function(){ el('tut').classList.add('on'); };
+  if(el('tutGo')) el('tutGo').onclick = function(){
+    el('tut').classList.remove('on');
+    if(!S.tut){ S.tut = true; save(); }
+  };
+  if(el('sndBtn')) el('sndBtn').onclick = function(){
+    audioInit();
+    S.mute = !S.mute; save(); rSnd();
+    toast(S.mute ? '音效已关闭' : '音效已开启');
+  };
+  if(el('undoBtn')) el('undoBtn').onclick = undoSell;
+  if(el('dlgOv') && el('dlgOv').addEventListener) el('dlgOv').addEventListener('click', dlgTap);
+  if(el('quest')) el('quest').onclick = function(){
+    var q = questCur();
+    if(q) showStory([{c:'capy', t:'现在的目标：' + q.t}]);
+    else showStory([{c:'capy', t:'外婆的笔记先告一段落啦。等装修开始，还有更多故事。'}]);
+  };
+  var ords = el('orders');
+  if(ords && ords.addEventListener) ords.addEventListener('click', function(e){
+    var dv = e.target && e.target.closest ? e.target.closest('[data-dv]') : null;
+    if(dv){ audioInit(); deliver(+dv.getAttribute('data-dv')); return; }
+    var rf = e.target && e.target.closest ? e.target.closest('[data-rf]') : null;
+    if(rf){ audioInit(); refreshOrder(+rf.getAttribute('data-rf')); return; }
+    // 点需求物品：告诉玩家这东西怎么来
+    var nd = e.target && e.target.closest ? e.target.closest('[data-need]') : null;
+    if(nd){ audioInit(); toast(howToGet(nd.getAttribute('data-need'))); }
+  });
+  if(el('gachaBtn')) el('gachaBtn').onclick = function(){
+    audioInit(); rGacha();
+    var box = el('gachaResult'); if(box) box.innerHTML = '';
+    el('gachaM').classList.add('on');
+  };
+  if(el('gachaGo')) el('gachaGo').onclick = function(){
+    audioInit();
+    var res = gachaPull();
+    if(res) showGachaResult(res);
+  };
+  if(el('giftBtn')) el('giftBtn').onclick = function(){ audioInit(); openGift(); };
+  if(el('renoBtn')) el('renoBtn').onclick = function(){ audioInit(); rReno(); el('renoM').classList.add('on'); };
+  if(el('shopBtn')) el('shopBtn').onclick = function(){ audioInit(); rShop(); el('shopM').classList.add('on'); };
+  var rb = el('renoBody');
+  if(rb && rb.addEventListener) rb.addEventListener('click', function(e){
+    var b2 = e.target && e.target.closest ? e.target.closest('[data-reno]') : null;
+    if(b2){ audioInit(); buyReno(b2.getAttribute('data-reno')); }
+  });
+  var sb2 = el('shopBody');
+  if(sb2 && sb2.addEventListener) sb2.addEventListener('click', function(e){
+    var b3 = e.target && e.target.closest ? e.target.closest('[data-shop]') : null;
+    if(b3){ audioInit(); buyShop(b3.getAttribute('data-shop')); rShop(); }
+  });
+  if(el('cookBtn')) el('cookBtn').onclick = function(){ audioInit(); cookSel=[null,null]; rCook(); el('cookM').classList.add('on'); };
+  if(el('wareBtn')) el('wareBtn').onclick = function(){ audioInit(); rWare(); el('wareM').classList.add('on'); };
+  if(el('cookGo')) el('cookGo').onclick = function(){ audioInit(); doCook(); };
+  var cp = el('cookPick');
+  if(cp && cp.addEventListener) cp.addEventListener('click', function(e){
+    var b4 = e.target && e.target.closest ? e.target.closest('[data-ck]') : null;
+    if(b4){ audioInit(); ckToggle(b4.getAttribute('data-ck')); }
+  });
+  var wg = el('wareGrid');
+  if(wg && wg.addEventListener) wg.addEventListener('click', function(e){
+    var b5 = e.target && e.target.closest ? e.target.closest('[data-ws]') : null;
+    if(b5){ audioInit(); storeTake(+b5.getAttribute('data-ws')); }
+  });
+  ['dexM','tut','renoM','shopM','gachaM','cookM','wareM'].forEach(function(m){
+    var mm = el(m);
+    if(mm && mm.addEventListener) mm.addEventListener('click', function(e){
+      if(e.target === mm && m !== 'tut') mm.classList.remove('on');
+      var cl = e.target && e.target.closest ? e.target.closest('[data-close]') : null;
+      if(cl) el(cl.getAttribute('data-close')).classList.remove('on');
+    });
+  });
+  if(typeof document.addEventListener === 'function'){
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) save(); });
+  }
+  if(typeof window.addEventListener === 'function'){
+    window.addEventListener('pagehide', save);
+  }
+}
+function rSnd(){
+  var u = el('sndIc') ? el('sndIc').querySelector && el('sndIc').querySelector('use') : null;
+  if(u) u.setAttribute('href', S.mute ? '#i-sndoff' : '#i-snd');
+  if(el('sndTx')) el('sndTx').textContent = S.mute ? '静音' : '音效';
+}
+
+/* ================= 心跳 ================= */
+var tickTimer = null;
+function startTick(){
+  tickTimer = setInterval(function(){
+    var before = {};
+    Object.keys(GENS).forEach(function(g){ before[g] = S.gens[g].ch; });
+    regen(now());
+    var changed = false;
+    Object.keys(GENS).forEach(function(g){ if(S.gens[g].ch !== before[g]) changed = true; });
+    if(changed){ rBadges(); }
+  }, 1000);
+}
+
+/* ================= 启动 ================= */
+function boot(){
+  buildBoard();
+  if(!load()) initNew();
+  rAll(); rSnd();
+  bindInput(); bindUi();
+  startTick();
+  if(!S.story.intro){
+    S.story.intro = 1;
+    showStory(STORY_INTRO, function(){
+      S.tut = true; save();
+      toast('点一点菜篮子、面粉袋，或摸摸泡温泉的阿汤');
+    });
+    save();
+  } else if(!S.tut && el('tut')) el('tut').classList.add('on');
+}
+boot();
+
+/* 安装成 App / 离线游玩。只在 https 注册：
+   本地开发若也注册，sw 缓存会让改动刷新后看不到（此坑修过一次，别再引入） */
+if(location.protocol === 'https:' && 'serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+/* ================= 调试接口（不影响游戏） ================= */
+window.__game = {
+  gachaPull: gachaPull, openGift: openGift, refillGift: refillGift,
+  rollShiny: rollShiny, mkItem: mkItem, today: today, grantItems: grantItems,
+  S: function(){ return S; },
+  ITEMS: ITEMS, CHAINS: CHAINS, GENS: GENS,
+  tapGen: tapGen, tryMove: tryMove, deliver: deliver, canDeliver: function(i){ return canDeliver(S.orders[i]); },
+  sellAt: sellAt, undoSell: undoSell, addXp: addXp, regen: function(){ return regen(now()); },
+  count: countItem, save: save,
+  spawn: function(id, near, shiny){
+    var idx = nearestEmpty(typeof near === 'number' ? near : 24);
+    if(idx < 0) return -1;
+    S.board[idx] = mkItem(id, shiny ? 1 : 0); rCell(idx); return idx;
+  },
+  buyReno: buyReno, buyShop: buyShop, openChest: openChest,
+  starsOf: starsOf, capOf: capOf, regenIv: regenIv, openRows: openRows, renoCanBuy: renoCanBuy,
+  cook: function(a, b){ cookSel = [a, b]; return doCook(); },
+  storePut: storePut, storeTake: storeTake, cookedCount: cookedCount, RECIPES: RECIPES,
+  setOrder: function(slot, needs, cust){
+    S.orders[slot] = { c: cust || 'rabbit', needs: needs, rf: 0 }; rOrders();
+  },
+  refreshOrder: refreshOrder,
+  dlgTap: dlgTap, dlgOpen: dlgOpen,
+  stopTick: function(){ if(tickTimer) clearInterval(tickTimer); }
+};
+</script>
+</body>
+</html>
