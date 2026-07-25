@@ -23,15 +23,17 @@
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
-html,body{margin:0; padding:0; height:100%; overflow:hidden;
+html,body{margin:0; padding:0; overflow:hidden;
   overscroll-behavior:none; -webkit-overflow-scrolling:auto;}
+html{height:100vh; height:100dvh; background:var(--sky1);}
 body{
-  height:100dvh; height:100vh; overflow:hidden;
+  height:100vh; height:100dvh; overflow:hidden;   /* dvh 在后：iOS 上才拿得到真实可见高度 */
   background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 30%,var(--sky3) 62%,var(--sky4) 100%) fixed;
   font-family:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
   color:var(--ink);
   display:flex; justify-content:center;
   overflow-x:hidden;
+  padding-top:env(safe-area-inset-top);   /* 状态栏区域用主题色填满，不再留白条 */
 }
 /* 一屏式布局：整页不滚动，棋盘吃掉剩余高度，所有内容始终可见 */
 #app{width:100%; max-width:520px; height:100%;
@@ -102,8 +104,12 @@ body{
 .chb.empty{background:#8B7B6B; color:#EEE2CC;}
 
 /* ---------- 订单 ---------- */
-#orders{flex:0 0 auto; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px;}
-.order{flex:1; min-width:0; position:relative; background:linear-gradient(180deg,#FFFDF6,var(--paper));
+/* 订单栏横向滚动：卡片固定窄宽，任务再多也只占一行高度，左右划着看 */
+#orders{flex:0 0 auto; display:flex; gap:6px; overflow-x:auto; overflow-y:hidden;
+  padding-bottom:2px; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;}
+#orders::-webkit-scrollbar{display:none;}
+.order{flex:0 0 auto; width:104px; scroll-snap-align:start; position:relative; background:linear-gradient(180deg,#FFFDF6,var(--paper));
   border:2.5px solid #FFFDF5; border-radius:14px; padding:5px 4px 5px; display:flex; flex-direction:column; align-items:center; gap:2px;
   box-shadow:0 4px 10px rgba(90,120,60,.22);}
 .order .cwrap{display:flex; align-items:center; gap:5px; width:100%; justify-content:center;}
@@ -1212,7 +1218,7 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V1.1';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V1.2';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -1383,11 +1389,12 @@ function load(){
     else if(c[1]==='c') S.board[i] = {t:'c'};
     else S.board[i] = c[3] ? {t:'i', id:c[2], s:1} : {t:'i', id:c[2]};
   });
-  for(var i=0;i<3;i++){
+  for(var i=0;i<S.orders.length;i++){
     var o = S.orders[i];
     if(!o || !o.c || !Array.isArray(o.needs)) S.orders[i] = genOrder(i);
     else if(!o.rf) o.rf = 0;
   }
+  fillOrders();
   var hasDairy = false;
   for(var di=0; di<S.board.length; di++){
     var dc = S.board[di];
@@ -1762,6 +1769,9 @@ function addXp(n){
     Object.keys(GENS).forEach(function(g){ S.gens[g].ch = capOf(g); S.gens[g].last = now(); });
   }
   if(S.level > from){
+    var slotsBefore = S.orders.length;
+    fillOrders();
+    if(S.orders.length > slotsBefore) toast('订单位增加到 ' + S.orders.length + ' 个');
     levelFx(from, S.level);
     toast('等级提升至 Lv ' + S.level + '，生成器补货全部回满');
     sfx('level'); rBadges();
@@ -1770,6 +1780,19 @@ function addXp(n){
 }
 
 /* ================= 订单 ================= */
+/* 订单槽位数随等级增长；横向滚动条放得下，不占额外高度 */
+function orderSlots(){
+  var lv = S ? S.level : 1;
+  return lv >= 12 ? 5 : (lv >= 6 ? 4 : 3);
+}
+/* 补足到应有的槽位数（升级后自动多出新订单） */
+function fillOrders(){
+  var want = orderSlots();
+  while(S.orders.length < want) S.orders.push(genOrder(S.orders.length));
+  for(var i=0;i<S.orders.length;i++){
+    if(!S.orders[i]) S.orders[i] = genOrder(i);
+  }
+}
 function genOrder(slot){
   var used = [];
   for(var i=0;i<3;i++) if(i!==slot && S && S.orders && S.orders[i]) used.push(S.orders[i].c);
@@ -2230,7 +2253,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '9';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '10';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2309,9 +2332,9 @@ function rPills(){
 function rOrders(){
   var wrap = el('orders'); if(!wrap) return;
   var html = '';
-  for(var i=0;i<3;i++){
+  for(var i=0;i<S.orders.length;i++){
     var o = S.orders[i];
-    if(!o){ html += '<div class="order"></div>'; continue; }
+    if(!o) continue;
     var ok = canDeliver(o);
     var rw = orderReward(o);
     var needsH = '';
@@ -2327,8 +2350,11 @@ function rOrders(){
       '<span class="cname">' + CUSTS[o.c].n + '</span></div>' +
       '<div class="needs">' + needsH + '</div>' +
       '<div class="orow"><span class="reward">' + svgUse('i-coin') + '+' + rw.coins + '</span>' +
-      '<button class="dv' + (ok?' ready':'') + '" data-dv="' + i + '"' + (ok?'':' disabled') + '>交付</button>' +
-      '<button class="rf" data-rf="' + i + '"' + (o.rf ? ' disabled' : '') + ' title="花 10 金币换一单，每单限一次">' + svgUse('i-refresh') + '</button></div></div>';
+      (ok
+        ? '<button class="dv ready" data-dv="' + i + '">交付</button>'
+        : '<button class="rf" data-rf="' + i + '"' + (o.rf ? ' disabled' : '') +
+          ' title="换一位客人，花 10 金币，每单限一次">' + svgUse('i-refresh') + '</button>') +
+      '</div></div>';
   }
   wrap.innerHTML = html;
 }
@@ -2977,6 +3003,7 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  orderSlots: orderSlots, fillOrders: fillOrders,
   exportSave: exportSave, importSave: importSave, resetSave: resetSave, GAME_VER: GAME_VER,
   gachaPull: gachaPull, openGift: openGift, refillGift: refillGift,
   rollShiny: rollShiny, mkItem: mkItem, today: today, grantItems: grantItems,

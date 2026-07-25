@@ -392,6 +392,20 @@ ok(gN.S().dex.length === 3 && Object.keys(gN.S().cards).length === 0, '重置清
 ok(typeof gN.GAME_VER === 'string' && gN.GAME_VER.length > 0, '版本号常量存在（' + gN.GAME_VER + '）');
 gN.stopTick();
 
+// ---------- V1.2 订单槽位随等级增长 ----------
+const SO = g.S();
+SO.level = 1; SO.orders.length = 3; g.fillOrders();
+ok(g.orderSlots() === 3, 'Lv1 时 3 个订单位');
+SO.level = 6; g.fillOrders();
+ok(SO.orders.length === 4, 'Lv6 时增加到 4 个订单位');
+SO.level = 12; g.fillOrders();
+ok(SO.orders.length === 5, 'Lv12 时增加到 5 个订单位');
+ok(SO.orders.every(function(o){ return o && o.c && o.needs.length; }), '新增的订单位都有有效订单');
+g.save();
+const gS = makeEnv(store);
+ok(gS.S().orders.length === 5, '订单位数量可存档恢复');
+gS.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
