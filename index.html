@@ -23,19 +23,24 @@
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
-html,body{margin:0;padding:0;}
+html,body{margin:0; padding:0; height:100%; overflow:hidden;
+  overscroll-behavior:none; -webkit-overflow-scrolling:auto;}
 body{
-  min-height:100vh;
+  height:100dvh; height:100vh; overflow:hidden;
   background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 30%,var(--sky3) 62%,var(--sky4) 100%) fixed;
   font-family:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Microsoft YaHei",system-ui,sans-serif;
   color:var(--ink);
   display:flex; justify-content:center;
   overflow-x:hidden;
 }
-#app{width:100%; max-width:520px; padding:0 10px calc(14px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:9px;}
+/* 一屏式布局：整页不滚动，棋盘吃掉剩余高度，所有内容始终可见 */
+#app{width:100%; max-width:520px; height:100%;
+  padding:0 8px calc(6px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:6px; overflow:hidden;}
 
 /* ---------- 顶部场景 ---------- */
-#scene{position:relative; margin:0 -10px; height:178px; overflow:hidden; border-bottom:3px solid var(--woodD);}
+#scene{position:relative; margin:0 -8px; flex:0 0 auto;
+  height:clamp(96px, 17vh, 132px); overflow:hidden; border-bottom:3px solid var(--woodD);}
 #scene > svg{position:absolute; inset:0; width:100%; height:100%;}
 #sceneBg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 58%;}
 /* 装修改造层：按场景框百分比定位，不依赖 SVG 坐标系（背景换图也不会错位） */
@@ -55,14 +60,14 @@ body{
 .plaque.gold::after{background:#FFF6D8;}
 /* 生图背景加载成功后，隐藏手绘回退层；装修改造图层仍浮在背景之上 */
 #scene.hasbg #sceneArt, #scene.hasbg #sceneSky{display:none;}
-#sceneTop{position:absolute; top:10px; left:12px; right:12px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none;}
-#title{background:linear-gradient(180deg,#FFFDF6,var(--paper2)); border:3px solid #FFFDF5;
+#sceneTop{position:absolute; top:6px; left:10px; right:8px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none;}
+#title{background:linear-gradient(180deg,#FFFDF6,var(--paper2)); border:2.5px solid #FFFDF5;
   box-shadow:0 3px 0 rgba(150,120,80,.28), 0 6px 14px rgba(90,110,60,.22);
-  border-radius:16px; padding:6px 14px 7px; text-align:center;}
-#title h1{margin:0; font-size:20px; letter-spacing:3px; color:#7A5A36; font-weight:900;}
+  border-radius:14px; padding:4px 11px 5px; text-align:center;}
+#title h1{margin:0; font-size:17px; letter-spacing:2px; color:#7A5A36; font-weight:900;}
 #title span{display:inline-block; margin-top:2px; font-size:10.5px; color:#FFF6E2; letter-spacing:2px;
   background:var(--lant2); border-radius:999px; padding:1px 10px;}
-#pills{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; align-items:flex-start; pointer-events:auto; max-width:190px; z-index:4;}
+#pills{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; align-items:flex-start; pointer-events:auto; max-width:min(58vw,210px); z-index:4;}
 .pill{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#FFFCF2,var(--paper));
   border:2px solid var(--pline); box-shadow:0 2px 0 rgba(160,130,90,.25);
   color:var(--ink); border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums;}
@@ -87,7 +92,7 @@ body{
   animation:tin .25s ease; transition:opacity .4s, transform .4s;}
 .tchip.out{opacity:0; transform:translateY(-6px);}
 @keyframes tin{0%{opacity:0; transform:translateY(-8px);}100%{opacity:1;}}
-#capyBtn{position:absolute; right:2px; bottom:-4px; width:124px; height:112px; background:none; border:none; padding:0; cursor:pointer; z-index:3;}
+#capyBtn{position:absolute; right:0px; bottom:-10px; width:clamp(74px,21vw,92px); height:clamp(66px,19vw,84px); background:none; border:none; padding:0; cursor:pointer; z-index:3;}
 #capyBtn svg{width:100%; height:100%; filter:drop-shadow(0 4px 6px rgba(90,110,60,.35));}
 #capyBtn .art{filter:drop-shadow(0 4px 6px rgba(90,110,60,.35));}
 #capyBtn .art > img{object-fit:contain;}
@@ -97,13 +102,13 @@ body{
 .chb.empty{background:#8B7B6B; color:#EEE2CC;}
 
 /* ---------- 订单 ---------- */
-#orders{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;}
+#orders{flex:0 0 auto; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px;}
 .order{flex:1; min-width:0; position:relative; background:linear-gradient(180deg,#FFFDF6,var(--paper));
-  border:2.5px solid #FFFDF5; border-radius:16px; padding:7px 6px 6px; display:flex; flex-direction:column; align-items:center; gap:4px;
+  border:2.5px solid #FFFDF5; border-radius:14px; padding:5px 4px 5px; display:flex; flex-direction:column; align-items:center; gap:2px;
   box-shadow:0 4px 10px rgba(90,120,60,.22);}
 .order .cwrap{display:flex; align-items:center; gap:5px; width:100%; justify-content:center;}
 /* 立绘自带奶油色圆底，无需再套描边与底色；仅保留圆形裁切 */
-.order .cust{width:48px; height:48px; flex:none;}
+.order .cust{width:36px; height:36px; flex:none;}
 .order .cust svg{width:100%; height:100%;}
 .order .cust .art{width:100%; height:100%;}
 .order .cust .art > img{object-fit:contain;}
@@ -111,7 +116,7 @@ body{
 /* 需求项等分卡内宽度、不换行：固定宽度会在窄屏放不下而换行，把卡片撑高一截 */
 .order .needs{display:flex; gap:6px; align-items:flex-start; justify-content:center; width:100%;}
 .need{flex:1 1 0; min-width:0; max-width:54px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;}
-.nicon{position:relative; width:100%; max-width:46px; aspect-ratio:1; background:var(--cellBg); border:2px solid #EDE0C2; border-radius:11px;}
+.nicon{position:relative; width:100%; max-width:42px; aspect-ratio:1; background:var(--cellBg); border:2px solid #EDE0C2; border-radius:11px;}
 .need.ok .nicon{border-color:#9CC69C; background:#EFFAEF;}
 .nicon .art, .nicon svg{position:absolute; inset:8%; width:84%; height:84%;}
 .nname{font-size:9.5px; font-weight:800; line-height:1.15; color:var(--sub); text-align:center; word-break:break-all;}
@@ -133,7 +138,7 @@ body{
 @media (max-width:430px){
   .order{padding:6px 4px 5px;}
   .order .cname{max-width:52px; font-size:10px;}
-  .order .cust{width:40px; height:40px;}
+  .order .cust{width:32px; height:32px;}
   .order .needs{gap:4px;}
   .nname{font-size:8.5px; line-height:1.1;}
   .need .cnt{font-size:9px; padding:0 4px; right:-5px;}
@@ -149,9 +154,12 @@ body{
 }
 
 /* ---------- 棋盘 ---------- */
-#boardWrap{position:relative; width:min(100%,446px); margin:0 auto;}
-#board{display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(9,1fr); gap:5px; aspect-ratio:7/9.05;
-  padding:10px; border-radius:22px;
+#boardWrap{position:relative; flex:1 1 auto; min-height:0; width:100%;
+  display:flex; align-items:center; justify-content:center;}
+#board{display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(9,1fr);
+  gap:clamp(3px,.9vh,5px); aspect-ratio:7/9.05; height:100%; max-height:100%; max-width:min(100%,446px);
+  padding:clamp(6px,1.1vh,10px); border-radius:20px;
+  touch-action:none; user-select:none; -webkit-user-select:none;
   background:linear-gradient(180deg,#EDF6DC 0%,var(--boardBg) 45%,#D6E8B8 100%);
   border:3px solid #FFFDF5;
   box-shadow:0 8px 20px rgba(90,120,60,.25), inset 0 2px 0 rgba(255,255,255,.7);}
@@ -272,7 +280,7 @@ body{
   border-top:7px solid var(--lant2); animation:bob 1.2s ease-in-out infinite;}
 
 /* ---------- 主线目标 ---------- */
-#quest{display:flex; align-items:center; gap:7px; background:linear-gradient(180deg,#FFFCF2,var(--paper));
+#quest{flex:0 0 auto; display:flex; align-items:center; gap:6px; background:linear-gradient(180deg,#FFFCF2,var(--paper));
   border:2px solid var(--pline); box-shadow:0 2px 0 rgba(160,130,90,.22);
   border-radius:13px; padding:6px 11px; color:var(--ink); cursor:pointer;}
 #quest .qico{width:18px; height:18px; flex:none; color:var(--lant2);}
@@ -350,7 +358,7 @@ body{
 #gachaResult .grare.SR{background:linear-gradient(90deg,#FFE08A,#F5B942); color:#7A4E12;}
 #gachaResult.pop{animation:popIn .34s cubic-bezier(.34,1.56,.64,1);}
 .dxs .cnum{display:block; font-size:9.5px; font-weight:900; color:#B0763A;}
-#giftBtn{position:absolute; left:8px; bottom:6px; width:54px; height:54px; background:none; border:none;
+#giftBtn{position:absolute; right:calc(clamp(78px,22vw,96px) - 6px); bottom:2px; width:42px; height:42px; background:none; border:none;
   padding:0; cursor:pointer; z-index:4; filter:drop-shadow(0 3px 5px rgba(90,110,60,.35));}
 #giftBtn .art{width:100%; height:100%;}
 #giftBtn.empty{opacity:.45;}
@@ -378,6 +386,73 @@ body{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--ink); word-break:break-all;}
 #saveBox:focus{outline:2px solid var(--lant); outline-offset:-1px;}
 .sbtn.warn{background:linear-gradient(180deg,#F09A9A,#E07A7A); border-bottom-color:#B85555; color:#FFF6F0;}
+
+/* ---------- 底部工具条与展开菜单 ---------- */
+#dock{flex:0 0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+.dbtn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  background:linear-gradient(180deg,var(--paper),var(--paper2)),var(--grain);
+  border:2px solid var(--pline); border-bottom-width:3px; border-radius:13px;
+  padding:5px 2px 4px; cursor:pointer; color:var(--ink); font-family:inherit;
+  font-weight:900; font-size:10.5px; min-width:0;}
+.dbtn:active{transform:translateY(1.5px); border-bottom-width:1.5px;}
+.dbtn svg{width:19px; height:19px; color:#B0763A;}
+.dbtn.on{background:linear-gradient(180deg,#FFE6C2,#F7D2A0); border-color:#D9A45E;}
+
+/* 展开面板：默认收起不占版面，点"更多"从底部滑出 */
+/* 用 bottom 位移而非百分比 transform：translate 的百分比基准是元素自身尺寸，
+   与 left:50% 的水平居中叠加后容易算错，改成显式位移更可靠 */
+#menuPanel{position:fixed; left:50%; bottom:0; margin-left:-260px; width:min(100%,520px);
+  z-index:44; padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,#FFFDF6,var(--paper)),var(--grain);
+  border:2.5px solid var(--pline); border-bottom:none; border-radius:20px 20px 0 0;
+  box-shadow:0 -8px 26px rgba(8,6,18,.28);
+  visibility:hidden; opacity:0; transform:translateY(24px);
+  transition:transform .26s cubic-bezier(.3,1.1,.5,1), opacity .2s, visibility .26s;}
+#menuPanel.on{visibility:visible; opacity:1; transform:translateY(0);}
+@media (max-width:520px){ #menuPanel{ left:0; margin-left:0; width:100%; } }
+#menuPanel .mgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.mbtn{display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:rgba(120,86,50,.08); border:2px solid var(--pline); border-radius:13px;
+  padding:9px 4px; cursor:pointer; color:var(--ink); font-family:inherit; font-weight:900; font-size:12px;}
+.mbtn:active{transform:scale(.96);}
+.mbtn svg{width:21px; height:21px; color:#B0763A;}
+#menuMask{position:fixed; inset:0; z-index:43; background:rgba(12,10,24,.35); display:none;}
+#menuMask.on{display:block;}
+
+/* 矮屏保护：小屏手机上优先保证棋盘可玩，上部区块进一步压缩 */
+@media (max-height:740px){
+  #scene{height:clamp(78px,13vh,104px);}
+  .order{padding:4px 3px;}
+  .order .cust{width:28px; height:28px;}
+  .order .cname{font-size:9.5px;}
+  .nicon{max-width:34px;}
+  .nname{font-size:8px;}
+  .dv{padding:2px 7px; font-size:10.5px;}
+  .reward{font-size:10px;}
+  #quest{padding:3px 8px;}
+  #quest .qt{font-size:11px;}
+  .dbtn{font-size:9.5px; padding:4px 2px 3px;}
+  .dbtn svg{width:16px; height:16px;}
+}
+@media (max-height:620px){
+  #scene{height:72px;}
+  #title h1{font-size:14px;}
+  #title span{font-size:9px;}
+  /* 极矮屏：订单卡压到最紧，把高度让给棋盘 */
+  .order{padding:3px 2px; gap:1px;}
+  .order .cust{width:22px; height:22px;}
+  .order .cname{display:none;}
+  .nicon{max-width:28px;}
+  .nname{display:none;}
+  .need .cnt{font-size:8.5px; padding:0 3px;}
+  .order .orow{gap:3px;}
+  .dv{padding:2px 6px; font-size:10px;}
+  .reward{font-size:9.5px;}
+  .reward svg{width:11px; height:11px;}
+  #quest{padding:2px 7px;}
+  #quest .qt{font-size:10px;}
+  .dbtn span{font-size:9px;}
+}
 
 /* ---------- 动画 ---------- */
 @keyframes popIn{0%{transform:scale(.25)}62%{transform:scale(1.14)}100%{transform:scale(1)}}
@@ -811,6 +886,8 @@ body{
 <symbol id="card-duck" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F5C842"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
 <symbol id="card-turtle" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#8FBF6A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
 <symbol id="card-moon" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#E8D89A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+  <path d="M4 7h16M4 12h16M4 17h16"/></g></symbol>
 <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
   <circle cx="12" cy="12" r="3.2"/>
   <path d="M12 2.6 l1.6 2.3 2.7-.7 .5 2.8 2.6 1 -1.3 2.5 1.8 2.1 -2.3 1.6 .3 2.8 -2.8 .2 -1.2 2.5 -2.4-1.4 -2.4 1.4 -1.2-2.5 -2.8-.2 .3-2.8 -2.3-1.6 1.8-2.1 -1.3-2.5 2.6-1 .5-2.8 2.7 .7 Z"/></g></symbol>
@@ -945,11 +1022,6 @@ body{
   <div id="quest"><svg class="qico"><use href="#i-scroll"/></svg><span class="qt" id="qTxt"></span><span class="qp" id="qP"></span></div>
 
   <!-- 灶台与储物间 -->
-  <div id="stations">
-    <button class="stTile" id="cookBtn"><svg><use href="#i-pot"/></svg><span>烹饪台<small>两样食材，试出新菜谱</small></span></button>
-    <button class="stTile" id="wareBtn"><svg><use href="#i-box"/></svg><span>储物间<small>暂存食材，腾出棋盘</small></span></button>
-    <button class="stTile" id="gachaBtn"><svg><use href="#i-capsule"/></svg><span>扭蛋机<small>碰碰运气，收集小玩意</small></span></button>
-  </div>
 
   <!-- 棋盘 -->
   <div id="boardWrap">
@@ -958,17 +1030,29 @@ body{
   </div>
 
   <!-- 底栏 -->
-  <div id="bar">
-    <button class="bbtn" id="renoBtn"><svg><use href="#i-hammer"/></svg>装修</button>
-    <button class="bbtn" id="shopBtn"><svg><use href="#i-bag"/></svg>商店</button>
-    <button class="bbtn" id="dexBtn"><svg><use href="#i-book"/></svg>图鉴</button>
-    <button class="bbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">音效</span></button>
-    <button class="bbtn" id="helpBtn"><svg><use href="#i-help"/></svg>玩法</button>
-    <button class="bbtn" id="setBtn"><svg><use href="#i-gear"/></svg>设置</button>
+  <!-- 底部工具条：常用四项常驻，其余收进可展开面板，版面不再随功能增加而变长 -->
+  <div id="dock">
+    <button class="dbtn" id="cookBtn"><svg><use href="#i-pot"/></svg><span>烹饪台</span></button>
+    <button class="dbtn" id="gachaBtn"><svg><use href="#i-capsule"/></svg><span>扭蛋机</span></button>
+    <button class="dbtn" id="wareBtn"><svg><use href="#i-box"/></svg><span>储物间</span></button>
+    <button class="dbtn" id="menuBtn"><svg><use href="#i-menu"/></svg><span>更多</span></button>
   </div>
+
 </div>
 
 <div id="ghost"><span class="art"><svg><use id="ghostUse" href="#s-veg1"/></svg><img id="ghostImg" src="art/items/veg1.png?v=3" alt="" onerror="artFail(this)"></span></div>
+
+<div id="menuMask"></div>
+<div id="menuPanel">
+  <div class="mgrid">
+      <button class="mbtn" id="renoBtn"><svg><use href="#i-hammer"/></svg><span>装修</span></button>
+      <button class="mbtn" id="shopBtn"><svg><use href="#i-bag"/></svg><span>商店</span></button>
+      <button class="mbtn" id="dexBtn"><svg><use href="#i-book"/></svg><span>图鉴</span></button>
+      <button class="mbtn" id="helpBtn"><svg><use href="#i-help"/></svg><span>玩法</span></button>
+      <button class="mbtn" id="setBtn"><svg><use href="#i-gear"/></svg><span>设置</span></button>
+      <button class="mbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">音效</span></button>
+    </div>
+</div>
 
 <!-- 信息卡 -->
 <div id="sheet">
@@ -1128,7 +1212,7 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V1.0';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V1.1';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -2146,7 +2230,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '7';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '8';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2729,6 +2813,27 @@ function bindUi(){
     // 点需求物品：告诉玩家这东西怎么来
     var nd = e.target && e.target.closest ? e.target.closest('[data-need]') : null;
     if(nd){ audioInit(); toast(howToGet(nd.getAttribute('data-need'))); }
+  });
+  // 底部"更多"面板：点按展开/收起；点遮罩或选中任一项后自动收起
+  function menuToggle(open){
+    var pnl = el('menuPanel'), mask = el('menuMask'), btn = el('menuBtn');
+    if(!pnl) return;
+    var isOpen = pnl.getAttribute('data-open') === '1';
+    var willOpen = (open === undefined) ? !isOpen : open;
+    pnl.setAttribute('data-open', willOpen ? '1' : '0');
+    // 直接写内联样式，不依赖类名切换（同优先级规则在部分环境下不稳定）
+    if(pnl.style){
+      pnl.style.visibility = willOpen ? 'visible' : 'hidden';
+      pnl.style.opacity = willOpen ? '1' : '0';
+      pnl.style.transform = willOpen ? 'translateY(0)' : 'translateY(24px)';
+    }
+    if(mask && mask.style) mask.style.display = willOpen ? 'block' : 'none';
+    if(btn && btn.classList) btn.classList.toggle('on', willOpen);
+  }
+  if(el('menuBtn')) el('menuBtn').onclick = function(){ audioInit(); menuToggle(); };
+  if(el('menuMask')) el('menuMask').onclick = function(){ menuToggle(false); };
+  if(el('menuPanel') && el('menuPanel').addEventListener) el('menuPanel').addEventListener('click', function(e){
+    if(e.target && e.target.closest && e.target.closest('.mbtn')) setTimeout(function(){ menuToggle(false); }, 60);
   });
   if(el('verTag')) el('verTag').textContent = GAME_VER;
   if(el('setSub')) el('setSub').textContent = '当前版本 ' + GAME_VER;
