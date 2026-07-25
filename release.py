@@ -59,12 +59,35 @@ self.addEventListener('activate', function (e) {
 
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+  var isPage = e.request.mode === 'navigate' ||
+               (e.request.destination === 'document') ||
+               /\.html($|\?)/.test(e.request.url);
+
+  // 页面走"网络优先"：有网就总是拿最新版，断网才回落缓存。
+  // 否则玩家装过一次后会一直吃旧缓存，我们发了新版他也刷不出来。
+  if (isPage) {
+    e.respondWith(
+      fetch(e.request).then(function (res) {
+        if (res && res.status === 200) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match(e.request, { ignoreSearch: true })
+          .then(function (hit) { return hit || caches.match('./index.html'); });
+      })
+    );
+    return;
+  }
+
+  // 图片等静态资源走"缓存优先"：它们带版本号，换图必然换 URL，不会读到旧的
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(function (hit) {
       if (hit) return hit;
       return fetch(e.request).then(function (res) {
         if (res && res.status === 200 && res.type === 'basic') {
-          const copy = res.clone();
+          var copy = res.clone();
           caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
         }
         return res;
