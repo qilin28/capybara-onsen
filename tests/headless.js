@@ -360,6 +360,38 @@ const shinyOrig = S5.board.filter(function (c) { return c && c.s; }).length;
 ok(shinyKept === shinyOrig, '棋盘上的闪光标记可存档恢复（' + shinyKept + ' 个）');
 g5.stopTick();
 
+// ---------- 存档导出 / 导入 / 重置 ----------
+const SS = S;
+SS.coins = 777; SS.level = 9; SS.stars = 33; SS.tickets = 4;
+const code = g.exportSave();
+ok(typeof code === 'string' && code.indexOf('WONSEN1.') === 0, '导出的存档码带标识前缀');
+ok(!/\s/.test(code), '存档码不含空白字符，便于复制粘贴');
+
+// 换个环境模拟"新手机"，导入后进度应完整还原
+const freshStore = new Map();
+const gN = makeEnv(freshStore);
+const SN = gN.S();
+ok(SN.coins === 50 && SN.level === 1, '新设备初始为全新存档');
+const r = gN.importSave(code);
+ok(r.ok === true, '存档码可成功导入：' + r.msg);
+// load() 会重建 S 对象，必须重新取引用
+ok(gN.S().coins === 777 && gN.S().level === 9, '导入后金币与等级还原');
+ok(gN.S().stars === 33 && gN.S().tickets === 4, '导入后星星与扭蛋券还原');
+
+// 非法输入应被拒绝，且不破坏当前存档
+const beforeBad = gN.S().coins;
+ok(gN.importSave('').ok === false, '空存档码被拒绝');
+ok(gN.importSave('随便一串文字').ok === false, '非本游戏的码被拒绝');
+ok(gN.importSave('WONSEN1.@@@坏掉的@@@').ok === false, '损坏的存档码被拒绝');
+ok(gN.S().coins === beforeBad, '导入失败不影响当前存档');
+
+// 重置
+gN.resetSave();
+ok(gN.S().coins === 50 && gN.S().level === 1, '重置后回到初始状态');
+ok(gN.S().dex.length === 3 && Object.keys(gN.S().cards).length === 0, '重置清空图鉴与卡牌');
+ok(typeof gN.GAME_VER === 'string' && gN.GAME_VER.length > 0, '版本号常量存在（' + gN.GAME_VER + '）');
+gN.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);

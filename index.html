@@ -369,6 +369,16 @@ body{
   box-shadow:0 0 5px rgba(242,193,78,.9);}
 @keyframes shGlow{0%,100%{opacity:.6;}50%{opacity:1;}}
 
+/* ---------- 设置与存档 ---------- */
+#title span b{font-style:normal; font-weight:900; opacity:.85; margin-left:2px;}
+.sethint{margin:2px 0 8px; font-size:11px; line-height:1.6; color:var(--sub);}
+.setrow{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;}
+#saveBox{width:100%; height:62px; resize:none; border-radius:12px; border:2px solid var(--pline);
+  background:rgba(255,253,244,.9); padding:8px 10px; font-size:11px; line-height:1.5;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--ink); word-break:break-all;}
+#saveBox:focus{outline:2px solid var(--lant); outline-offset:-1px;}
+.sbtn.warn{background:linear-gradient(180deg,#F09A9A,#E07A7A); border-bottom-color:#B85555; color:#FFF6F0;}
+
 /* ---------- 动画 ---------- */
 @keyframes popIn{0%{transform:scale(.25)}62%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes mgPop{0%{transform:scale(.55)}55%{transform:scale(1.28)}100%{transform:scale(1)}}
@@ -801,6 +811,9 @@ body{
 <symbol id="card-duck" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#F5C842"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
 <symbol id="card-turtle" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#8FBF6A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
 <symbol id="card-moon" viewBox="0 0 64 64"><g stroke="#4A3226" stroke-width="2.5" stroke-linejoin="round"><rect x="4" y="4" width="56" height="56" rx="12" fill="#F3EBD4"/><circle cx="32" cy="30" r="14" fill="#E8D89A"/><path d="M22 46 h20" stroke-linecap="round"/></g></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="3.2"/>
+  <path d="M12 2.6 l1.6 2.3 2.7-.7 .5 2.8 2.6 1 -1.3 2.5 1.8 2.1 -2.3 1.6 .3 2.8 -2.8 .2 -1.2 2.5 -2.4-1.4 -2.4 1.4 -1.2-2.5 -2.8-.2 .3-2.8 -2.3-1.6 1.8-2.1 -1.3-2.5 2.6-1 .5-2.8 2.7 .7 Z"/></g></symbol>
 <symbol id="i-capsule" viewBox="0 0 24 24">
   <circle cx="12" cy="12" r="8.6" fill="#FFF3D6" stroke="currentColor" stroke-width="2"/>
   <path d="M3.6 12 A8.6 8.6 0 0 1 20.4 12 Z" fill="#F0913C" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
@@ -905,7 +918,7 @@ body{
     </g>
 </svg>
     <div id="sceneTop">
-      <div id="title"><h1>水豚温泉町</h1><span>汤屋食堂篇</span></div>
+      <div id="title"><h1>水豚温泉町</h1><span>汤屋食堂篇 <b id="verTag"></b></span></div>
       <div id="pills">
         <div class="pill"><svg><use href="#i-coin"/></svg><b id="coinN">0</b></div>
         <div class="pill"><svg><use href="#i-star"/></svg><b id="starN">0</b></div>
@@ -951,6 +964,7 @@ body{
     <button class="bbtn" id="dexBtn"><svg><use href="#i-book"/></svg>图鉴</button>
     <button class="bbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">音效</span></button>
     <button class="bbtn" id="helpBtn"><svg><use href="#i-help"/></svg>玩法</button>
+    <button class="bbtn" id="setBtn"><svg><use href="#i-gear"/></svg>设置</button>
   </div>
 </div>
 
@@ -986,6 +1000,30 @@ body{
   <button class="pclose" data-close="shopM"><svg><use href="#i-close"/></svg></button>
   <h2>杂货商店</h2><div class="psub">狸猫货郎的小摊，金币换好物</div>
   <div id="shopBody"></div>
+</div></div>
+
+<!-- 设置与存档 -->
+<div id="setM" class="modal"><div class="panel">
+  <button class="pclose" data-close="setM"><svg><use href="#i-close"/></svg></button>
+  <h2>设置</h2><div class="psub" id="setSub"></div>
+
+  <div class="dxh"><i style="background:#7ECBB4"></i>存档备份</div>
+  <p class="sethint">存档只存在这台设备的浏览器里。换手机或清理浏览器数据会丢失进度，
+    可以导出一串存档码自己保管（发到微信收藏或备忘录都行），在新设备粘贴回来即可继续。</p>
+  <div class="setrow">
+    <button class="sbtn" id="expBtn">导出存档码</button>
+    <button class="sbtn" id="copyBtn" style="display:none">复制</button>
+  </div>
+  <textarea id="saveBox" placeholder="点上方按钮导出；或把存档码粘贴到这里再点导入"></textarea>
+  <div class="setrow">
+    <button class="sbtn" id="impBtn">导入存档码</button>
+  </div>
+
+  <div class="dxh" style="margin-top:14px"><i style="background:#E88AA0"></i>重新开始</div>
+  <p class="sethint">清空当前进度，从头开始经营。清空前建议先导出存档码留个底。</p>
+  <div class="setrow">
+    <button class="sbtn warn" id="resetBtn">清空存档，重新开始</button>
+  </div>
 </div></div>
 
 <!-- 扭蛋机 -->
@@ -1090,6 +1128,7 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
+var GAME_VER = 'V1.0';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -1352,6 +1391,51 @@ function tapGen(gid){
   if(gid==='capy') capySquish();
   checkQuest('gen');
   save();
+  return true;
+}
+
+/* ================= 存档管理（导出 / 导入 / 重新开始） =================
+   存档只在本机浏览器里，换手机或清缓存会丢。导出成一串文本自己保管，
+   新设备粘贴回去即可续玩。用 base64 是为了避免换行与中文在复制粘贴中被破坏。 */
+function exportSave(){
+  save();
+  var raw = '';
+  try{ raw = localStorage.getItem(SAVE_KEY) || ''; }catch(e){}
+  if(!raw) return '';
+  try{
+    // encodeURIComponent 先把中文转成字节，btoa 才不会抛错
+    return 'WONSEN1.' + btoa(unescape(encodeURIComponent(raw)));
+  }catch(e){ return ''; }
+}
+function importSave(code){
+  if(!code) return { ok:false, msg:'请先粘贴存档码' };
+  code = String(code).replace(/\s/g, '');
+  if(code.indexOf('WONSEN1.') !== 0) return { ok:false, msg:'这串码不是水豚温泉町的存档' };
+  var json = '';
+  try{ json = decodeURIComponent(escape(atob(code.slice(8)))); }
+  catch(e){ return { ok:false, msg:'存档码不完整，请重新复制' }; }
+  var d = null;
+  try{ d = JSON.parse(json); }catch(e){ return { ok:false, msg:'存档码已损坏' }; }
+  if(!d || d.v !== 1 || typeof d.coins !== 'number') return { ok:false, msg:'存档内容无法识别' };
+  // 先备份当前档，导入失败还能救回来
+  try{
+    localStorage.setItem(SAVE_KEY + '_bak', localStorage.getItem(SAVE_KEY) || '');
+    localStorage.setItem(SAVE_KEY, json);
+  }catch(e){ return { ok:false, msg:'无法写入存档（浏览器存储受限）' }; }
+  if(!load()){
+    try{ localStorage.setItem(SAVE_KEY, localStorage.getItem(SAVE_KEY + '_bak') || ''); }catch(e){}
+    return { ok:false, msg:'存档读取失败，已还原原档' };
+  }
+  rAll(); rGift();
+  return { ok:true, msg:'存档已导入，等级 ' + S.level + '，金币 ' + S.coins };
+}
+function resetSave(){
+  try{
+    localStorage.setItem(SAVE_KEY + '_bak', localStorage.getItem(SAVE_KEY) || '');
+    localStorage.removeItem(SAVE_KEY);
+  }catch(e){}
+  initNew();
+  rAll(); rGift(); save();
   return true;
 }
 
@@ -2062,7 +2146,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '5';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '6';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2646,6 +2730,50 @@ function bindUi(){
     var nd = e.target && e.target.closest ? e.target.closest('[data-need]') : null;
     if(nd){ audioInit(); toast(howToGet(nd.getAttribute('data-need'))); }
   });
+  if(el('verTag')) el('verTag').textContent = GAME_VER;
+  if(el('setSub')) el('setSub').textContent = '当前版本 ' + GAME_VER;
+  if(el('setBtn')) el('setBtn').onclick = function(){
+    audioInit();
+    if(el('saveBox')) el('saveBox').value = '';
+    if(el('copyBtn')) el('copyBtn').style.display = 'none';
+    el('setM').classList.add('on');
+  };
+  if(el('expBtn')) el('expBtn').onclick = function(){
+    var code = exportSave();
+    if(!code){ toast('还没有可导出的存档'); return; }
+    if(el('saveBox')){ el('saveBox').value = code; el('saveBox').select(); }
+    if(el('copyBtn')) el('copyBtn').style.display = '';
+    toast('存档码已生成，请复制保存');
+  };
+  if(el('copyBtn')) el('copyBtn').onclick = function(){
+    var box = el('saveBox'); if(!box || !box.value) return;
+    box.select();
+    var done = false;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(box.value).then(function(){ toast('已复制到剪贴板'); });
+      done = true;
+    }
+    if(!done){
+      // 老浏览器兜底
+      try{ document.execCommand('copy'); toast('已复制到剪贴板'); }
+      catch(e){ toast('请长按选中后手动复制'); }
+    }
+  };
+  if(el('impBtn')) el('impBtn').onclick = function(){
+    var box = el('saveBox');
+    var res = importSave(box ? box.value : '');
+    toast(res.msg);
+    if(res.ok){
+      sfx('level');
+      el('setM').classList.remove('on');
+    } else { sfx('err'); }
+  };
+  if(el('resetBtn')) el('resetBtn').onclick = function(){
+    if(!confirm('确定清空当前存档、从头开始吗？\n建议先导出存档码留个底。')) return;
+    resetSave();
+    toast('存档已清空，重新开始');
+    el('setM').classList.remove('on');
+  };
   if(el('gachaBtn')) el('gachaBtn').onclick = function(){
     audioInit(); rGacha();
     var box = el('gachaResult'); if(box) box.innerHTML = '';
@@ -2682,7 +2810,7 @@ function bindUi(){
     var b5 = e.target && e.target.closest ? e.target.closest('[data-ws]') : null;
     if(b5){ audioInit(); storeTake(+b5.getAttribute('data-ws')); }
   });
-  ['dexM','tut','renoM','shopM','gachaM','cookM','wareM'].forEach(function(m){
+  ['dexM','tut','renoM','shopM','gachaM','cookM','wareM','setM'].forEach(function(m){
     var mm = el(m);
     if(mm && mm.addEventListener) mm.addEventListener('click', function(e){
       if(e.target === mm && m !== 'tut') mm.classList.remove('on');
@@ -2744,6 +2872,7 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  exportSave: exportSave, importSave: importSave, resetSave: resetSave, GAME_VER: GAME_VER,
   gachaPull: gachaPull, openGift: openGift, refillGift: refillGift,
   rollShiny: rollShiny, mkItem: mkItem, today: today, grantItems: grantItems,
   S: function(){ return S; },
