@@ -406,6 +406,18 @@ const gS = makeEnv(store);
 ok(gS.S().orders.length === 5, '订单位数量可存档恢复');
 gS.stopTick();
 
+// ---------- V1.3 图标条布局与订单详情 ----------
+const SL = g.S();
+g.setOrder(0,[['veg1',2]],'rabbit');
+g.openTask(0);
+ok(true, '订单详情面板可打开（不抛错）');
+g.showInfo(-1);
+ok(true, '底部信息条空态可渲染');
+const anyIdx = SL.board.findIndex(function(c){ return c && c.t === 'i'; });
+if (anyIdx >= 0) { g.showInfo(anyIdx); ok(true, '底部信息条可显示物品详情'); }
+const genIdx = SL.board.findIndex(function(c){ return c && c.t === 'g'; });
+if (genIdx >= 0) { g.showInfo(genIdx); ok(true, '底部信息条可显示生成器详情'); }
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
