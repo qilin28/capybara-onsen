@@ -404,7 +404,23 @@ body{
   -webkit-overflow-scrolling:touch; scrollbar-width:none;}
 #orders::-webkit-scrollbar{display:none;}
 .tsk{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px;
-  background:none; border:none; padding:0; cursor:pointer; font-family:inherit; width:50px;}
+  background:none; border:none; padding:0; cursor:pointer; font-family:inherit;}
+/* 订单：主体是需要的食材，客人头像缩成左上角小徽章 */
+.titems{position:relative; display:flex; gap:3px; padding:3px 4px;
+  background:linear-gradient(180deg,#FFFDF6,var(--paper)); border:2px solid var(--pline);
+  border-radius:11px; box-shadow:0 2px 0 rgba(160,130,90,.25);}
+.titem{position:relative; width:34px; height:34px; background:var(--cellBg);
+  border:1.5px solid #EDE0C2; border-radius:8px;}
+.titem .art{width:100%; height:100%;}
+.titem.ok{border-color:#9CC69C; background:#EFFAEF;}
+.tcnt{position:absolute; bottom:-4px; right:-4px; font-size:8.5px; font-weight:900;
+  background:#FFF9EC; border:1.5px solid var(--pline); border-radius:999px; padding:0 3px;
+  color:#A0522D; z-index:2; line-height:1.4;}
+.titem.ok .tcnt{color:#2F7B4F; border-color:#9CC69C; background:#EFFAEF;}
+.tcust{position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%;
+  border:2px solid #FFFDF5; overflow:hidden; background:var(--paper); z-index:3;
+  box-shadow:0 1px 3px rgba(90,110,60,.3);}
+.tcust .art{width:100%; height:100%;}
 .tsk .tav{position:relative; width:42px; height:42px; border-radius:50%;
   background:linear-gradient(180deg,#FFFDF6,var(--paper)); border:2.5px solid var(--pline);
   box-shadow:0 2px 0 rgba(160,130,90,.25); overflow:hidden;
@@ -412,9 +428,9 @@ body{
 .tsk .tav svg{width:22px; height:22px; color:#B0763A;}
 .tsk .tav .art{width:100%; height:100%;}
 .tsk .tbadge{font-size:9px; font-weight:900; color:var(--sub); white-space:nowrap;
-  max-width:52px; overflow:hidden; text-overflow:ellipsis;}
-/* 备齐的订单：绿圈加轻微呼吸，一眼看到该交了 */
-.tsk.ready .tav{border-color:#7FB84F; box-shadow:0 0 0 2px rgba(127,184,79,.35), 0 2px 0 rgba(120,160,70,.3);
+  max-width:80px; overflow:hidden; text-overflow:ellipsis;}
+/* 备齐：整块亮绿圈呼吸，一眼看到该交了 */
+.tsk.ready .titems{border-color:#7FB84F; box-shadow:0 0 0 2px rgba(127,184,79,.35), 0 2px 0 rgba(120,160,70,.3);
   animation:tskGlow 1.6s ease-in-out infinite;}
 .tsk.ready .tbadge{color:#4F7A34;}
 @keyframes tskGlow{50%{box-shadow:0 0 0 4px rgba(127,184,79,.28), 0 2px 0 rgba(120,160,70,.3);}}
@@ -1272,7 +1288,7 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V1.3';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V1.4';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -2307,7 +2323,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '11';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '12';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2401,15 +2417,18 @@ function rOrders(){
         '<span class="nicon">' + itemArt(nd[0]) +
         '<span class="cnt">' + have + '/' + nd[1] + '</span></span></div>';
     });
-    var done = 0, total = 0;
+    // 主视觉是"要凑的食材"，客人头像缩成角标——玩家先看的是要什么，而不是谁点的
+    var itemsH = '';
     o.needs.forEach(function(nd){
-      total += nd[1];
-      done += Math.min(countItem(nd[0]), nd[1]);
+      var have = Math.min(countItem(nd[0]), nd[1]);
+      itemsH += '<span class="titem' + (have >= nd[1] ? ' ok' : '') + '">' +
+        itemArt(nd[0]) + '<span class="tcnt">' + have + '/' + nd[1] + '</span></span>';
     });
     html += '<button class="tsk' + (ok ? ' ready' : '') + '" data-task="' + i + '" title="' +
-      CUSTS[o.c].n + '">' +
-      '<span class="tav">' + artUse(CUSTS[o.c].sym,'','chars') + '</span>' +
-      '<span class="tbadge">' + (ok ? '可交付' : (done + '/' + total)) + '</span>' +
+      CUSTS[o.c].n + ' 的订单">' +
+      '<span class="titems">' + itemsH +
+      '<span class="tcust">' + artUse(CUSTS[o.c].sym,'','chars') + '</span></span>' +
+      '<span class="tbadge">' + (ok ? '可交付' : ('+' + rw.coins)) + '</span>' +
       '</button>';
   }
   // 功能入口并入同一条：任务在前，工具在后，中间用分隔标记
