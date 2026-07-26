@@ -427,6 +427,10 @@ body{
   display:flex; align-items:center; justify-content:center;}
 .tsk .tav svg{width:22px; height:22px; color:#B0763A;}
 .tsk .tav .art{width:100%; height:100%;}
+.tgo{display:block; font-size:9.5px; font-weight:900; color:#FFF6E8; white-space:nowrap;
+  background:linear-gradient(180deg,#8FCB5C,#6FA83F); border:1.5px solid #4F7A34;
+  border-radius:999px; padding:1px 8px; box-shadow:0 2px 0 #4F7A34; cursor:pointer;}
+.tgo:active{transform:translateY(1.5px); box-shadow:0 0.5px 0 #4F7A34;}
 .tsk .tbadge{font-size:9px; font-weight:900; color:var(--sub); white-space:nowrap;
   max-width:80px; overflow:hidden; text-overflow:ellipsis;}
 /* 备齐：整块亮绿圈呼吸，一眼看到该交了 */
@@ -1288,7 +1292,7 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V1.4';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V1.5';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -2323,7 +2327,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '12';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '13';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2428,7 +2432,9 @@ function rOrders(){
       CUSTS[o.c].n + ' 的订单">' +
       '<span class="titems">' + itemsH +
       '<span class="tcust">' + artUse(CUSTS[o.c].sym,'','chars') + '</span></span>' +
-      '<span class="tbadge">' + (ok ? '可交付' : ('+' + rw.coins)) + '</span>' +
+      (ok
+        ? '<span class="tgo" data-dv="' + i + '">交付 +' + rw.coins + '</span>'
+        : '<span class="tbadge">+' + rw.coins + '</span>') +
       '</button>';
   }
   // 功能入口并入同一条：任务在前，工具在后，中间用分隔标记
@@ -2995,6 +3001,9 @@ function bindUi(){
   };
   var ords = el('orders');
   if(ords && ords.addEventListener) ords.addEventListener('click', function(e){
+    // 图标上的交付按钮直接交单；点图标其他位置才展开详情
+    var go = e.target && e.target.closest ? e.target.closest('.tgo') : null;
+    if(go){ audioInit(); deliver(+go.getAttribute('data-dv')); return; }
     var tk = e.target && e.target.closest ? e.target.closest('[data-task]') : null;
     if(tk){ audioInit(); openTask(+tk.getAttribute('data-task')); return; }
     var tl = e.target && e.target.closest ? e.target.closest('[data-tool]') : null;

@@ -1,6 +1,6 @@
 /* 离线缓存：装好后断网也能玩。此文件由 release.py 自动生成，勿手改。
    CACHE 版本号与 index.html 的 ART_VER 一起 +1，旧缓存在 activate 阶段清掉。 */
-const CACHE = 'wonsen-v12';
+const CACHE = 'wonsen-v13';
 const ASSETS = [
   './',
   './index.html',
