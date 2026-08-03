@@ -570,6 +570,80 @@ ok(gV2.S().vol.bgm === 10 && gV2.S().vol.sfx === 55, '音量设置可存档恢�
 ok(gV2.volOf('voice') === 1, '读档后系数换算正确');
 gV1.stopTick(); gV2.stopTick();
 
+// ---------- 声音可达性与更新记录 ----------
+const gS2 = makeEnv(new Map());
+ok(Array.isArray(gS2.CHANGELOG) && gS2.CHANGELOG.length >= 9, '更新记录至少 9 个版本');
+ok(gS2.CHANGELOG[0].v === gS2.GAME_VER, '更新记录第一条就是当前版本');
+ok(gS2.CHANGELOG.every(function(c){ return c.v && c.d && c.t && c.li.length; }), '每条更新记录都完整');
+// 静音时拖动滑块应自动恢复有声
+const SS2 = gS2.S();
+SS2.mute = true;
+ok(gS2.volOf('bgm') === 0, '静音时音量系数为 0');
+SS2.mute = false; SS2.vol.bgm = 45;
+ok(gS2.volOf('bgm') === 0.45, '取消静音后按滑块值出声');
+gS2.stopTick();
+
+// ---------- V2.1 汐见川钓鱼 ----------
+const gFi = makeEnv(new Map());
+const SFi = gFi.S();
+ok(gFi.fishUnlocked() === false, 'Lv1 时钓鱼未开放');
+SFi.level = 5; SFi.coins = 5000;
+ok(gFi.fishUnlocked() === true, 'Lv5 开放钓鱼');
+ok(gFi.CHAINS.fish.items.length === 7, '水产链 7 级');
+
+// 抛竿扣钱
+const coinsFi = SFi.coins;
+const cast = gFi.fishCast();
+ok(cast !== null, '可以抛竿');
+ok(SFi.coins === coinsFi - gFi.FISH_COST, '抛竿扣除鱼饵钱');
+ok(cast.biteAt >= 1200 && cast.biteAt <= 3200, '上钩时刻在合理区间');
+
+// 四种判定
+ok(gFi.fishStrike(cast.t0 + cast.biteAt + 30).kind === 'perfect', '刚上钩就提竿是完美');
+const fc2 = gFi.fishCast();
+ok(gFi.fishStrike(fc2.t0 + 50).kind === 'early', '抢竿会吓跑鱼');
+const fc3 = gFi.fishCast();
+ok(gFi.fishStrike(fc3.t0 + fc3.biteAt + fc3.win + 300).kind === 'late', '超过窗口就跑了');
+const fc4 = gFi.fishCast();
+const fr4 = gFi.fishStrike(fc4.t0 + fc4.biteAt + fc4.win * 0.8);
+ok(fr4.kind === 'ok' && fr4.fish, '窗口后段是普通判定，仍能钓到');
+
+// 收竿入棋盘
+const fiBefore = SFi.board.filter(function(c){ return c; }).length;
+const got = gFi.fishCollect();
+ok(got && got.placed === 'board', '钓到的鱼放进棋盘');
+ok(SFi.board.filter(function(c){ return c; }).length === fiBefore + 1, '棋盘多了一个物品');
+ok(SFi.fishCount >= 1, '累计钓鱼数已记录');
+
+// 脱钩不产鱼
+const fc5 = gFi.fishCast();
+gFi.fishStrike(fc5.t0 + 10);
+ok(gFi.fishCollect() === null, '脱钩后没有鱼可收');
+
+// 鱼竿升级
+ok(gFi.rodLevel() === 0, '初始是旧竹竿');
+SFi.coins = 5000;
+ok(gFi.buyRod() === true, '金币够时可升级鱼竿');
+ok(gFi.rodLevel() === 1, '鱼竿等级提升');
+SFi.coins = 0;
+ok(gFi.buyRod() === false, '钱不够时买不了');
+
+// 鱼获随等级解锁
+SFi.level = 1;
+const lowFish = [];
+for (let i = 0; i < 40; i++) lowFish.push(gFi.fishRoll(false).id);
+ok(lowFish.every(function(id){ return ['f1','f2','f3'].indexOf(id) >= 0; }), '低等级只钓得到前几级鱼');
+
+// 钓鱼数据可存档
+const fiStore = new Map();
+const gFi2 = makeEnv(fiStore);
+gFi2.S().rod = 2; gFi2.S().fishCount = 17;
+gFi2.save();
+const gFi3 = makeEnv(fiStore);
+ok(gFi3.S().rod === 2 && gFi3.rodLevel() === 2, '鱼竿等级可存档恢复');
+ok(gFi3.S().fishCount === 17, '钓鱼数可存档恢复');
+gFi.stopTick(); gFi2.stopTick(); gFi3.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);

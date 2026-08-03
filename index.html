@@ -428,6 +428,59 @@ body{
   background:radial-gradient(circle at 50% 45%, #F5D76E 0 42%, transparent 43%);}
 .dmwin .dst i.on{background:radial-gradient(circle at 50% 45%, #F5B942 0 42%, transparent 43%);}
 
+/* ---------- 更新记录 ---------- */
+.logitem{border:2px solid var(--pline); border-radius:12px; margin-bottom:7px; overflow:hidden;
+  background:rgba(120,86,50,.05);}
+.loghd{display:flex; align-items:center; gap:8px; padding:7px 10px; cursor:pointer;}
+.loghd b{font-size:12.5px; font-weight:900; color:#B0763A; flex:none;}
+.loghd span{flex:1; min-width:0; font-size:12px; font-weight:900; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.loghd i{font-style:normal; font-size:10px; color:var(--sub); flex:none;}
+.logli{display:none; margin:0; padding:0 12px 9px 26px;}
+.logitem.on .logli{display:block;}
+.logli li{font-size:11.5px; line-height:1.75; color:var(--sub);}
+
+/* ---------- 汐见川钓鱼 ---------- */
+#pond{position:relative; height:150px; border-radius:16px; overflow:hidden;
+  background:linear-gradient(180deg,#BFE3F0 0%,#8CC7DE 45%,#6BAFCB 100%);
+  border:2.5px solid var(--pline); box-shadow:inset 0 3px 10px rgba(20,60,90,.25);}
+#pondWater{position:absolute; inset:0;
+  background:repeating-linear-gradient(115deg, rgba(255,255,255,.16) 0 3px, transparent 3px 22px);
+  animation:pondFlow 7s linear infinite;}
+@keyframes pondFlow{to{ transform:translateX(-22px); }}
+#float{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
+  width:30px; height:30px; pointer-events:none;}
+#float .fbody{position:absolute; inset:0; border-radius:50%;
+  background:linear-gradient(180deg,#FFF3E0 0 48%, #E8563F 48% 100%);
+  border:2.5px solid #8A3B2C; box-shadow:0 3px 8px rgba(20,60,90,.4);}
+#float .fring{position:absolute; left:50%; top:60%; width:16px; height:6px;
+  transform:translate(-50%,-50%) scale(1); border:2px solid rgba(255,255,255,.75);
+  border-radius:50%; opacity:0;}
+/* 待机：轻轻上下浮动 */
+#pond.wait #float{ animation:floatBob 2.4s ease-in-out infinite; }
+@keyframes floatBob{ 50%{ top:calc(52% + 5px); } }
+/* 上钩：猛地沉下去 + 涟漪，这一刻要点 */
+#pond.bite #float{ animation:floatDip .55s cubic-bezier(.3,0,.2,1) forwards; }
+@keyframes floatDip{ to{ top:calc(52% + 22px); } }
+#pond.bite #float .fring{ animation:floatRing .55s ease-out 2; }
+@keyframes floatRing{ from{ opacity:.9; transform:translate(-50%,-50%) scale(.6);}
+  to{ opacity:0; transform:translate(-50%,-50%) scale(2.6);} }
+#fishHint{position:absolute; left:50%; bottom:9px; transform:translateX(-50%);
+  font-size:11.5px; font-weight:900; color:#FFF8EC; white-space:nowrap;
+  background:rgba(40,80,105,.55); border-radius:999px; padding:3px 12px;}
+#pond.bite #fishHint{ background:rgba(200,70,50,.85); }
+#fishRes{min-height:56px; display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:8px; font-size:12.5px; font-weight:900; color:var(--ink);}
+#fishRes .fimg{width:46px; height:46px; background:var(--cellBg);
+  border:2px solid #EDE0C2; border-radius:11px; padding:2px;}
+#fishRes .fimg .art{width:100%; height:100%;}
+.rodrow{display:flex; align-items:center; gap:9px; background:rgba(120,86,50,.06);
+  border:2px solid var(--pline); border-radius:12px; padding:8px 10px;}
+.rodrow .rodi{flex:1; min-width:0;}
+.rodrow .rodi b{display:block; font-size:12.5px;}
+.rodrow .rodi span{display:block; font-size:10.5px; color:var(--sub); line-height:1.5;}
+.rodrow.own{border-color:#9CC69C; background:#F1FAF1;}
+
 /* ---------- 客人好感 ---------- */
 .favbar{display:flex; align-items:center; gap:7px; margin:6px 0 10px;
   background:rgba(120,86,50,.08); border-radius:10px; padding:5px 9px;}
@@ -1036,6 +1089,9 @@ body{
   <circle cx="20.5" cy="9.5" r=".8" fill="currentColor" stroke="none"/></g></symbol>
 <symbol id="i-menu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
   <path d="M4 7h16M4 12h16M4 17h16"/></g></symbol>
+<symbol id="i-fish" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M3 12c3-4 7-6 10-6s6 2 7.5 6c-1.5 4-4.5 6-7.5 6s-7-2-10-6Z"/>
+  <path d="M3 12l-1.2-3M3 12l-1.2 3"/><circle cx="15.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/></g></symbol>
 <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
   <circle cx="12" cy="12" r="3.2"/>
   <path d="M12 2.6 l1.6 2.3 2.7-.7 .5 2.8 2.6 1 -1.3 2.5 1.8 2.1 -2.3 1.6 .3 2.8 -2.8 .2 -1.2 2.5 -2.4-1.4 -2.4 1.4 -1.2-2.5 -2.8-.2 .3-2.8 -2.3-1.6 1.8-2.1 -1.3-2.5 2.6-1 .5-2.8 2.7 .7 Z"/></g></symbol>
@@ -1201,8 +1257,9 @@ body{
       <button class="mbtn" id="dexBtn"><svg><use href="#i-book"/></svg><span>图鉴</span></button>
       <button class="mbtn" id="helpBtn"><svg><use href="#i-help"/></svg><span>玩法</span></button>
       <button class="mbtn" id="dreamBtn"><svg><use href="#i-moon"/></svg><span>梦境</span></button>
+      <button class="mbtn" id="fishBtn"><svg><use href="#i-fish"/></svg><span>钓鱼</span></button>
       <button class="mbtn" id="setBtn"><svg><use href="#i-gear"/></svg><span>设置</span></button>
-      <button class="mbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">音效</span></button>
+      <button class="mbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">声音</span></button>
     </div>
 </div>
 
@@ -1267,6 +1324,10 @@ body{
     <button class="sbtn" id="impBtn">导入存档码</button>
   </div>
 
+  <div class="dxh" style="margin-top:14px"><i style="background:#B08BD4"></i>更新记录</div>
+  <p class="sethint">每次更新做了什么，都记在这里。</p>
+  <div id="logBox"></div>
+
   <div class="dxh" style="margin-top:14px"><i style="background:#E88AA0"></i>重新开始</div>
   <p class="sethint">清空当前进度，从头开始经营。清空前建议先导出存档码留个底。</p>
   <div class="setrow">
@@ -1294,6 +1355,43 @@ body{
     <button class="sbtn" id="dmRetry">重来</button>
     <button class="sbtn" id="dmQuit">离开梦境</button>
   </div>
+</div></div>
+
+<!-- 声音 -->
+<div id="sndM" class="modal"><div class="panel">
+  <button class="pclose" data-close="sndM"><svg><use href="#i-close"/></svg></button>
+  <h2>声音</h2><div class="psub">拖动滑块即时生效，设置会自动保存</div>
+  <div class="vols" id="sndVols">
+    <label class="volrow"><span>音效</span>
+      <input type="range" min="0" max="100" step="5" id="mSfx"><b id="mSfxN">80</b></label>
+    <label class="volrow"><span>背景音</span>
+      <input type="range" min="0" max="100" step="5" id="mBgm"><b id="mBgmN">30</b></label>
+    <label class="volrow"><span>配音</span>
+      <input type="range" min="0" max="100" step="5" id="mVoice"><b id="mVoiceN">90</b></label>
+  </div>
+  <div class="setrow" style="margin-top:6px">
+    <button class="sbtn" id="muteBtn">全部静音</button>
+  </div>
+</div></div>
+
+<!-- 汐见川钓鱼 -->
+<div id="fishM" class="modal"><div class="panel">
+  <button class="pclose" data-close="fishM"><svg><use href="#i-close"/></svg></button>
+  <h2>汐见川</h2><div class="psub" id="fishSub"></div>
+
+  <div id="pond">
+    <div id="pondWater"></div>
+    <div id="float"><span class="fbody"></span><span class="fring"></span></div>
+    <div id="fishHint">点「抛竿」开始</div>
+  </div>
+
+  <div class="setrow" style="justify-content:center; margin-top:12px">
+    <button class="bigbtn" id="castBtn">抛竿（20 金币）</button>
+  </div>
+  <div id="fishRes"></div>
+
+  <div class="dxh" style="margin-top:14px"><i style="background:#7FB8D4"></i>鱼竿</div>
+  <div id="rodBox"></div>
 </div></div>
 
 <!-- 订单详情（点顶部客人图标展开） -->
@@ -1367,7 +1465,9 @@ var CHAINS = {
   bun: { n: '面点坊', color: '#E8C07A', items: ['bun1','bun2','bun3','bun4','bun5','bun6','bun7','bun8'] },
   dairy: { n: '蛋奶铺', color: '#F2D06B', items: ['d1','d2','d3','d4','d5','d6','d7'] },
   cook1: { n: '暖心料理', color: '#E8955C', cooked: 1, items: ['k1','k2','k3','k4','k5'] },
-  cook2: { n: '幸福甜品', color: '#E8A0C0', cooked: 1, items: ['t1','t2','t3','t4','t5'] }
+  cook2: { n: '幸福甜品', color: '#E8A0C0', cooked: 1, items: ['t1','t2','t3','t4','t5'] },
+  fish: { n: '汐见川', color: '#7FB8D4', items: ['f1','f2','f3','f4','f5','f6','f7'] },
+  cook3: { n: '河鲜料理', color: '#6FA8C8', cooked: 1, items: ['r1','r2','r3','r4','r5'] }
 };
 var BASECH = ['veg','bun','dairy'];
 var ITEM_NAMES = {
@@ -1375,7 +1475,10 @@ var ITEM_NAMES = {
   bun1:'面粉', bun2:'面团', bun3:'馒头', bun4:'花卷', bun5:'葱油饼', bun6:'肉包', bun7:'小笼包', bun8:'蟹黄灌汤包',
   d1:'鸡蛋', d2:'蛋液', d3:'煎蛋', d4:'牛奶', d5:'奶油', d6:'芝士', d7:'黄金芝士',
   k1:'鸡蛋灌饼', k2:'番茄炒蛋', k3:'菜肉大包', k4:'南瓜奶露', k5:'芝士小笼',
-  t1:'焦糖布丁', t2:'香酥蛋挞', t3:'云朵舒芙蕾', t4:'南瓜派', t5:'星空慕斯'
+  t1:'焦糖布丁', t2:'香酥蛋挞', t3:'云朵舒芙蕾', t4:'南瓜派', t5:'星空慕斯',
+  f1:'小银鱼', f2:'青花鱼', f3:'橙斑鱼', f4:'河蚌', f5:'红蟹', f6:'鲭鱼', f7:'金鲤',
+  r1:'盐烤小鱼', r2:'鲜贝汤', r3:'蟹肉可乐饼', r4:'汐见渔火锅', r5:'金鲤宴'
+
 };
 var ITEMS = {};
 Object.keys(CHAINS).forEach(function(ck){
@@ -1389,6 +1492,11 @@ var RECIPES = [
   { r:'k3', a:'bun6', b:'veg6', hint:'实在的面点装满一篮鲜蔬' },
   { r:'k4', a:'veg5', b:'d5',   hint:'圆滚滚的甜与丝滑相遇' },
   { r:'k5', a:'bun7', b:'d6',   hint:'笼屉里的拉丝惊喜' },
+  { r:'r1', a:'f2',   b:'bun2', hint:'河边的小鱼，撒点盐上火烤' },
+  { r:'r2', a:'f4',   b:'veg3', hint:'贝壳张开时，鲜味就出来了' },
+  { r:'r3', a:'f5',   b:'bun5', hint:'把横行的家伙裹进酥皮里' },
+  { r:'r4', a:'f6',   b:'veg6', hint:'渔夫收工后最想吃的一锅' },
+  { r:'r5', a:'f7',   b:'d6',   hint:'传说中的那条鱼，值得最好的配料' },
   { r:'t1', a:'d2',   b:'d4',   hint:'蛋与奶的温柔凝固' },
   { r:'t2', a:'bun2', b:'d5',   hint:'面团抱住一朵云' },
   { r:'t3', a:'d1',   b:'d5',   hint:'会呼吸的蛋奶云朵' },
@@ -1410,7 +1518,52 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.1';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V2.1';
+/* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
+var CHANGELOG = [
+  { v:'V2.1', d:'2026-08-04', t:'汐见川钓鱼', li:[
+    '新玩法：等级 5 开放钓鱼，盯准浮标下沉的瞬间提竿',
+    '完美判定有机会钓到更大的鱼，还可能是闪光的',
+    '新增水产链 7 级：小银鱼到金鲤',
+    '新增 5 道河鲜料理配方',
+    '4 级鱼竿可买，越好的竿判定窗口越宽'
+  ]},
+  { v:'V2.0', d:'2026-08-03', t:'梦境解谜', li:[
+    '新玩法：30 关限步解谜，不消耗店里的食材',
+    '第 11 关起有云朵格，合成后那格会飘走',
+    '第 21 关起是镜像盘，一次合成在对称位同步发生',
+    '通关得贝币，按剩余步数评三星'
+  ]},
+  { v:'V1.7', d:'2026-08-03', t:'回头客', li:[
+    '客人好感 5 级，每级掉一段专属小故事和奖励',
+    '客人从 4 位增加到 8 位，随等级陆续上门',
+    '主线从 10 条延长到 30 条',
+    '主线走完后接上街坊回礼，循环目标永不枯竭'
+  ]},
+  { v:'V1.6', d:'2026-08-03', t:'声与色', li:[
+    '背景音乐循环播放，开场剧情有配音',
+    '音效、背景音、配音三档音量可分别调节'
+  ]},
+  { v:'V1.5', d:'2026-07-26', t:'一键交付', li:[
+    '订单备齐后图标上直接出现交付按钮，不用再点开详情'
+  ]},
+  { v:'V1.4', d:'2026-07-26', t:'看得懂的订单', li:[
+    '订单图标改为直接显示需要的食材与进度'
+  ]},
+  { v:'V1.3', d:'2026-07-26', t:'布局重构', li:[
+    '任务与工具收进顶部一条横向滚动图标栏',
+    '合成区放大到屏幕的三分之二',
+    '底部改为物品详情条'
+  ]},
+  { v:'V1.2', d:'2026-07-25', t:'手机适配', li:[
+    '修复底部按钮在 iPhone 上看不见的问题',
+    '页面不再上下滚动，拖动食材不会带着页面跑'
+  ]},
+  { v:'V1.0', d:'2026-07-25', t:'首个版本', li:[
+    '合成、订单、烹饪、装修、扭蛋、图鉴',
+    '存档可导出导入，支持添加到手机主屏幕离线玩'
+  ]}
+];    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -1561,7 +1714,8 @@ function initNew(){
     gens: {},
     orders:[null,null,null], sold:null,
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
-    vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice }, dream:{}, shells:0,
+    vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
+    rod:0, fishCount:0, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1589,6 +1743,7 @@ function save(){
       v:1, coins:S.coins, xp:S.xp, level:S.level, mute:S.mute, tut:S.tut, dex:S.dex,
       cells:cells, gens:S.gens, orders:S.orders, t:now(),
       story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless, vol:S.vol,
+      rod:S.rod, fishCount:S.fishCount,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -1613,6 +1768,7 @@ function load(){
     fav: (d.fav && typeof d.fav === 'object') ? d.fav : {},   // V1.7 老档默认空好感
     endless: d.endless || 0,
     vol: (d.vol && typeof d.vol === 'object') ? d.vol : { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
+    rod: d.rod || 0, fishCount: d.fishCount || 0,
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -1838,6 +1994,129 @@ var DREAMS = [
     mirror:true,
     init:[[0,'veg4'],[4,'veg4'],[1,'veg3'],[3,'veg3'],[5,'veg3'],[9,'veg3'],[6,'veg2'],[8,'veg2'],[10,'veg2'],[14,'veg2'],[11,'veg1'],[13,'veg1'],[15,'veg1'],[19,'veg1'],[16,'veg1'],[18,'veg1'],[20,'veg1'],[24,'veg1']] }
 ];
+
+/* ================= 汐见川钓鱼（V2.1） =================
+   时机判定玩法：浮标沉下去的瞬间点击。判定窗口越准，鱼越好。
+   这是第三个玩法动词——不是拖拽合成，而是看准时机点一下。 */
+var RODS = [
+  { n:'旧竹竿',   cost:0,    win:1.00, up:0,   desc:'外婆留下的，还能用' },
+  { n:'手编鱼竿', cost:400,  win:1.25, up:.05, desc:'判定窗口变宽，偶尔钓到更好的' },
+  { n:'桧木鱼竿', cost:1200, win:1.55, up:.12, desc:'窗口更宽，明显更容易钓大物' },
+  { n:'汐见名竿', cost:3000, win:1.90, up:.22, desc:'水獭渔夫的珍藏，几乎不脱钩' }
+];
+/* 鱼获表：按等级解锁更高级的鱼；完美判定会往上跳一级 */
+var FISH_POOL = [
+  { id:'f1', w:40, lv:1 }, { id:'f2', w:28, lv:1 }, { id:'f3', w:16, lv:3 },
+  { id:'f4', w:10, lv:5 }, { id:'f5', w:5,  lv:8 }, { id:'f6', w:2,  lv:12 }
+];
+var FISH_COST = 20;              // 每竿消耗的鱼饵钱
+var FISH_STATE = null;           // 当前这一竿的运行时状态
+
+function rodLevel(){ return Math.min(S.rod || 0, RODS.length - 1); }
+function fishUnlocked(){ return S.level >= 5; }
+
+/* 开一竿：随机一个"上钩时刻"，玩家要在那前后的窗口内点击 */
+function fishCast(){
+  if(!fishUnlocked()) return null;
+  if(S.coins < FISH_COST){ toast('鱼饵不够了，需要 ' + FISH_COST + ' 金币'); return null; }
+  S.coins -= FISH_COST;
+  var rod = RODS[rodLevel()];
+  FISH_STATE = {
+    phase: 'wait',
+    // 1.2-3.2 秒后上钩，玩家不知道具体时刻，只能盯着浮标
+    biteAt: 1200 + Math.random() * 2000,
+    // 判定窗口：基础 600ms，好竿更宽
+    win: Math.round(600 * rod.win),
+    t0: Date.now(),
+    result: null
+  };
+  rPills(); save();
+  return FISH_STATE;
+}
+/* 玩家点击：按偏差判定完美 / 普通 / 脱钩 */
+function fishStrike(now){
+  var st = FISH_STATE;
+  if(!st || st.phase !== 'wait') return null;
+  var t = (now || Date.now()) - st.t0;
+  var diff = t - st.biteAt;
+  var res;
+  if(diff < -180){
+    res = { kind:'early', msg:'提早了，鱼被吓跑了' };          // 抢竿
+  } else if(diff > st.win){
+    res = { kind:'late', msg:'太慢了，鱼跑掉了' };             // 错过窗口
+  } else if(diff >= -180 && diff <= st.win * 0.35){
+    res = { kind:'perfect', msg:'完美！' };                    // 前 35% 窗口
+  } else {
+    res = { kind:'ok', msg:'钓到了' };
+  }
+  st.phase = 'done';
+  st.result = res;
+  if(res.kind === 'perfect' || res.kind === 'ok') res.fish = fishRoll(res.kind === 'perfect');
+  return res;
+}
+/* 抽鱼：按等级过滤鱼池，完美判定额外获得一次升级机会 */
+function fishRoll(perfect){
+  var pool = FISH_POOL.filter(function(f){ return S.level >= f.lv; });
+  if(!pool.length) pool = [FISH_POOL[0]];
+  var total = 0;
+  pool.forEach(function(f){ total += f.w; });
+  var r = Math.random() * total, pick = pool[0];
+  for(var i = 0; i < pool.length; i++){
+    r -= pool[i].w;
+    if(r <= 0){ pick = pool[i]; break; }
+  }
+  var id = pick.id;
+  var rod = RODS[rodLevel()];
+  // 完美判定 + 鱼竿加成：有机会往上跳一级
+  var upChance = (perfect ? 0.35 : 0) + rod.up;
+  if(Math.random() < upChance){
+    var idx = CHAINS.fish.items.indexOf(id);
+    if(idx >= 0 && idx < CHAINS.fish.items.length - 1) id = CHAINS.fish.items[idx + 1];
+  }
+  var shiny = rollShiny();
+  return { id: id, shiny: shiny };
+}
+/* 收竿：把鱼放进棋盘（满了就进储物间） */
+function fishCollect(){
+  var st = FISH_STATE;
+  if(!st || !st.result || !st.result.fish) return null;
+  var f = st.result.fish;
+  var idx = nearestEmpty(24);
+  var placed = 'board';
+  if(idx >= 0){
+    S.board[idx] = mkItem(f.id, f.shiny);
+    rCell(idx); fxPop(idx);
+    discover(f.id);
+    if(f.shiny) discoverShiny(f.id);
+  } else {
+    // 棋盘满了就直接塞储物间（闪光会丢失标记，所以优先放棋盘）
+    var slot = -1;
+    for(var i = 0; i < S.store.length; i++) if(!S.store[i]){ slot = i; break; }
+    if(slot >= 0){
+      S.store[slot] = f.id;
+      discover(f.id);
+      placed = 'store';
+    } else {
+      placed = 'full';
+    }
+  }
+  FISH_STATE = null;
+  S.fishCount = (S.fishCount || 0) + 1;
+  checkQuest('fish');
+  rPills(); save();
+  return { id: f.id, shiny: f.shiny, placed: placed };
+}
+function buyRod(){
+  var next = rodLevel() + 1;
+  if(next >= RODS.length){ toast('已经是最好的鱼竿了'); return false; }
+  var r = RODS[next];
+  if(S.coins < r.cost){ toast('还差 ' + (r.cost - S.coins) + ' 金币'); return false; }
+  S.coins -= r.cost;
+  S.rod = next;
+  toast('换上了' + r.n + '！' + r.desc);
+  sfx('level'); rPills(); save();
+  return true;
+}
 
 /* ---------- 梦境运行时 ---------- */
 var DM = null;   // 当前梦境局面，退出即弃，永不写进主存档
@@ -2877,7 +3156,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '17';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '18';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2990,6 +3269,7 @@ function rOrders(){
   // 功能入口并入同一条：任务在前，工具在后，中间用分隔标记
   html += '<span class="tsep"></span>';
   var tools = [
+    ['fish',  'i-fish',    '钓鱼'],
     ['cook',  'i-pot',     '烹饪台'],
     ['gacha', 'i-capsule', '扭蛋机'],
     ['ware',  'i-box',     '储物间'],
@@ -2998,6 +3278,11 @@ function rOrders(){
     ['dex',   'i-book',    '图鉴'],
     ['dream', 'i-moon',    '梦境']
   ];
+  tools = tools.filter(function(t){
+    if(t[0] === 'dream') return S.level >= 3;
+    if(t[0] === 'fish')  return fishUnlocked();
+    return true;
+  });
   tools.forEach(function(t){
     html += '<button class="tsk fn" data-tool="' + t[0] + '" title="' + t[2] + '">' +
       '<span class="tav">' + svgUse(t[1]) + '</span>' +
@@ -3005,6 +3290,91 @@ function rOrders(){
   });
   wrap.innerHTML = html;
 }
+/* 钓鱼界面：抛竿 -> 等待 -> 浮标下沉 -> 点击判定 -> 收鱼 */
+var fishTimer = null;
+function rFish(){
+  var sub = el('fishSub');
+  if(sub) sub.textContent = '钓上来的鱼可以合成、交订单、下锅。已钓 ' + (S.fishCount || 0) + ' 条';
+  var btn = el('castBtn');
+  if(btn){
+    btn.textContent = '抛竿（' + FISH_COST + ' 金币）';
+    btn.disabled = S.coins < FISH_COST;
+  }
+  rRods();
+}
+function rRods(){
+  var box = el('rodBox'); if(!box) return;
+  var cur = rodLevel(), html = '';
+  RODS.forEach(function(r, i){
+    var own = i <= cur;
+    html += '<div class="rodrow' + (own ? ' own' : '') + '" style="margin-bottom:7px">' +
+      '<div class="rodi"><b>' + r.n + (i === cur ? '（使用中）' : '') + '</b>' +
+      '<span>' + r.desc + '</span></div>' +
+      (own ? '<span class="rcost">已有</span>'
+           : (i === cur + 1
+              ? '<button class="sbtn" id="rodBuy">' + r.cost + ' 金币</button>'
+              : '<span class="rcost">' + r.cost + '</span>')) +
+      '</div>';
+  });
+  box.innerHTML = html;
+  if(el('rodBuy')) el('rodBuy').onclick = function(){ if(buyRod()) rFish(); };
+}
+function fishReset(){
+  if(fishTimer){ clearTimeout(fishTimer); fishTimer = null; }
+  FISH_STATE = null;
+  var pond = el('pond');
+  if(pond && pond.classList){ pond.classList.remove('wait'); pond.classList.remove('bite'); }
+  var hint = el('fishHint');
+  if(hint) hint.textContent = '点「抛竿」开始';
+  var btn = el('castBtn');
+  if(btn){ btn.textContent = '抛竿（' + FISH_COST + ' 金币）'; btn.disabled = S.coins < FISH_COST; }
+}
+function doCast(){
+  var st = fishCast();
+  if(!st) return;
+  var pond = el('pond'), hint = el('fishHint'), btn = el('castBtn'), res = el('fishRes');
+  if(res) res.innerHTML = '';
+  if(pond && pond.classList){ pond.classList.add('wait'); pond.classList.remove('bite'); }
+  if(hint) hint.textContent = '盯着浮标……沉下去就点！';
+  if(btn){ btn.textContent = '提竿！'; btn.disabled = false; }
+  // 到点让浮标沉下去；玩家看到动画才知道该点了
+  fishTimer = setTimeout(function(){
+    if(!FISH_STATE || FISH_STATE.phase !== 'wait') return;
+    if(pond && pond.classList){ pond.classList.remove('wait'); pond.classList.add('bite'); }
+    sfx('tap');
+    // 超时未点算脱钩
+    fishTimer = setTimeout(function(){ if(FISH_STATE && FISH_STATE.phase === 'wait') doStrike(); },
+                           FISH_STATE.win + 200);
+  }, st.biteAt);
+  rPills();
+}
+function doStrike(){
+  var r = fishStrike();
+  if(!r) return;
+  if(fishTimer){ clearTimeout(fishTimer); fishTimer = null; }
+  var pond = el('pond'), hint = el('fishHint'), res = el('fishRes'), btn = el('castBtn');
+  if(pond && pond.classList){ pond.classList.remove('wait'); pond.classList.remove('bite'); }
+  if(hint) hint.textContent = r.msg;
+  if(r.fish){
+    var got = fishCollect();
+    sfx(r.kind === 'perfect' ? 'level' : 'coin');
+    if(res){
+      res.innerHTML = '<span class="fimg">' + itemArt(got.id) + '</span>' +
+        '<span>' + (r.kind === 'perfect' ? '完美！' : '') +
+        (got.shiny ? '闪光' : '') + ITEMS[got.id].n +
+        (got.placed === 'store' ? '（已存入储物间）' : got.placed === 'full' ? '（放不下，溜走了）' : '') +
+        '</span>';
+    }
+    if(got.placed === 'full') toast('棋盘和储物间都满了，鱼溜走了');
+  } else {
+    sfx('err');
+    if(res) res.innerHTML = '<span style="color:var(--sub)">' + r.msg + '</span>';
+    FISH_STATE = null;
+  }
+  if(btn){ btn.textContent = '再抛一竿（' + FISH_COST + ' 金币）'; btn.disabled = S.coins < FISH_COST; }
+  rFish(); rPills();
+}
+
 /* 订单详情：点顶部图标才展开，把需求、奖励、交付按钮都放这里 */
 var taskSlot = -1;
 function openTask(slot){
@@ -3774,9 +4144,11 @@ function bindUi(){
     if(!S.tut){ S.tut = true; save(); }
   };
   if(el('sndBtn')) el('sndBtn').onclick = function(){
-    audioInit();
-    S.mute = !S.mute; save(); rSnd(); bgmSync();
-    toast(S.mute ? '声音已关闭' : '声音已开启');
+    audioInit(); syncVolUI(); el('sndM').classList.add('on');
+  };
+  if(el('muteBtn')) el('muteBtn').onclick = function(){
+    S.mute = !S.mute; save(); rSnd(); bgmSync(); syncVolUI();
+    toast(S.mute ? '已全部静音' : '声音已开启');
   };
   if(el('undoBtn')) el('undoBtn').onclick = undoSell;
   if(el('dlgOv') && el('dlgOv').addEventListener) el('dlgOv').addEventListener('click', dlgTap);
@@ -3796,7 +4168,7 @@ function bindUi(){
     if(tl){
       audioInit();
       var map = {cook:'cookBtn', gacha:'gachaBtn', ware:'wareBtn',
-                 reno:'renoBtn', shop:'shopBtn', dex:'dexBtn', dream:'dreamBtn'};
+                 reno:'renoBtn', shop:'shopBtn', dex:'dexBtn', dream:'dreamBtn', fish:'fishBtn'};
       var target = el(map[tl.getAttribute('data-tool')]);
       if(target && target.onclick) target.onclick();
       return;
@@ -3851,34 +4223,45 @@ function bindUi(){
     rDreamList(); el('dreamM').classList.add('on');
   };
   bindDream();
-  // 三档音量滑块：拖动即时生效并存档，背景音可实时听到变化
+  // 三档音量滑块：声音弹窗与设置面板各一套，共用同一份数据
   ['sfx','bgm','voice'].forEach(function(kind){
-    var id = 'vol' + kind.charAt(0).toUpperCase() + kind.slice(1);
-    var sl = el(id), num = el(id + 'N');
-    if(!sl) return;
-    sl.value = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
-    if(num) num.textContent = sl.value;
-    sl.oninput = function(){
-      if(!S.vol) S.vol = { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice };
-      S.vol[kind] = +sl.value;
-      if(num) num.textContent = sl.value;
-      if(kind === 'bgm') bgmSync();
-      if(kind === 'sfx') sfx('tap');          // 拖动时立刻听到当前音量
-      if(kind === 'voice') playVoice('intro_2');
-      save();
-    };
+    var Cap = kind.charAt(0).toUpperCase() + kind.slice(1);
+    ['vol' + Cap, 'm' + Cap].forEach(function(id){
+      var sl = el(id), num = el(id + 'N');
+      if(!sl) return;
+      sl.oninput = function(){
+        if(!S.vol) S.vol = { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice };
+        S.vol[kind] = +sl.value;
+        if(S.mute && +sl.value > 0){ S.mute = false; rSnd(); }   // 拖动即视为想听
+        if(num) num.textContent = sl.value;
+        syncVolUI();
+        if(kind === 'bgm') bgmSync();
+        if(kind === 'sfx') sfx('tap');          // 拖动时立刻听到当前音量
+        if(kind === 'voice') playVoice('intro_2');
+        save();
+      };
+    });
   });
+  syncVolUI();
+  if(el('fishBtn')) el('fishBtn').onclick = function(){
+    audioInit();
+    if(!fishUnlocked()){ toast('等级 5 之后，水獭渔夫会带你去汐见川'); return; }
+    fishReset(); rFish(); el('fishM').classList.add('on');
+  };
+  if(el('castBtn')) el('castBtn').onclick = function(){
+    audioInit();
+    if(FISH_STATE && FISH_STATE.phase === 'wait') doStrike();   // 同一个按钮兼作提竿
+    else doCast();
+  };
+  // 点水面也能提竿，手机上更好按
+  if(el('pond')) el('pond').onclick = function(){
+    if(FISH_STATE && FISH_STATE.phase === 'wait'){ audioInit(); doStrike(); }
+  };
   if(el('verTag')) el('verTag').textContent = GAME_VER;
   if(el('setSub')) el('setSub').textContent = '当前版本 ' + GAME_VER;
   if(el('setBtn')) el('setBtn').onclick = function(){
     audioInit();
-    ['sfx','bgm','voice'].forEach(function(kind){
-      var id = 'vol' + kind.charAt(0).toUpperCase() + kind.slice(1);
-      var sl = el(id), num = el(id + 'N');
-      if(!sl) return;
-      sl.value = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
-      if(num) num.textContent = sl.value;
-    });
+    syncVolUI(); rChangelog();
     if(el('saveBox')) el('saveBox').value = '';
     if(el('copyBtn')) el('copyBtn').style.display = 'none';
     el('setM').classList.add('on');
@@ -3973,10 +4356,44 @@ function bindUi(){
     window.addEventListener('pagehide', save);
   }
 }
+/* 把音量数值同步到两处滑块（声音弹窗、设置面板） */
+/* 更新记录：当前版本默认展开，其余折叠 */
+function rChangelog(){
+  var box = el('logBox'); if(!box) return;
+  var html = '';
+  CHANGELOG.forEach(function(c, i){
+    var open = i === 0;
+    html += '<div class="logitem' + (open ? ' on' : '') + '" data-log="' + i + '">' +
+      '<div class="loghd"><b>' + c.v + '</b><span>' + c.t + '</span><i>' + c.d + '</i></div>' +
+      '<ul class="logli">' + c.li.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+      '</div>';
+  });
+  box.innerHTML = html;
+  var rows = box.querySelectorAll ? box.querySelectorAll('.loghd') : [];
+  for(var i = 0; i < rows.length; i++){
+    rows[i].onclick = function(){
+      var it = this.parentNode;
+      if(it && it.classList) it.classList.toggle('on');
+    };
+  }
+}
+function syncVolUI(){
+  ['sfx','bgm','voice'].forEach(function(kind){
+    var Cap = kind.charAt(0).toUpperCase() + kind.slice(1);
+    var v = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
+    ['vol' + Cap, 'm' + Cap].forEach(function(id){
+      var sl = el(id), num = el(id + 'N');
+      if(sl) sl.value = v;
+      if(num) num.textContent = S.mute ? '静音' : v;
+    });
+  });
+  var mb = el('muteBtn');
+  if(mb) mb.textContent = S.mute ? '取消静音' : '全部静音';
+}
 function rSnd(){
   var u = el('sndIc') ? el('sndIc').querySelector && el('sndIc').querySelector('use') : null;
   if(u) u.setAttribute('href', S.mute ? '#i-sndoff' : '#i-snd');
-  if(el('sndTx')) el('sndTx').textContent = S.mute ? '静音' : '音效';
+  if(el('sndTx')) el('sndTx').textContent = S.mute ? '静音' : '声音';
 }
 
 /* ================= 心跳 ================= */
@@ -4020,6 +4437,10 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  CHANGELOG: CHANGELOG, syncVolUI: syncVolUI,
+  fishCast: fishCast, fishStrike: fishStrike, fishCollect: fishCollect,
+  fishRoll: fishRoll, buyRod: buyRod, rodLevel: rodLevel, fishUnlocked: fishUnlocked,
+  RODS: RODS, FISH_POOL: FISH_POOL, FISH_COST: FISH_COST, FS: function(){ return FISH_STATE; },
   volOf: volOf, VOL_DEF: VOL_DEF, playVoice: playVoice, stopVoice: stopVoice,
   bgmPlay: bgmPlay, bgmStop: bgmStop, bgmSync: bgmSync,
   DREAMS: DREAMS, dreamStart: dreamStart, dreamMove: dreamMove, dreamWin: dreamWin,
