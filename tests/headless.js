@@ -466,6 +466,85 @@ ok(gE.questCur().n === 25, '第四轮需求随轮次增长');
 ok(gE.questCur().coins <= 900, '无尽奖励有上限，不会通胀');
 gE.stopTick();
 
+// ---------- V2.0 梦境解谜 ----------
+const gD = makeEnv(new Map());
+const SD = gD.S();
+ok(gD.DREAMS.length === 30, '梦境共 30 关');
+ok(gD.DREAMS.every(function(l){ return l.opt > 0 && l.mv >= l.opt; }), '每关都记录了最优步数且上限不低于它');
+
+// 开局
+ok(gD.dreamStart(1) === true, '可以开始第 1 关');
+const dm = gD.DM();
+ok(dm.left === gD.DREAMS[0].mv, '开局步数等于关卡上限');
+ok(dm.cells.filter(function(c){ return c; }).length === gD.DREAMS[0].init.length, '初始盘面按数据铺好');
+ok(gD.dreamWin() === false, '开局未达成目标');
+
+// 合成推进
+const before = dm.left;
+const a = gD.DREAMS[0].init[0][0], b = gD.DREAMS[0].init[1][0];
+ok(gD.dreamMove(a, b) === 'merge', '两个同级可以合成');
+ok(gD.DM().left === before - 1, '合成消耗一步');
+ok(gD.DM().cells[a] === null, '源格清空');
+ok(gD.DM().cells[b].id === 'veg2', '目标格升级为下一级');
+
+// 不同物品不能合
+gD.dreamStart(2);
+const d2 = gD.DM();
+let mixA = -1, mixB = -1;
+for (let i = 0; i < d2.cells.length; i++) {
+  if (!d2.cells[i]) continue;
+  if (mixA < 0) mixA = i;
+  else if (d2.cells[i].id !== d2.cells[mixA].id) { mixB = i; break; }
+}
+if (mixB >= 0) ok(gD.dreamMove(mixA, mixB) === 'bounce', '不同物品不能合成');
+
+// 空格移动不消耗步数
+gD.dreamStart(1);
+const d3 = gD.DM();
+const dmSrc = gD.DREAMS[0].init[0][0];
+let empty = -1;
+for (let i = 0; i < d3.cells.length; i++) if (!d3.cells[i]) { empty = i; break; }
+const mvBefore = d3.left;
+ok(gD.dreamMove(dmSrc, empty) === 'move', '可以移动到空格');
+ok(gD.DM().left === mvBefore, '纯移动不消耗步数');
+
+// 通关结算与星级
+gD.dreamStart(1);
+const lv1 = gD.DREAMS[0];
+const pos = lv1.init.map(function(p){ return p[0]; });
+gD.dreamMove(pos[0], pos[1]);
+gD.dreamMove(pos[2], pos[3]);
+ok(gD.dreamWin() === true, '按最优解可以通关第 1 关');
+ok(gD.dreamStars() === 3, '用最优步数通关得 3 星');
+const fin = gD.dreamFinish();
+ok(fin && fin.stars === 3, '结算返回星级');
+ok(SD.shells === 6, '首通 3 星给 6 枚贝币');
+ok(SD.dream[1] === 3, '成绩记入存档');
+
+// 重复通关不重复发奖
+gD.dreamStart(1);
+gD.dreamMove(pos[0], pos[1]);
+gD.dreamMove(pos[2], pos[3]);
+const again = gD.dreamFinish();
+ok(again.gain === 0, '同星级重刷不再发贝币');
+ok(SD.shells === 6, '贝币总数不变');
+
+// 关卡解锁
+ok(gD.dreamUnlocked() >= 3, '初始至少开放 3 关');
+ok(gD.dreamTotalStars() === 3, '星星总数统计正确');
+gD.stopTick();
+
+// 梦境成绩可存档
+const dStore = new Map();
+const gD2 = makeEnv(dStore);
+gD2.S().dream = { 1: 3, 2: 2 };
+gD2.S().shells = 17;
+gD2.save();
+const gD3 = makeEnv(dStore);
+ok(gD3.S().dream[1] === 3 && gD3.S().shells === 17, '梦境星数与贝币可存档恢复');
+ok(gD3.dreamTotalStars() === 5, '读档后星星合计正确');
+gD2.stopTick(); gD3.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
