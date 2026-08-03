@@ -9,7 +9,11 @@
     font-family:"PingFang SC","Hiragino Sans GB",system-ui,sans-serif; color:#6B4F3A;}
   .wrap{max-width:520px; margin:0 auto;}
   h1{font-size:20px; letter-spacing:2px; margin:0 0 4px;}
-  .sub{font-size:12.5px; color:#5C6B45; margin-bottom:18px;}
+  .sub{font-size:12.5px; color:#5C6B45; margin-bottom:16px; line-height:1.6;}
+  .grp{font-size:13px; font-weight:900; color:#4F6B32; margin:18px 0 8px;
+    display:flex; align-items:center; gap:7px;}
+  .grp i{display:block; width:9px; height:9px; border-radius:50%; background:#F0913C;}
+  .grp.calm i{background:#7ECBB4;}
   .card{background:linear-gradient(180deg,#FFFDF6,#F7ECD5); border:2.5px solid #E8D6B2;
     border-radius:16px; padding:14px 16px; margin-bottom:12px; box-shadow:0 4px 10px rgba(90,120,60,.2);}
   .card h2{font-size:15px; margin:0 0 2px;}
@@ -17,43 +21,70 @@
   audio{width:100%; height:44px;}
   .tag{display:inline-block; font-size:10.5px; font-weight:900; color:#FFF6E8;
     background:#F0913C; border-radius:999px; padding:2px 10px; margin-bottom:6px;}
-  .tag.music{background:#7FB84F;}
-  .note{background:rgba(255,253,246,.75); border:2px dashed #E8D6B2; border-radius:14px;
-    padding:12px 14px; font-size:12px; line-height:1.7; color:#7A5A36;}
+  .tag.calm{background:#7ECBB4;}
+  .tag.voice{background:#B08BD4;}
+  .note{background:rgba(255,253,246,.8); border:2px dashed #E8D6B2; border-radius:14px;
+    padding:13px 15px; font-size:12px; line-height:1.75; color:#7A5A36; margin-top:18px;}
   .note b{color:#D4762A;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>水豚温泉町 音频试听</h1>
-  <div class="sub">配音已定（甜美精品音）· 现在只需选背景音乐：听完告诉我「音乐 1」或「音乐 2」</div>
+  <div class="sub">听完告诉我编号即可。音量在游戏「设置」里可分三档单独调，背景音默认已压到 30。</div>
+
+  <div class="grp"><i></i>欢快组（新做的）</div>
 
   <div class="card">
-    <span class="tag">配音（已选定）</span>
-    <h2>甜美精品音</h2>
-    <p>台词：呼……走了好远的路，这里就是外婆信里写的那间店吧。</p>
-    <audio controls preload="none" src="audio/voice/intro_2.mp3"></audio>
+    <span class="tag">音乐 1</span>
+    <h2>阳光小调（2 分 08 秒）</h2>
+    <p>尤克里里 + 马林巴 + 拨弦，112 BPM。明快但不吵，最适合长时间挂着</p>
+    <audio controls preload="none" src="audio/bgm_sunny.mp3"></audio>
   </div>
 
-
+  <div class="card">
+    <span class="tag">音乐 2</span>
+    <h2>集市漫步（2 分 23 秒）</h2>
+    <p>马林巴 + 颤音琴 + 单簧管，120 BPM。带点摇摆感，最活泼的一首</p>
+    <audio controls preload="none" src="audio/bgm_market.mp3"></audio>
+  </div>
 
   <div class="card">
-    <span class="tag music">音乐 1（新）</span>
+    <span class="tag">音乐 3</span>
+    <h2>轻快尤克里里（54 秒）</h2>
+    <p>尤克里里 + 钟琴，108 BPM。最短最跳脱，循环频率高，可能会腻</p>
+    <audio controls preload="none" src="audio/bgm_uke.mp3"></audio>
+  </div>
+
+  <div class="grp calm"><i></i>安静组（上一轮的，留着对比）</div>
+
+  <div class="card">
+    <span class="tag calm">音乐 4</span>
     <h2>轻柔钢琴（2 分 57 秒）</h2>
-    <p>钢琴 + 柔和弦乐，70 BPM。已排除沙锤、风铃等全部碎响打击乐</p>
+    <p>钢琴 + 弦乐，70 BPM。最安静</p>
     <audio controls preload="none" src="audio/bgm_piano.mp3"></audio>
   </div>
 
   <div class="card">
-    <span class="tag music">音乐 2（新）</span>
+    <span class="tag calm">音乐 5</span>
     <h2>铃音木琴（1 分 48 秒）</h2>
-    <p>颤音琴 + 钟琴 + 尼龙吉他，84 BPM。更轻快一点，同样无碎响</p>
+    <p>颤音琴 + 钟琴 + 尼龙吉他，84 BPM</p>
     <audio controls preload="none" src="audio/bgm_bell.mp3"></audio>
   </div>
 
+  <div class="grp calm"><i style="background:#B08BD4"></i>配音（已定，供参考）</div>
+
+  <div class="card">
+    <span class="tag voice">甜美精品音</span>
+    <h2>水豚阿汤</h2>
+    <p>台词：呼……走了好远的路，这里就是外婆信里写的那间店吧。</p>
+    <audio controls preload="none" src="audio/voice/intro_2.mp3"></audio>
+  </div>
+
   <div class="note">
-    上次三首里的"沙沙声"是沙锤/风铃类碎响打击乐，这两首生成时已全部排除。<br>
-    <b>选 1 或 2</b>，定了我就接进游戏做循环播放，并把剩余剧情配音补全。
+    告诉我要哪首（<b>音乐 1 到 5</b>），我就把它接进游戏做循环播放。<br><br>
+    关于「太吵」：已经做了<b>音效 / 背景音 / 配音三档独立音量</b>，在游戏底部「更多 → 设置」里拖滑块即时生效。
+    背景音默认只有 30，不会盖住其他声音，嫌吵还能直接拉到 0 只留音效。
   </div>
 </div>
 </body>

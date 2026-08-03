@@ -449,6 +449,22 @@ body{
 
 /* ---------- 设置与存档 ---------- */
 #title span b{font-style:normal; font-weight:900; opacity:.85; margin-left:2px;}
+.vols{display:flex; flex-direction:column; gap:9px; margin:4px 0 14px;}
+.volrow{display:flex; align-items:center; gap:9px;}
+.volrow > span{width:44px; flex:none; font-size:12px; font-weight:900; color:var(--ink);}
+.volrow > b{width:32px; flex:none; text-align:right; font-size:11px; font-weight:900; color:var(--sub);}
+.volrow input[type=range]{flex:1; min-width:0; height:22px; -webkit-appearance:none; appearance:none;
+  background:none; cursor:pointer;}
+.volrow input[type=range]::-webkit-slider-runnable-track{height:7px; border-radius:999px;
+  background:rgba(160,130,90,.28);}
+.volrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none;
+  width:19px; height:19px; margin-top:-6px; border-radius:50%;
+  background:linear-gradient(180deg,#FFD98A,#F0913C); border:2px solid #B0763A;
+  box-shadow:0 2px 0 rgba(120,86,50,.35);}
+.volrow input[type=range]::-moz-range-track{height:7px; border-radius:999px; background:rgba(160,130,90,.28);}
+.volrow input[type=range]::-moz-range-thumb{width:19px; height:19px; border-radius:50%;
+  background:linear-gradient(180deg,#FFD98A,#F0913C); border:2px solid #B0763A;}
+
 .sethint{margin:2px 0 8px; font-size:11px; line-height:1.6; color:var(--sub);}
 .setrow{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;}
 #saveBox{width:100%; height:62px; resize:none; border-radius:12px; border:2px solid var(--pline);
@@ -1229,6 +1245,16 @@ body{
   <button class="pclose" data-close="setM"><svg><use href="#i-close"/></svg></button>
   <h2>设置</h2><div class="psub" id="setSub"></div>
 
+  <div class="dxh"><i style="background:#F0913C"></i>音量</div>
+  <div class="vols">
+    <label class="volrow"><span>音效</span>
+      <input type="range" min="0" max="100" step="5" id="volSfx"><b id="volSfxN">80</b></label>
+    <label class="volrow"><span>背景音</span>
+      <input type="range" min="0" max="100" step="5" id="volBgm"><b id="volBgmN">30</b></label>
+    <label class="volrow"><span>配音</span>
+      <input type="range" min="0" max="100" step="5" id="volVoice"><b id="volVoiceN">90</b></label>
+  </div>
+
   <div class="dxh"><i style="background:#7ECBB4"></i>存档备份</div>
   <p class="sethint">存档只存在这台设备的浏览器里。换手机或清理浏览器数据会丢失进度，
     可以导出一串存档码自己保管（发到微信收藏或备忘录都行），在新设备粘贴回来即可继续。</p>
@@ -1535,7 +1561,8 @@ function initNew(){
     board: new Array(COLS*ROWS).fill(null),
     gens: {},
     orders:[null,null,null], sold:null,
-    story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0, dream:{}, shells:0,
+    story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
+    vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice }, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1562,7 +1589,7 @@ function save(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       v:1, coins:S.coins, xp:S.xp, level:S.level, mute:S.mute, tut:S.tut, dex:S.dex,
       cells:cells, gens:S.gens, orders:S.orders, t:now(),
-      story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless,
+      story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless, vol:S.vol,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -1586,6 +1613,7 @@ function load(){
     thx: Array.isArray(d.thx) ? d.thx : [],
     fav: (d.fav && typeof d.fav === 'object') ? d.fav : {},   // V1.7 老档默认空好感
     endless: d.endless || 0,
+    vol: (d.vol && typeof d.vol === 'object') ? d.vol : { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -3553,18 +3581,27 @@ var PENT = [523.25, 587.33, 659.25, 783.99, 880];
    循环播放，音量压得低（只做底噪不抢戏）；跟随音效开关一起静音。
    浏览器不允许自动播放，所以等玩家第一次触碰界面再启动。 */
 var bgmEl = null, bgmReady = false;
+/* 三档独立音量（0-100）。背景音默认压到 30，免得盖住音效与配音 */
+var VOL_DEF = { sfx: 80, bgm: 30, voice: 90 };
+function volOf(kind){
+  if(S.mute) return 0;
+  var v = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
+  return Math.max(0, Math.min(100, v)) / 100;
+}
 function bgmInit(){
   if(bgmEl) return;
   try{
     bgmEl = new Audio('audio/bgm.mp3?v=' + ART_VER);
     bgmEl.loop = true;
-    bgmEl.volume = 0.22;   // 背景音，压低
+    bgmEl.volume = volOf('bgm');
     bgmEl.preload = 'none';
   }catch(e){ bgmEl = null; }
 }
 function bgmPlay(){
   bgmInit();
   if(!bgmEl || S.mute) return;
+  bgmEl.volume = volOf('bgm');
+  if(volOf('bgm') <= 0){ bgmStop(); return; }
   try{
     var pr = bgmEl.play();
     if(pr && pr.catch) pr.catch(function(){});   // 未交互时会被拒绝，忽略即可
@@ -3575,7 +3612,25 @@ function bgmStop(){
   if(!bgmEl) return;
   try{ bgmEl.pause(); }catch(e){}
 }
-function bgmSync(){ if(S.mute) bgmStop(); else bgmPlay(); }
+/* 剧情配音：按需加载，播不出来就静默跳过（不影响文字剧情） */
+var voiceEl = null;
+function playVoice(key){
+  if(S.mute || volOf('voice') <= 0 || !key) return;
+  try{
+    if(!voiceEl){ voiceEl = new Audio(); voiceEl.preload = 'none'; }
+    voiceEl.pause();
+    voiceEl.volume = volOf('voice');
+    voiceEl.src = 'audio/voice/' + key + '.mp3?v=' + ART_VER;
+    var pr = voiceEl.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  }catch(e){}
+}
+function stopVoice(){ if(voiceEl){ try{ voiceEl.pause(); }catch(e){} } }
+
+function bgmSync(){
+  if(bgmEl) bgmEl.volume = volOf('bgm');
+  if(S.mute || volOf('bgm') <= 0) bgmStop(); else bgmPlay();
+}
 
 function audioInit(){
   bgmPlay();          // 借第一次交互启动背景音乐
@@ -3583,21 +3638,22 @@ function audioInit(){
   try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
 }
 function tone(f, dur, vol, type, delay){
-  if(S.mute || !actx) return;
+  if(S.mute || !actx || volOf('sfx') <= 0) return;
   try{
     var t0 = actx.currentTime + (delay||0);
     var o = actx.createOscillator(), g = actx.createGain();
     o.type = type || 'sine';
     o.frequency.setValueAtTime(f, t0);
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015);
+    var v = Math.max(0.0002, vol * volOf('sfx'));
+    g.gain.exponentialRampToValueAtTime(v, t0 + 0.015);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     o.connect(g); g.connect(actx.destination);
     o.start(t0); o.stop(t0 + dur + 0.05);
   }catch(e){}
 }
 function sfx(kind, tier){
-  if(S.mute || !actx) return;
+  if(S.mute || !actx || volOf('sfx') <= 0) return;
   if(kind==='tap'){ tone(392, .09, .08, 'triangle'); }
   else if(kind==='merge'){
     var f = PENT[(tier||1) % PENT.length];
@@ -3793,10 +3849,34 @@ function bindUi(){
     rDreamList(); el('dreamM').classList.add('on');
   };
   bindDream();
+  // 三档音量滑块：拖动即时生效并存档，背景音可实时听到变化
+  ['sfx','bgm','voice'].forEach(function(kind){
+    var id = 'vol' + kind.charAt(0).toUpperCase() + kind.slice(1);
+    var sl = el(id), num = el(id + 'N');
+    if(!sl) return;
+    sl.value = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
+    if(num) num.textContent = sl.value;
+    sl.oninput = function(){
+      if(!S.vol) S.vol = { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice };
+      S.vol[kind] = +sl.value;
+      if(num) num.textContent = sl.value;
+      if(kind === 'bgm') bgmSync();
+      if(kind === 'sfx') sfx('tap');          // 拖动时立刻听到当前音量
+      if(kind === 'voice') playVoice('intro_2');
+      save();
+    };
+  });
   if(el('verTag')) el('verTag').textContent = GAME_VER;
   if(el('setSub')) el('setSub').textContent = '当前版本 ' + GAME_VER;
   if(el('setBtn')) el('setBtn').onclick = function(){
     audioInit();
+    ['sfx','bgm','voice'].forEach(function(kind){
+      var id = 'vol' + kind.charAt(0).toUpperCase() + kind.slice(1);
+      var sl = el(id), num = el(id + 'N');
+      if(!sl) return;
+      sl.value = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
+      if(num) num.textContent = sl.value;
+    });
     if(el('saveBox')) el('saveBox').value = '';
     if(el('copyBtn')) el('copyBtn').style.display = 'none';
     el('setM').classList.add('on');
