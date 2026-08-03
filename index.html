@@ -1410,7 +1410,7 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.0';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V2.1';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -1432,12 +1432,11 @@ var CUST_LINES = {
     thanks:'唔……好久没吃到这么实在的了。', more:['年纪大了，就爱念旧。','你这店啊，越来越像样了。','慢工出细活，别学年轻人急躁。'] }
 };
 var STORY_INTRO = [
-  {c:null, t:'暮色落进山谷，温泉町的灯笼一盏一盏亮了起来。'},
-  {c:null, t:'巷子最深处，有一间蒙尘多年的小食堂。门口的木牌，字迹早已模糊。'},
-  {c:'capy', t:'呼……走了好远的路，这里就是外婆信里写的那间店吧。'},
-  {c:'capy', t:'灶台还能用，锅也都在，就是到处都是灰呀。'},
-  {c:'capy', t:'先把菜篮子和面粉袋摆出来。从今天起，这里就是我的食堂啦！'}
-];
+  {c:null, t:'暮色落进山谷，温泉町的灯笼一盏一盏亮了起来。', v:'intro_0'},
+  {c:null, t:'巷子最深处，有一间蒙尘多年的小食堂。门口的木牌，字迹早已模糊。', v:'intro_1'},
+  {c:'capy', t:'呼……走了好远的路，这里就是外婆信里写的那间店吧。', v:'intro_2'},
+  {c:'capy', t:'灶台还能用，锅也都在，就是到处都是灰呀。', v:'intro_3'},
+  {c:'capy', t:'先把菜篮子和面粉袋摆出来。从今天起，这里就是我的食堂啦！', v:'intro_4'}];
 var STORY_MERGE = [
   {c:'capy', t:'哇，两份一样的食材合在一起，变成更好的了！'},
   {c:'capy', t:'外婆的笔记写的是真的……照这个法子，一定能把店重新开起来。'}
@@ -2693,6 +2692,8 @@ function showStory(lines, done){
 }
 function dlgLine(){
   var ln = dlgQ[dlgIdx];
+  stopVoice();
+  if(ln.v) playVoice(ln.v);   // 这一句有配音就念出来
   var ava = el('dlgAva'), name = el('dlgName'), use = el('dlgAvaUse');
   if(ln.c){
     if(ava && ava.classList) ava.classList.remove('hide');
@@ -2731,6 +2732,7 @@ function dlgTap(){
   if(dlgIdx < dlgQ.length){ dlgLine(); sfx('tap'); return; }
   var o = el('dlgOv'); if(o && o.classList) o.classList.remove('on');
   dlgQ = [];
+  stopVoice();          // 剧情结束别让语音继续念
   var d = dlgDone; dlgDone = null;
   if(d) d();
 }
@@ -2875,7 +2877,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '15';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '17';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4018,6 +4020,8 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  volOf: volOf, VOL_DEF: VOL_DEF, playVoice: playVoice, stopVoice: stopVoice,
+  bgmPlay: bgmPlay, bgmStop: bgmStop, bgmSync: bgmSync,
   DREAMS: DREAMS, dreamStart: dreamStart, dreamMove: dreamMove, dreamWin: dreamWin,
   dreamStars: dreamStars, dreamFinish: dreamFinish, dreamUnlocked: dreamUnlocked,
   dreamTotalStars: dreamTotalStars, dreamCount: dreamCount, DM: function(){ return DM; },

@@ -545,6 +545,31 @@ ok(gD3.S().dream[1] === 3 && gD3.S().shells === 17, '梦境星数与贝币可存
 ok(gD3.dreamTotalStars() === 5, '读档后星星合计正确');
 gD2.stopTick(); gD3.stopTick();
 
+// ---------- V1.6 三档音量 ----------
+const gV = makeEnv(new Map());
+const SV = gV.S();
+ok(SV.vol.sfx === 80 && SV.vol.bgm === 30 && SV.vol.voice === 90, '三档音量有默认值，背景音默认压低到 30');
+ok(gV.volOf('bgm') === 0.3, '音量换算为 0-1 系数');
+SV.vol.bgm = 0;
+ok(gV.volOf('bgm') === 0, '背景音可拉到 0');
+SV.vol.bgm = 200;
+ok(gV.volOf('bgm') === 1, '超范围的值会被夹到上限');
+SV.vol.bgm = 30;
+SV.mute = true;
+ok(gV.volOf('sfx') === 0 && gV.volOf('bgm') === 0 && gV.volOf('voice') === 0, '总静音时三档全部为 0');
+SV.mute = false;
+gV.stopTick();
+
+// 音量设置可存档
+const volStore = new Map();
+const gV1 = makeEnv(volStore);
+gV1.S().vol = { sfx: 55, bgm: 10, voice: 100 };
+gV1.save();
+const gV2 = makeEnv(volStore);
+ok(gV2.S().vol.bgm === 10 && gV2.S().vol.sfx === 55, '音量设置可存档恢复');
+ok(gV2.volOf('voice') === 1, '读档后系数换算正确');
+gV1.stopTick(); gV2.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);

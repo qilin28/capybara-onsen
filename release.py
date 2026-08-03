@@ -33,6 +33,9 @@ def rebuild_sw(version):
     assets = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png']
     for d in ('art/items', 'art/chars', 'art/cards', 'art/scene'):
         assets += ['./' + f for f in sorted(glob.glob(d + '/*.png'))]
+    # 音频也要能离线播放；配音按需加载，但缓存了断网时同样有声
+    for d in ('audio', 'audio/voice'):
+        assets += ['./' + f for f in sorted(glob.glob(d + '/*.mp3'))]
     lines = ',\n'.join("  '%s'" % a for a in assets)
     sw = """/* 离线缓存：装好后断网也能玩。此文件由 release.py 自动生成，勿手改。
    CACHE 版本号与 index.html 的 ART_VER 一起 +1，旧缓存在 activate 阶段清掉。 */
@@ -112,6 +115,9 @@ def build_zip(version):
             for f in sorted(glob.glob(d + '/*')):
                 if f.endswith(keep_ext):
                     z.write(f, f)
+        for d in ('audio', 'audio/voice'):
+            for f in sorted(glob.glob(d + '/*.mp3')):
+                z.write(f, f)
         n = len(z.namelist())
     return out, n, os.path.getsize(out)
 
@@ -124,4 +130,4 @@ if __name__ == '__main__':
     print('离线缓存清单 %d 项' % cached)
     print('打包完成：%s（%d 文件，%.1f MB）' % (out, files, size / 1048576))
     print()
-    print('接下来：把这个 zip 重新拖到 Netlify 部署（同一站点的 Deploys 页面，链接不变）')
+    print('接下来：git add -A && git commit && git push，GitHub Pages 会自动重新发布')

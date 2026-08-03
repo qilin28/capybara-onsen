@@ -1,6 +1,6 @@
 /* 离线缓存：装好后断网也能玩。此文件由 release.py 自动生成，勿手改。
    CACHE 版本号与 index.html 的 ART_VER 一起 +1，旧缓存在 activate 阶段清掉。 */
-const CACHE = 'wonsen-v15';
+const CACHE = 'wonsen-v17';
 const ASSETS = [
   './',
   './index.html',
@@ -61,7 +61,13 @@ const ASSETS = [
   './art/cards/moon.png',
   './art/cards/pin.png',
   './art/cards/turtle.png',
-  './art/scene/town.png'
+  './art/scene/town.png',
+  './audio/bgm.mp3',
+  './audio/voice/intro_0.mp3',
+  './audio/voice/intro_1.mp3',
+  './audio/voice/intro_2.mp3',
+  './audio/voice/intro_3.mp3',
+  './audio/voice/intro_4.mp3'
 ];
 
 self.addEventListener('install', function (e) {
