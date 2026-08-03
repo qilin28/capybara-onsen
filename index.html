@@ -388,6 +388,25 @@ body{
   box-shadow:0 0 5px rgba(242,193,78,.9);}
 @keyframes shGlow{0%,100%{opacity:.6;}50%{opacity:1;}}
 
+/* ---------- 客人好感 ---------- */
+.favbar{display:flex; align-items:center; gap:7px; margin:6px 0 10px;
+  background:rgba(120,86,50,.08); border-radius:10px; padding:5px 9px;}
+.favt{font-size:11.5px; font-weight:900; color:#B0763A; white-space:nowrap;}
+.favw{flex:1; height:7px; background:rgba(160,130,90,.22); border-radius:999px; overflow:hidden;}
+.favw i{display:block; height:100%; border-radius:999px;
+  background:linear-gradient(90deg,#F5B942,#F0913C);}
+.favn{font-size:10.5px; font-weight:900; color:var(--sub); white-space:nowrap;}
+.favlist{display:flex; flex-direction:column; gap:7px;}
+.favrow{display:flex; align-items:center; gap:9px; background:rgba(120,86,50,.06);
+  border:2px solid var(--pline); border-radius:12px; padding:7px 9px;}
+.favrow .fava{width:38px; height:38px; flex:none; border-radius:50%; overflow:hidden;
+  background:var(--paper); border:2px solid var(--pline);}
+.favrow .fava .art{width:100%; height:100%;}
+.favrow .favi{flex:1; min-width:0;}
+.favrow .favi b{display:block; font-size:12.5px; font-weight:900;}
+.favrow .favi span{display:block; font-size:10.5px; color:var(--sub);}
+.favrow.lock{opacity:.45;}
+
 /* ---------- 设置与存档 ---------- */
 #title span b{font-style:normal; font-weight:900; opacity:.85; margin-left:2px;}
 .sethint{margin:2px 0 8px; font-size:11px; line-height:1.6; color:var(--sub);}
@@ -1142,6 +1161,8 @@ body{
   <button class="pclose" data-close="dexM"><svg><use href="#i-close"/></svg></button>
   <h2>汤屋食堂图鉴</h2><div class="psub" id="dexSub"></div>
   <div id="dexBody"></div>
+  <div class="dxh" style="margin-top:14px"><i style="background:#F0913C"></i>街坊好感</div>
+  <div class="favlist" id="favBody"></div>
 </div></div>
 
 <!-- 装修 -->
@@ -1186,6 +1207,7 @@ body{
 <div id="taskM" class="modal"><div class="panel">
   <button class="pclose" data-close="taskM"><svg><use href="#i-close"/></svg></button>
   <h2 id="taskName">客人的订单</h2><div class="psub" id="taskSub"></div>
+  <div id="taskFav"></div>
   <div id="taskNeeds"></div>
   <div id="taskBtns" class="setrow" style="margin-top:12px"></div>
 </div></div>
@@ -1288,11 +1310,14 @@ var GENS = {
 };
 var CUSTS = {
   rabbit:{ n:'兔子小姐', sym:'c-rabbit' }, panda:{ n:'熊猫大叔', sym:'c-panda' },
-  shiba:{ n:'柴犬快递员', sym:'c-shiba' }, hedge:{ n:'刺猬奶奶', sym:'c-hedge' }
+  shiba:{ n:'柴犬快递员', sym:'c-shiba' }, hedge:{ n:'刺猬奶奶', sym:'c-hedge' },
+  // V1.7 新街坊：按等级陆续上门，lv 是他们第一次出现的等级
+  tanuki:{ n:'狸猫掌柜', sym:'c-tanuki', lv:4 }, otter:{ n:'水獭渔夫', sym:'c-otter', lv:7 },
+  egret:{ n:'白鹭小姐', sym:'c-egret', lv:11 }, hamster:{ n:'仓鼠爷爷', sym:'c-hamster', lv:15 }
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V1.5';    // 显示在标题下方与设置面板；每次发版更新
+var GAME_VER = 'V1.7';    // 显示在标题下方与设置面板；每次发版更新
 
 /* ================= 剧情数据 ================= */
 var CUST_LINES = {
@@ -1303,7 +1328,15 @@ var CUST_LINES = {
   shiba: { intro:['您的包裹——啊不对，今天是我自己来的！','跑了一整天，饿扁了。吃得快的话，我给你讲镇上的新鲜事！'],
     thanks:'呼……满血复活！这一趟跑得值。', more:['温泉街那边又开了家新铺子。','刺猬奶奶总念叨你外婆呢。','吃饱了，继续送件去咯！'] },
   hedge: { intro:['灯又亮起来了，真好啊。','奶奶我牙口不好，想吃点软软的、热热的。'],
-    thanks:'好孩子……和她一样，手是暖的。', more:['慢慢做，奶奶不赶时间。','这条巷子，热闹起来才像话。','改天给你讲讲外婆年轻时的事。'] }
+    thanks:'好孩子……和她一样，手是暖的。', more:['慢慢做，奶奶不赶时间。','这条巷子，热闹起来才像话。','改天给你讲讲外婆年轻时的事。'] },
+  tanuki: { intro:['听说巷尾的老店换人了？我来瞧瞧成色。','我在街口开杂货铺的，往后进货找我，给你算便宜。'],
+    thanks:'嚯，有两下子。这条街要热闹了。', more:['今天的货还没上架，先来你这儿垫垫。','做生意嘛，回头客最要紧。','你外婆当年也总照顾我生意。'] },
+  otter: { intro:['刚从汐见川回来，一身水汽，不介意吧？','今天鱼获不错，可惜我只会烤，不会做别的。'],
+    thanks:'比我自己烤的强一百倍！下次给你带条好的。', more:['今天河水凉，鱼都躲深处去了。','会做饭的人，走到哪儿都饿不着。','改天带你去我的老钓点。'] },
+  egret: { intro:['……这里就是大家说的那家小店？','我不太常出门，希望没有打扰。'],
+    thanks:'很干净的味道。我会再来的。', more:['今天天气好，就飞过来了。','安静的店，我喜欢。','听说你在攒钱修店？加油。'] },
+  hamster: { intro:['慢着点，慢着点……老骨头喽。','孩子，你外婆跟我提过你，说你手巧。'],
+    thanks:'唔……好久没吃到这么实在的了。', more:['年纪大了，就爱念旧。','你这店啊，越来越像样了。','慢工出细活，别学年轻人急躁。'] }
 };
 var STORY_INTRO = [
   {c:null, t:'暮色落进山谷，温泉町的灯笼一盏一盏亮了起来。'},
@@ -1341,6 +1374,49 @@ var QUESTS = [
     story:[{c:null, t:'汤屋食堂，重新开张。巷子里的灯，从此每晚都亮着。'}] },
   { t:'试试手气：在扭蛋机扭一次', type:'gacha', n:1, coins:30,
     story:[{c:'capy', t:'咔啦——扭蛋机转起来了！里面都是温泉町的小玩意，攒齐一套据说会交好运。'}] },
+  // ---- V1.7 主线延长：从"开张"走到"这条街认得你" ----
+  { t:'混个脸熟：任意一位客人好感达到 1 级', type:'fav', n:1, coins:60,
+    story:[{c:'capy', t:'有人开始记得我的名字了。原来开店最有意思的不是卖东西，是认识人。'}] },
+  { t:'街口的杂货铺：等级达到 4，狸猫掌柜会来', type:'level', n:4, coins:80,
+    story:[{c:'tanuki', t:'我在街口开杂货铺的。往后这条街要热闹了，咱们互相照应。'}] },
+  { t:'手熟了：累计交付 20 份订单', type:'deliver', n:20, coins:120,
+    story:[{c:'capy', t:'一份、两份……记不清做了多少了。手比脑子还先知道下一步。'}] },
+  { t:'翻新一半：完成 5 项装修', type:'reno', n:5, coins:150,
+    story:[{c:'capy', t:'店里一天一个样。外婆要是看见，应该会点点头吧。'}] },
+  { t:'常来的街坊：好感等级累计达到 5', type:'fav', n:5, coins:150,
+    story:[{c:'hedge', t:'现在啊，一天不来这儿坐坐，就觉得少了点什么。'}] },
+  { t:'汐见川的渔夫：等级达到 7', type:'level', n:7, coins:180,
+    story:[{c:'otter', t:'刚从河边回来。听说这儿的饭好吃，我可是特地绕路过来的。'}] },
+  { t:'小有积蓄：金币达到 800', type:'coins', n:800, coins:200,
+    story:[{c:'capy', t:'钱箱终于沉了一点。修店、进货、再添个新灶——想做的事排着队呢。'}] },
+  { t:'手艺见长：发现 10 道菜谱', type:'cook', n:10, coins:200,
+    story:[{c:'panda', t:'菜单越来越长了。你外婆当年也是这样，一道一道试出来的。'}] },
+  { t:'食材博物：图鉴收录 20 种', type:'dex', n:20, coins:180,
+    story:[{c:'capy', t:'从一颗种子开始，居然认识了这么多东西。'}] },
+  { t:'安静的客人：等级达到 11', type:'level', n:11, coins:220,
+    story:[{c:'egret', t:'……我可以坐这里吗？角落就好。'}] },
+  { t:'闪闪发光：发现 3 种闪光食材', type:'shiny', n:3, coins:250,
+    story:[{c:'capy', t:'偶尔会冒出亮晶晶的食材，客人见了眼睛都亮了。运气也是手艺的一部分。'}] },
+  { t:'交心的朋友：任意一位客人好感达到 3 级', type:'fav', n:3, coins:280,
+    story:[{c:'capy', t:'他们开始跟我讲自己的事了。这家店好像不只是吃饭的地方。'}] },
+  { t:'老主顾满堂：累计交付 60 份订单', type:'deliver', n:60, coins:320,
+    story:[{c:'shiba', t:'我送件跑遍全镇，现在人人都问我"那家亮灯的小店在哪"。'}] },
+  { t:'外婆的老友：等级达到 15', type:'level', n:15, coins:350,
+    story:[{c:'hamster', t:'慢着点……孩子，你外婆跟我提过你。让我尝尝她说的手艺。'}] },
+  { t:'满墙星光：累计获得 120 颗星星', type:'stars', n:120, coins:360,
+    story:[{c:'capy', t:'星星攒了一罐子。每一颗都是有人吃得开心的证明。'}] },
+  { t:'收藏家：集齐 5 张扭蛋卡', type:'card', n:5, coins:300,
+    story:[{c:'capy', t:'扭蛋里的小玩意摆了一整排。据说集齐一套，温泉祭那天会有好事。'}] },
+  { t:'菜单写满：发现全部菜谱', type:'cook', n:20, coins:400,
+    story:[{c:'panda', t:'……行了，这条街的面食，我认第二。'}] },
+  { t:'本店贵客：任意一位客人好感达到 5 级', type:'fav', n:5, coins:500,
+    story:[{c:'capy', t:'有人说，这家店是他一天里最想来的地方。这句话比什么都值钱。'}] },
+  { t:'街坊满座：好感等级累计达到 20', type:'fav', n:20, coins:600,
+    story:[{c:'capy', t:'从空荡荡的屋子，到坐满人的小店。原来复兴一条街，是从记住每个人的口味开始的。'}] },
+  { t:'温泉街的传闻：等级达到 20，开启街坊回礼', type:'level', n:20, coins:800,
+    story:[{c:'capy', t:'镇上开始传"巷尾有家好店"。'},
+           {c:'tanuki', t:'我跟你说，隔壁的老汤屋也想找人接手了。你有没有兴趣？'},
+           {c:'capy', t:'……温泉町的故事，才刚开了个头。往后每天都会有街坊来回礼，别关门啊。'}] },
 ];
 
 /* ================= 装修与商店 ================= */
@@ -1392,7 +1468,7 @@ function initNew(){
     board: new Array(COLS*ROWS).fill(null),
     gens: {},
     orders:[null,null,null], sold:null,
-    story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0},
+    story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1419,7 +1495,7 @@ function save(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       v:1, coins:S.coins, xp:S.xp, level:S.level, mute:S.mute, tut:S.tut, dex:S.dex,
       cells:cells, gens:S.gens, orders:S.orders, t:now(),
-      story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat,
+      story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
     }));
@@ -1440,6 +1516,8 @@ function load(){
     story: d.story || {intro:0, merge:0, deliver:0},
     met: Array.isArray(d.met) ? d.met : [],
     thx: Array.isArray(d.thx) ? d.thx : [],
+    fav: (d.fav && typeof d.fav === 'object') ? d.fav : {},   // V1.7 老档默认空好感
+    endless: d.endless || 0,
     quest: d.quest || {i:0, p:0},
     stat: d.stat || {deliver:0},
     stars: d.stars || 0,
@@ -1557,6 +1635,96 @@ function tapGen(gid){
   checkQuest('gen');
   save();
   return true;
+}
+
+/* ================= 客人好感（V1.7） =================
+   每位客人 5 级好感，靠累计交付累积。升级会掉一段专属小故事 + 一份奖励。
+   这是"通关之后还想继续交单"的主要动力：内容有限，好感无限。 */
+var FAV_NEED = [0, 3, 8, 16, 28, 45];   // 达到第 n 级所需的累计交付数
+var FAV_TITLE = ['点头之交', '眼熟的客人', '常来的街坊', '交心的朋友', '本店贵客', '一辈子的老主顾'];
+var FAV_STORY = {
+  rabbit: ['你记住了她总坐靠窗的位置。',
+           '她说坡上的花开了，下次带一束来。',
+           '她带来了外婆写给她的旧食谱，纸角都磨圆了。',
+           '"我小时候就在这张桌子上写作业。"她笑着说。',
+           '她把自家做的果酱留在柜台上，没说话就走了。'],
+  panda: ['他开始对你直呼名字了。',
+          '他教了你一个和面的老法子。',
+          '他承认，你的面已经能排上这条街第二。',
+          '"第一？第一当然是你外婆。"他喝了口茶。',
+          '他把外婆当年送他的那只旧碗，还了回来。'],
+  shiba: ['他把你的店标在了自己的送件地图上。',
+          '他绕远路只为在你这儿吃口热的。',
+          '他帮你把菜送到了坡上的老人家里。',
+          '"这条街我最熟，谁家好吃我说了算。"',
+          '他给你带来一封没有寄出地址的旧信——是外婆写的。'],
+  hedge: ['奶奶开始记得你放了多少糖。',
+          '她带来了自己织的杯垫。',
+          '她讲起外婆年轻时也在这里手忙脚乱。',
+          '"人老了，就靠这一口热的活着。"',
+          '她说等温泉祭那天，一定要来吃你做的第一碗。'],
+  tanuki: ['他开始给你留最新鲜的那批货。',
+           '他悄悄给你抹了个零头。',
+           '他把街口最好的位置让给你贴海报。',
+           '"生意人不轻易服人，你算一个。"',
+           '他把杂货铺的备用钥匙交给你保管。'],
+  otter: ['他开始教你怎么挑鱼。',
+          '他带来了汐见川最肥的那条。',
+          '他说下雨天的河边，鱼最好钓。',
+          '"我这辈子只服两个人，你和你外婆。"',
+          '他送了你一根自己用了十年的鱼竿。'],
+  egret: ['她开始提前打招呼再进门。',
+          '她在角落的位置坐了整整一下午。',
+          '她带来一小盆开花的水草。',
+          '"这里让我想起小时候的家。"',
+          '她第一次笑出了声。'],
+  hamster: ['爷爷开始拄着拐杖每天来。',
+            '他说你的火候有长进了。',
+            '他给你看了外婆年轻时的合影。',
+            '"她要是看见今天的店，会高兴的。"',
+            '他把外婆没写完的那本菜谱交给了你。']
+};
+/* 每级奖励：金币按级递增，逢 2、4 级额外给扭蛋券 */
+function favReward(lv){
+  return { coins: 40 * lv, tickets: (lv === 2 || lv === 4) ? 1 : 0 };
+}
+function favLevel(c){
+  var n = (S.fav && S.fav[c]) || 0, lv = 0;
+  for(var i = 1; i < FAV_NEED.length; i++){ if(n >= FAV_NEED[i]) lv = i; }
+  return lv;
+}
+function favNext(c){
+  var lv = favLevel(c);
+  return lv >= 5 ? null : FAV_NEED[lv + 1];
+}
+/* 交付时调用：累加好感，够了就升级并掉故事与奖励 */
+function favGain(c){
+  if(!S.fav) S.fav = {};
+  var before = favLevel(c);
+  S.fav[c] = (S.fav[c] || 0) + 1;
+  var after = favLevel(c);
+  if(after > before){
+    for(var lv = before + 1; lv <= after; lv++){
+      var rw = favReward(lv);
+      S.coins += rw.coins;
+      if(rw.tickets) S.tickets = (S.tickets || 0) + rw.tickets;
+      var story = (FAV_STORY[c] || [])[lv - 1] || '';
+      showStory([{ c: c, t: '好感提升到「' + FAV_TITLE[lv] + '」。' + story }]);
+      toast(CUSTS[c].n + ' 好感 ' + FAV_TITLE[lv] + '，+' + rw.coins + ' 金币' +
+            (rw.tickets ? '、+' + rw.tickets + ' 扭蛋券' : ''));
+    }
+    sfx('level');
+    return true;
+  }
+  return false;
+}
+/* 已解锁的客人：按等级逐步引入新街坊，避免一上来全是陌生人 */
+function custPool(){
+  var out = [];
+  Object.keys(CUSTS).forEach(function(k){
+    if(!CUSTS[k].lv || S.level >= CUSTS[k].lv) out.push(k);
+  });
+  return out;
 }
 
 /* ================= 存档管理（导出 / 导入 / 重新开始） =================
@@ -1821,7 +1989,7 @@ function discover(id){
   S.coins += bonus;
   toast('图鉴新收录：' + ITEMS[id].n + '，奖励 ' + bonus + ' 金币');
   rPills(); checkQuest('coins');
-  if(el('dexM') && el('dexM').classList && el('dexM').classList.contains('on')) rDex();
+  if(el('dexM') && el('dexM').classList && el('dexM').classList.contains('on')){ rDex(); rFavList(); }
 }
 function xpNeed(l){ return 25 + Math.round(10 * Math.pow(l, 1.65)); }
 var lvUpTimer = null;
@@ -1869,8 +2037,8 @@ function fillOrders(){
 }
 function genOrder(slot){
   var used = [];
-  for(var i=0;i<3;i++) if(i!==slot && S && S.orders && S.orders[i]) used.push(S.orders[i].c);
-  var pool = CUST_IDS.filter(function(c){ return used.indexOf(c) < 0; });
+  if(S && S.orders) for(var i=0;i<S.orders.length;i++) if(i!==slot && S.orders[i]) used.push(S.orders[i].c);
+  var pool = custPool().filter(function(c){ return used.indexOf(c) < 0; });
   var cust = pool[Math.floor(Math.random()*pool.length)] || CUST_IDS[0];
   var level = S ? S.level : 1;
   var cap = Math.min(2 + Math.floor(level/2), 6);
@@ -1986,8 +2154,9 @@ function deliver(slot){
     S.thx.push(o.c);
     showStory([{c:o.c, t:CUST_LINES[o.c].thanks}]);
   }
+  favGain(o.c);
   S.orders[slot] = genOrder(slot);
-  checkQuest('deliver'); checkQuest('coins');
+  checkQuest('deliver'); checkQuest('coins'); checkQuest('fav'); checkQuest('level'); checkQuest('stars');
   meetCheck();
   rOrders(); rPills(); save();
   return true;
@@ -2255,9 +2424,38 @@ function dlgTap(){
 }
 
 /* ================= 主线目标（外婆的笔记） ================= */
-function questCur(){ return S.quest.i < QUESTS.length ? QUESTS[S.quest.i] : null; }
+/* 街坊回礼（V1.7 无尽层）：主线走完后接手，用累计交付数滚动生成目标。
+   奖励随轮次递增但设上限，避免后期金币通胀。 */
+var ENDLESS_NAMES = ['街坊回礼', '今日照顾', '熟客答谢', '巷子里的口碑', '暖灯常亮'];
+function endlessQuest(){
+  var round = S.endless || 0;
+  var need = 10 + round * 5;              // 每轮多要 5 单
+  var coins = Math.min(200 + round * 40, 900);   // 奖励封顶
+  return {
+    t: ENDLESS_NAMES[round % ENDLESS_NAMES.length] + '：再交付 ' + need + ' 份订单',
+    type: 'endless', n: need, coins: coins, endless: true
+  };
+}
+function questCur(){
+  if(S.quest.i < QUESTS.length) return QUESTS[S.quest.i];
+  return endlessQuest();
+}
 function checkQuest(type){
   var q = questCur(); if(!q) return;
+  if(q.endless){
+    if(type !== 'deliver'){ rQuest(); return; }
+    S.quest.p++;
+    if(S.quest.p >= q.n){
+      S.coins += q.coins;
+      S.tickets = (S.tickets || 0) + 1;      // 每轮附赠一张扭蛋券
+      S.endless = (S.endless || 0) + 1;
+      S.quest.p = 0;
+      toast('街坊回礼完成，+' + q.coins + ' 金币、+1 扭蛋券');
+      sfx('level'); rPills();
+    }
+    rQuest(); save();
+    return;
+  }
   if(q.type === 'coins'){
     if(S.coins >= q.n) questDone(); else rQuest();
     return;
@@ -2269,6 +2467,39 @@ function checkQuest(type){
   }
   if(q.type === 'cook'){
     S.quest.p = cookedCount();
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  // V1.7 累计型目标：随时按当前状态判定，不依赖事件触发
+  if(q.type === 'fav'){
+    var sum = 0;
+    Object.keys(CUSTS).forEach(function(c){ sum += favLevel(c); });
+    S.quest.p = sum;
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'level'){
+    S.quest.p = S.level;
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'dex'){
+    S.quest.p = S.dex.length;
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'shiny'){
+    S.quest.p = (S.dexS || []).length;
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'card'){
+    S.quest.p = Object.keys(S.cards || {}).length;
+    if(S.quest.p >= q.n) questDone(); else rQuest();
+    return;
+  }
+  if(q.type === 'stars'){
+    S.quest.p = S.stars;
     if(S.quest.p >= q.n) questDone(); else rQuest();
     return;
   }
@@ -2304,6 +2535,11 @@ function rQuest(){
     return;
   }
   if(qb && qb.classList) qb.classList.remove('done');
+  if(q.endless){
+    if(qt) qt.textContent = '街坊回礼 · 第 ' + ((S.endless || 0) + 1) + ' 轮：' + q.t.split('：')[1];
+    if(qp) qp.textContent = S.quest.p + '/' + q.n;
+    return;
+  }
   if(qt) qt.textContent = '外婆的笔记：' + q.t;
   if(qp) qp.textContent = q.type === 'coins' ? Math.min(S.coins, q.n) + '/' + q.n
     : q.type === 'reno' ? S.reno.length + '/' + q.n
@@ -2327,7 +2563,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '13';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '14';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -2462,6 +2698,14 @@ function openTask(slot){
   var ok = canDeliver(o), rw = orderReward(o);
   if(el('taskName')) el('taskName').textContent = CUSTS[o.c].n + ' 的订单';
   if(el('taskSub')) el('taskSub').textContent = ok ? '食材已备齐，可以交付了' : '还差一些食材，点物品可看怎么获得';
+  var flv = favLevel(o.c), fnx = favNext(o.c), fcur = (S.fav && S.fav[o.c]) || 0;
+  var favH = '<div class="favbar"><span class="favt">' + FAV_TITLE[flv] + '</span>' +
+    (fnx === null
+      ? '<span class="favn">好感已满</span>'
+      : '<span class="favw"><i style="width:' +
+        Math.round(Math.min(1, (fcur - FAV_NEED[flv]) / (fnx - FAV_NEED[flv])) * 100) + '%"></i></span>' +
+        '<span class="favn">' + fcur + ' / ' + fnx + '</span>') + '</div>';
+  if(el('taskFav')) el('taskFav').innerHTML = favH;
   var h = '';
   o.needs.forEach(function(nd){
     var have = Math.min(countItem(nd[0]), nd[1]);
@@ -2484,6 +2728,25 @@ function openTask(slot){
     if(refreshOrder(taskSlot)) openTask(taskSlot);
   };
   el('taskM').classList.add('on');
+}
+/* 街坊好感一览：图鉴里能一眼看到每位客人的进度，未解锁的显示为剪影 */
+function rFavList(){
+  var box = el('favBody'); if(!box) return;
+  var html = '', unlocked = custPool();
+  Object.keys(CUSTS).forEach(function(c){
+    var open = unlocked.indexOf(c) >= 0;
+    if(!open){
+      html += '<div class="favrow lock"><div class="fava"></div>' +
+        '<div class="favi"><b>？？？</b><span>等级 ' + CUSTS[c].lv + ' 后会来光顾</span></div></div>';
+      return;
+    }
+    var lv = favLevel(c), nx = favNext(c), cur = (S.fav && S.fav[c]) || 0;
+    html += '<div class="favrow"><div class="fava">' + artUse(CUSTS[c].sym,'','chars') + '</div>' +
+      '<div class="favi"><b>' + CUSTS[c].n + '</b>' +
+      '<span>' + FAV_TITLE[lv] + (nx === null ? ' · 已满' : ' · ' + cur + '/' + nx + ' 次交付') + '</span></div>' +
+      '</div>';
+  });
+  box.innerHTML = html;
 }
 function rDex(){
   var body = el('dexBody'); if(!body) return;
@@ -2850,7 +3113,36 @@ function hideUndo(){
 /* ================= 音效（WebAudio 五声音阶，无音频文件） ================= */
 var actx = null;
 var PENT = [523.25, 587.33, 659.25, 783.99, 880];
+/* ================= 背景音乐 =================
+   循环播放，音量压得低（只做底噪不抢戏）；跟随音效开关一起静音。
+   浏览器不允许自动播放，所以等玩家第一次触碰界面再启动。 */
+var bgmEl = null, bgmReady = false;
+function bgmInit(){
+  if(bgmEl) return;
+  try{
+    bgmEl = new Audio('audio/bgm.mp3?v=' + ART_VER);
+    bgmEl.loop = true;
+    bgmEl.volume = 0.22;   // 背景音，压低
+    bgmEl.preload = 'none';
+  }catch(e){ bgmEl = null; }
+}
+function bgmPlay(){
+  bgmInit();
+  if(!bgmEl || S.mute) return;
+  try{
+    var pr = bgmEl.play();
+    if(pr && pr.catch) pr.catch(function(){});   // 未交互时会被拒绝，忽略即可
+    bgmReady = true;
+  }catch(e){}
+}
+function bgmStop(){
+  if(!bgmEl) return;
+  try{ bgmEl.pause(); }catch(e){}
+}
+function bgmSync(){ if(S.mute) bgmStop(); else bgmPlay(); }
+
 function audioInit(){
+  bgmPlay();          // 借第一次交互启动背景音乐
   if(actx) return;
   try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
 }
@@ -2981,7 +3273,7 @@ function hitCell(x, y){
 }
 function bindUi(){
   if(el('capyBtn')) el('capyBtn').onclick = function(){ audioInit(); tapGen('capy'); };
-  if(el('dexBtn')) el('dexBtn').onclick = function(){ rDex(); el('dexM').classList.add('on'); };
+  if(el('dexBtn')) el('dexBtn').onclick = function(){ rDex(); rFavList(); el('dexM').classList.add('on'); };
   if(el('helpBtn')) el('helpBtn').onclick = function(){ el('tut').classList.add('on'); };
   if(el('tutGo')) el('tutGo').onclick = function(){
     el('tut').classList.remove('on');
@@ -2989,8 +3281,8 @@ function bindUi(){
   };
   if(el('sndBtn')) el('sndBtn').onclick = function(){
     audioInit();
-    S.mute = !S.mute; save(); rSnd();
-    toast(S.mute ? '音效已关闭' : '音效已开启');
+    S.mute = !S.mute; save(); rSnd(); bgmSync();
+    toast(S.mute ? '声音已关闭' : '声音已开启');
   };
   if(el('undoBtn')) el('undoBtn').onclick = undoSell;
   if(el('dlgOv') && el('dlgOv').addEventListener) el('dlgOv').addEventListener('click', dlgTap);
@@ -3138,7 +3430,10 @@ function bindUi(){
     });
   });
   if(typeof document.addEventListener === 'function'){
-    document.addEventListener('visibilitychange', function(){ if(document.hidden) save(); });
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden){ save(); bgmStop(); }
+      else if(bgmReady) bgmSync();     // 切回来恢复，但不打扰没听过音乐的玩家
+    });
   }
   if(typeof window.addEventListener === 'function'){
     window.addEventListener('pagehide', save);
@@ -3191,6 +3486,12 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  CUSTS: CUSTS, QUESTS: QUESTS,
+  endlessQuest: endlessQuest, questCur: questCur,
+  rFavList: rFavList,
+  favLevel: favLevel, favNext: favNext, favGain: favGain, custPool: custPool,
+  FAV_NEED: FAV_NEED, FAV_TITLE: FAV_TITLE,
+  bgmPlay: bgmPlay, bgmStop: bgmStop, bgmSync: bgmSync,
   showInfo: showInfo, openTask: openTask,
   orderSlots: orderSlots, fillOrders: fillOrders,
   exportSave: exportSave, importSave: importSave, resetSave: resetSave, GAME_VER: GAME_VER,

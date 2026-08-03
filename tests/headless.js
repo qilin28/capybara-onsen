@@ -285,12 +285,15 @@ ok(S5.coins === shCoin + shVal * 4, '闪光售价为普通的两倍');
 g.undoSell();
 
 // 闪光交付加成：同一订单，带闪光比不带多给金币
+// 好感升级会额外给金币，会污染这里的对比基准，所以先固定在刚升过级的位置
+S5.fav = S5.fav || {}; S5.fav.panda = 0;
 g.setOrder(0, [['veg5', 1]], 'panda');
 const plainIdx = g.spawn('veg5');
 const m5c0 = S5.coins;
 g.deliver(0);
 const plainGain = S5.coins - m5c0;
 drain(g);
+S5.fav.panda = 0;   // 两次交付都不触发好感升级，只比闪光加成
 g.setOrder(0, [['veg5', 1]], 'panda');
 g.spawn('veg5', null, true);
 const m5c1 = S5.coins;
@@ -417,6 +420,51 @@ const anyIdx = SL.board.findIndex(function(c){ return c && c.t === 'i'; });
 if (anyIdx >= 0) { g.showInfo(anyIdx); ok(true, '底部信息条可显示物品详情'); }
 const genIdx = SL.board.findIndex(function(c){ return c && c.t === 'g'; });
 if (genIdx >= 0) { g.showInfo(genIdx); ok(true, '底部信息条可显示生成器详情'); }
+
+// ---------- V1.7 好感 / 新客人 / 无尽层 ----------
+const gF = makeEnv(new Map());
+const SF = gF.S();
+ok(Object.keys(gF.CUSTS).length === 8, '客人扩充到 8 位');
+ok(gF.custPool().length === 4, 'Lv1 只解锁最初 4 位客人');
+SF.level = 15;
+ok(gF.custPool().length === 8, 'Lv15 后 8 位客人全部登场');
+
+// 好感累积与升级
+SF.fav = {};
+ok(gF.favLevel('rabbit') === 0, '初始好感 0 级');
+const coinsF0 = SF.coins;
+for (let i = 0; i < 3; i++) gF.favGain('rabbit');
+ok(gF.favLevel('rabbit') === 1, '交付 3 次后好感升到 1 级');
+ok(SF.coins > coinsF0, '好感升级发放金币奖励');
+for (let i = 0; i < 5; i++) gF.favGain('rabbit');
+ok(gF.favLevel('rabbit') === 2, '累计 8 次到 2 级');
+ok(SF.tickets > 0, '好感 2 级附赠扭蛋券');
+SF.fav.rabbit = 45;
+ok(gF.favLevel('rabbit') === 5, '满级为 5 级');
+ok(gF.favNext('rabbit') === null, '满级后没有下一档');
+
+gF.stopTick();
+
+// 好感可存档恢复
+const favStore = new Map();
+const gFS = makeEnv(favStore);
+gFS.S().fav = { rabbit: 9, panda: 4 };
+gFS.save();
+const gFS2 = makeEnv(favStore);
+ok(gFS2.S().fav.rabbit === 9 && gFS2.favLevel('rabbit') === 2, '好感数值与等级可存档恢复');
+gFS.stopTick(); gFS2.stopTick();
+
+// 无尽层
+const gE = makeEnv(new Map());
+const SE = gE.S();
+SE.quest.i = 999;          // 主线走完
+const eq = gE.questCur();
+ok(eq && eq.endless === true, '主线走完后接上无尽目标');
+ok(eq.n === 10, '第一轮需要 10 份订单');
+SE.endless = 3;
+ok(gE.questCur().n === 25, '第四轮需求随轮次增长');
+ok(gE.questCur().coins <= 900, '无尽奖励有上限，不会通胀');
+gE.stopTick();
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
