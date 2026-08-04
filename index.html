@@ -3343,6 +3343,69 @@ function rOrders(){
   });
   wrap.innerHTML = html;
 }
+/* ================= 造町布置（V2.3） =================
+   金币、星星、贝币的最终去处：把摆件放到街道上，做成自己的小镇。
+   有些摆件带轻微增益，但主要是"好看"——这是个表达自己的地方，不是数值副本。 */
+var DECOS = {
+  lantern:  { n:'红灯笼',   cost:120,  cur:'coin',  buff:null,              desc:'挂上就有节日气氛' },
+  bench:    { n:'长椅',     cost:180,  cur:'coin',  buff:null,              desc:'让街坊坐下歇歇脚' },
+  flower:   { n:'花盆',     cost:150,  cur:'coin',  buff:null,              desc:'一盆开得正好的花' },
+  fence:    { n:'木栅栏',   cost:200,  cur:'coin',  buff:null,              desc:'把小院围起来' },
+  crate:    { n:'货箱',     cost:160,  cur:'coin',  buff:null,              desc:'狸猫掌柜寄放的货' },
+  board:    { n:'告示板',   cost:260,  cur:'coin',  buff:{k:'order', v:.05}, desc:'订单金币 +5%' },
+  stone:    { n:'石灯笼',   cost:15,   cur:'star',  buff:{k:'regen', v:.06}, desc:'生成器回充 +6%' },
+  umbrella: { n:'纸伞',     cost:12,   cur:'star',  buff:null,              desc:'雨天也有好心情' },
+  chime:    { n:'风铃',     cost:20,   cur:'star',  buff:{k:'shiny', v:.01}, desc:'闪光率 +1%' },
+  sakura:   { n:'樱花树',   cost:30,   cur:'star',  buff:null,              desc:'春天来的时候最美' },
+  bell:     { n:'招福铃',   cost:25,   cur:'shell', buff:{k:'tip', v:.10},  desc:'汤屋小费 +10%' },
+  cat:      { n:'招财猫',   cost:40,   cur:'shell', buff:{k:'gacha', v:.03}, desc:'扭蛋出 SR 概率 +3%' }
+};
+var DECO_SLOTS = 12;          // 街道上的锚点数量
+function decoUnlocked(){ return S.level >= 6; }
+function decoOwned(id){ return (S.decoOwn || []).indexOf(id) >= 0; }
+function curName(c){ return c === 'coin' ? '金币' : c === 'star' ? '星星' : '贝币'; }
+function curHave(c){ return c === 'coin' ? S.coins : c === 'star' ? S.stars : (S.shells || 0); }
+function curPay(c, n){
+  if(c === 'coin'){ S.coins -= n; } else if(c === 'star'){ S.stars -= n; } else { S.shells -= n; }
+}
+function buyDeco(id){
+  var d = DECOS[id]; if(!d) return false;
+  if(decoOwned(id)){ toast('已经有这件了'); return false; }
+  if(curHave(d.cur) < d.cost){ toast('还差 ' + (d.cost - curHave(d.cur)) + ' ' + curName(d.cur)); return false; }
+  curPay(d.cur, d.cost);
+  if(!S.decoOwn) S.decoOwn = [];
+  S.decoOwn.push(id);
+  toast('买下了' + d.n);
+  sfx('coin'); rPills(); save();
+  return true;
+}
+/* 放置：slot 是街道锚点索引，同一件摆件只能放一处 */
+function placeDeco(slot, id){
+  if(!S.decoMap) S.decoMap = {};
+  if(id && !decoOwned(id)) return false;
+  if(slot < 0 || slot >= DECO_SLOTS) return false;
+  if(id){
+    // 若这件已在别处，先挪走
+    Object.keys(S.decoMap).forEach(function(k){ if(S.decoMap[k] === id) delete S.decoMap[k]; });
+    S.decoMap[slot] = id;
+  } else {
+    delete S.decoMap[slot];
+  }
+  save();
+  return true;
+}
+/* 已布置摆件带来的增益合计 */
+function decoBuff(kind){
+  var sum = 0;
+  var map = S.decoMap || {};
+  Object.keys(map).forEach(function(k){
+    var d = DECOS[map[k]];
+    if(d && d.buff && d.buff.k === kind) sum += d.buff.v;
+  });
+  return sum;
+}
+function decoPlaced(){ return Object.keys(S.decoMap || {}).length; }
+
 /* ================= 温泉汤屋（V2.2） =================
    放置经营：把毛巾和香氛投进汤池，客人泡完给小费。
    与前面三个玩法的区别是"不需要一直盯着"——离线也在赚，一天看两三次就行。 */
