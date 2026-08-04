@@ -460,6 +460,44 @@ body{
   background:radial-gradient(circle at 50% 45%, #F5D76E 0 42%, transparent 43%);}
 .dmwin .dst i.on{background:radial-gradient(circle at 50% 45%, #F5B942 0 42%, transparent 43%);}
 
+/* ---------- 造町 ---------- */
+#decoMap{position:relative; width:100%; aspect-ratio:640/1384; max-height:46vh;
+  margin:0 auto; border-radius:16px; overflow:hidden;
+  border:2.5px solid var(--wood2); box-shadow:0 3px 0 rgba(140,105,60,.3);}
+#decoMap .dmapbg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+.dslot{position:absolute; transform:translate(-50%,-50%); width:34px; height:34px;
+  border-radius:10px; padding:2px; cursor:pointer; font-family:inherit;
+  background:rgba(255,253,246,.4); border:2px dashed rgba(120,90,50,.5);
+  display:flex; align-items:center; justify-content:center;}
+.dslot i{display:block; width:10px; height:10px; border-radius:50%;
+  background:rgba(120,90,50,.35);}
+.dslot img{width:100%; height:100%; object-fit:contain;}
+.dslot.has{background:none; border-color:transparent; width:40px; height:40px;}
+.dslot.pick{border-color:#E08A32; background:rgba(255,214,120,.45);
+  animation:slotPulse 1.4s ease-in-out infinite;}
+@keyframes slotPulse{50%{ transform:translate(-50%,-50%) scale(1.12); }}
+.dslot:active{transform:translate(-50%,-50%) scale(.9);}
+.dgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.dcard{display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:linear-gradient(180deg,#FFFDF6,var(--paper)); border:2.5px solid var(--pline);
+  border-radius:13px; padding:8px 5px; cursor:pointer; font-family:inherit; color:var(--ink);}
+.dcard .dimg{width:46px; height:46px;}
+.dcard .dimg img{width:100%; height:100%; object-fit:contain;}
+.dcard b{font-size:11.5px; font-weight:900;}
+.dcard .dsub{font-size:9.5px; color:var(--sub);}
+.dcard .dcost{display:flex; align-items:center; gap:3px; font-size:10.5px; font-weight:900; color:#B0763A;}
+.dcard .dcost svg{width:13px; height:13px;}
+.dcard .dbuff{font-size:9px; color:#4F7A34; line-height:1.4; text-align:center;}
+.dcard.buy{background:linear-gradient(180deg,#FFF6E4,#F3DFB8);}
+.dcard.on{border-color:#E08A32; box-shadow:0 0 0 2px rgba(224,138,50,.35);}
+.dcard.used{opacity:.6;}
+.dcard:active{transform:scale(.96);}
+/* 小镇页上显示已摆好的摆件 */
+.tdeco{position:absolute; transform:translate(-50%,-50%); width:34px; height:34px;
+  pointer-events:none; z-index:1;}
+.tdeco img{width:100%; height:100%; object-fit:contain;
+  filter:drop-shadow(0 2px 3px rgba(40,60,30,.35));}
+
 /* ---------- 温泉汤屋 ---------- */
 #bath{position:relative; height:clamp(150px,26vh,210px); border-radius:18px; overflow:hidden;
   background:linear-gradient(180deg,#F6E8D8 0%,#EBD6BE 38%,#D9BFA0 100%);
@@ -1527,9 +1565,15 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.3.2';
+var GAME_VER = 'V2.4';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.4', d:'2026-08-05', t:'造町布置', li:[
+    '新玩法：等级 6 开放造町，在小镇地图上摆放 12 种装饰',
+    '摆件带实际增益：订单金币、生成器回充、闪光率、汤屋小费、扭蛋概率',
+    '金币、星星、贝币三种货币都有了去处',
+    '摆好的装饰会显示在小镇全貌页上'
+  ]},
   { v:'V2.3.2', d:'2026-08-05', t:'背景音调轻', li:[
     '背景音默认音量降到原来的四分之一',
     '滑块改用听感曲线，小音量区的调节更容易听出差别',
@@ -1747,7 +1791,7 @@ function initNew(){
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
-    pool:0, onsen:null, rep:0, dream:{}, shells:0,
+    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1777,6 +1821,7 @@ function save(){
       story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless, vol:S.vol,
       rod:S.rod, fishCount:S.fishCount,
       pool:S.pool, onsen:S.onsen, rep:S.rep,
+      decoOwn:S.decoOwn, decoMap:S.decoMap,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -1803,6 +1848,8 @@ function load(){
     vol: migrateVol(d.vol),
     rod: d.rod || 0, fishCount: d.fishCount || 0,
     pool: d.pool || 0, onsen: d.onsen || null, rep: d.rep || 0,
+    decoOwn: Array.isArray(d.decoOwn) ? d.decoOwn : [],
+    decoMap: (d.decoMap && typeof d.decoMap === 'object') ? d.decoMap : {},
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -1854,7 +1901,9 @@ function load(){
 /* ================= 装修效果 ================= */
 function renoHas(id){ return S && S.reno && S.reno.indexOf(id) >= 0; }
 function capOf(gid){ return GENS[gid].cap + (renoHas('chime') ? 2 : 0); }
-function regenIv(gid){ return GENS[gid].regen * (renoHas('lantern') ? 0.9 : 1); }
+function regenIv(gid){
+  return GENS[gid].regen * (renoHas('lantern') ? 0.9 : 1) / (1 + decoBuff('regen'));
+}
 function openRows(){
   return 6 + (renoHas('floor1')?1:0) + (renoHas('floor2')?1:0) + (renoHas('floor3')?1:0);
 }
@@ -2401,7 +2450,7 @@ function today(){
   var d = new Date();
   return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
 }
-function rollShiny(){ return Math.random() < SHINY_RATE ? 1 : 0; }
+function rollShiny(){ return Math.random() < (SHINY_RATE + decoBuff('shiny')) ? 1 : 0; }
 function mkItem(id, shiny){
   var c = { t:'i', id:id };
   if(shiny) c.s = 1;
@@ -2431,7 +2480,8 @@ function gachaPull(force){
   var r = force;
   if(!r){
     var x = Math.random();
-    r = x < 0.62 ? 'N' : (x < 0.93 ? 'R' : 'SR');
+    var srCut = 0.93 - decoBuff('gacha');   // 招财猫提高 SR 概率
+    r = x < 0.62 ? 'N' : (x < srCut ? 'R' : 'SR');
   }
   var res = { rarity:r, byTicket:byTicket };
   if(r === 'N'){
@@ -2711,6 +2761,7 @@ function orderReward(o){
   var coins = 0, xp = 0;
   o.needs.forEach(function(nd){ coins += ITEMS[nd[0]].val * 8 * nd[1]; xp += ITEMS[nd[0]].val * 3 * nd[1]; });
   if(renoHas('tables')) coins = Math.round(coins * 1.1);
+  coins = Math.round(coins * (1 + decoBuff('order')));   // 告示板等摆件加成
   return { coins:coins, xp:xp };
 }
 function starsOf(o){
@@ -3190,7 +3241,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '22';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '23';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3344,7 +3395,13 @@ var DECOS = {
   bell:     { n:'招福铃',   cost:25,   cur:'shell', buff:{k:'tip', v:.10},  desc:'汤屋小费 +10%' },
   cat:      { n:'招财猫',   cost:40,   cur:'shell', buff:{k:'gacha', v:.03}, desc:'扭蛋出 SR 概率 +3%' }
 };
-var DECO_SLOTS = 12;          // 街道上的锚点数量
+/* 锚点坐标（地图百分比）：挑的都是空地，不压建筑热点 */
+var DECO_POS = [
+  {x:40, y:12}, {x:60, y:29}, {x:38, y:36}, {x:12, y:47},
+  {x:58, y:53}, {x:82, y:44}, {x:33, y:52}, {x:66, y:65},
+  {x:44, y:72}, {x:14, y:70}, {x:56, y:84}, {x:34, y:93}
+];
+var DECO_SLOTS = DECO_POS.length;
 function decoUnlocked(){ return S.level >= 6; }
 function decoOwned(id){ return (S.decoOwn || []).indexOf(id) >= 0; }
 function curName(c){ return c === 'coin' ? '金币' : c === 'star' ? '星星' : '贝币'; }
@@ -3448,7 +3505,7 @@ function onsenCollect(){
   var cycles = Math.floor(passed / p.dur);
   cycles = Math.max(1, Math.min(cycles, Math.floor(ONSEN_MAX_HOURS * 60 / p.dur)));
   var bonus = onsenBonus(S.onsen.towel, S.onsen.aroma);
-  var coins = Math.round(p.tip * bonus * cycles);
+  var coins = Math.round(p.tip * bonus * cycles * (1 + decoBuff('tip')));
   var rep = cycles;                                         // 声望：每轮 1 点
   S.coins += coins;
   S.rep = (S.rep || 0) + rep;
@@ -3489,7 +3546,7 @@ var TOWN_SPOTS = [
   { id:'onsen', n:'温泉汤屋', x:17, y:31, sym:'i-onsen', lv:10 },
   { id:'fish',  n:'汐见川',   x:23, y:88, sym:'i-fish',  lv:5 },
   { id:'dream', n:'梦境',     x:76, y:16, sym:'i-moon',  lv:3 },
-  { id:'deco',  n:'造町',     x:87, y:78, sym:'i-house', lv:20 }
+  { id:'deco',  n:'造町',     x:87, y:78, sym:'i-house', lv:6 }
 ];
 function spotBadge(id){
   if(id === 'diner'){
@@ -3511,6 +3568,13 @@ function rTown(){
   var box = el('townHots');
   if(box){
     var html = '';
+    // 已摆放的摆件显示在地图上
+    Object.keys(S.decoMap || {}).forEach(function(k){
+      var id = S.decoMap[k], pos = DECO_POS[+k];
+      if(!id || !pos) return;
+      html += '<span class="tdeco" style="left:' + pos.x + '%; top:' + pos.y + '%">' +
+        '<img src="art/deco/' + id + '.png?v=' + ART_VER + '" alt=""></span>';
+    });
     TOWN_SPOTS.forEach(function(sp){
       var open = spotOpen(sp), bd = open ? spotBadge(sp.id) : null;
       html += '<button class="hot' + (sp.main ? ' main' : '') + (open ? '' : ' lock') + '" ' +
@@ -3568,6 +3632,52 @@ function closePage(){
   curPage = null;
 }
 function pageSub(text){ if(el('pgSub')) el('pgSub').textContent = text; }
+
+/* 造町整页：在小镇地图上摆东西。选中一件摆件，再点地图上的空位放下 */
+var decoPick = null;
+function openDecoPage(){
+  openPage('deco', '造町', '', '<div id="decoMap"></div><div id="decoShop"></div>');
+  rDecoPage();
+}
+function rDecoPage(){
+  var map = el('decoMap');
+  if(map){
+    var html = '<img class="dmapbg" src="art/scene/townmap.png?v=' + ART_VER + '" alt="">';
+    DECO_POS.forEach(function(pos, i){
+      var id = (S.decoMap || {})[i];
+      html += '<button class="dslot' + (id ? ' has' : '') + (decoPick ? ' pick' : '') +
+        '" data-slot="' + i + '" style="left:' + pos.x + '%; top:' + pos.y + '%">' +
+        (id ? '<img src="art/deco/' + id + '.png?v=' + ART_VER + '" alt="">' : '<i></i>') +
+        '</button>';
+    });
+    map.innerHTML = html;
+  }
+  var shop = el('decoShop');
+  if(shop){
+    var placed = decoPlaced();
+    pageSub(placed + ' / ' + DECO_SLOTS + ' 处');
+    var h = '<p class="sethint" style="margin:10px 2px">' +
+      (decoPick ? '已选「' + DECOS[decoPick].n + '」，点地图上的位置放下；再点一次取消'
+                : '点下面的摆件选中，再点地图上的位置放下。点已放好的可以收回。') +
+      '</p><div class="dgrid">';
+    Object.keys(DECOS).forEach(function(id){
+      var d = DECOS[id], own = decoOwned(id);
+      var used = false;
+      Object.keys(S.decoMap || {}).forEach(function(k){ if(S.decoMap[k] === id) used = true; });
+      h += '<button class="dcard' + (own ? '' : ' buy') + (decoPick === id ? ' on' : '') +
+        (used ? ' used' : '') + '" data-deco="' + id + '">' +
+        '<span class="dimg"><img src="art/deco/' + id + '.png?v=' + ART_VER + '" alt=""></span>' +
+        '<b>' + d.n + '</b>' +
+        (own ? '<span class="dsub">' + (used ? '已摆放' : '在仓库') + '</span>'
+             : '<span class="dcost">' + svgUse(d.cur === 'coin' ? 'i-coin' : d.cur === 'star' ? 'i-star' : 'i-shell') +
+               d.cost + '</span>') +
+        (d.buff ? '<span class="dbuff">' + d.desc + '</span>' : '') +
+        '</button>';
+    });
+    h += '</div>';
+    shop.innerHTML = h;
+  }
+}
 
 /* 汤屋整页：上面是汤池状态，下面选投入的物资 */
 var onsenTimer = null;
@@ -4721,6 +4831,39 @@ function bindUi(){
   if(pb && pb.addEventListener) pb.addEventListener('click', function(e){
     var t = e.target && e.target.closest ? e.target.closest('[data-dream]') : null;
     if(t){ audioInit(); openDream(+t.getAttribute('data-dream')); return; }
+    // 造町：选摆件（没买的先买）
+    var dc = e.target && e.target.closest ? e.target.closest('[data-deco]') : null;
+    if(dc){
+      audioInit();
+      var did = dc.getAttribute('data-deco');
+      if(!decoOwned(did)){
+        if(buyDeco(did)){ decoPick = did; rDecoPage(); }
+        return;
+      }
+      decoPick = (decoPick === did) ? null : did;
+      sfx('tap'); rDecoPage();
+      return;
+    }
+    // 造町：往地图上放 / 收回
+    var ds = e.target && e.target.closest ? e.target.closest('[data-slot]') : null;
+    if(ds){
+      audioInit();
+      var slot = +ds.getAttribute('data-slot');
+      var cur = (S.decoMap || {})[slot];
+      if(decoPick){
+        placeDeco(slot, decoPick);
+        toast('摆好了' + DECOS[decoPick].n);
+        decoPick = null; sfx('coin');
+      } else if(cur){
+        placeDeco(slot, null);
+        toast('收回了' + DECOS[cur].n);
+        sfx('sell');
+      } else {
+        toast('先在下面选一件摆件');
+      }
+      rDecoPage();
+      return;
+    }
     var sp = e.target && e.target.closest ? e.target.closest('[data-sup]') : null;
     if(sp){
       audioInit();
@@ -4776,7 +4919,7 @@ function bindUi(){
     if(id === 'fish')  openFishPage();
     else if(id === 'dream') openDreamPage();
     else if(id === 'onsen') openOnsenPage();
-    else if(id === 'deco'){ toast('造町还在施工中'); openTown(); }
+    else if(id === 'deco')  openDecoPage();
   });
   if(el('townBot')) el('townBot').addEventListener('click', function(e){
     var b = e.target && e.target.closest ? e.target.closest('[data-tb]') : null;
@@ -4973,6 +5116,9 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  DECOS: DECOS, DECO_POS: DECO_POS, DECO_SLOTS: DECO_SLOTS,
+  buyDeco: buyDeco, placeDeco: placeDeco, decoBuff: decoBuff, decoOwned: decoOwned,
+  decoPlaced: decoPlaced, decoUnlocked: decoUnlocked, openDecoPage: openDecoPage,
   migrateVol: migrateVol, BGM_CEIL: BGM_CEIL,
   openTown: openTown, closeTown: closeTown, openDiner: openDiner,
   rTown: rTown, TOWN_SPOTS: TOWN_SPOTS, spotBadge: spotBadge, spotOpen: spotOpen,

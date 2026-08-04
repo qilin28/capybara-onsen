@@ -31,7 +31,7 @@ def bump_version():
 def rebuild_sw(version):
     """重新生成 sw.js：CACHE 版本号与 ART_VER 对齐，离线清单自动枚举当前所有贴图。"""
     assets = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png']
-    for d in ('art/items', 'art/chars', 'art/cards', 'art/scene'):
+    for d in ('art/items', 'art/chars', 'art/cards', 'art/scene', 'art/deco'):
         assets += ['./' + f for f in sorted(glob.glob(d + '/*.png'))]
     # 音频也要能离线播放；配音按需加载，但缓存了断网时同样有声
     for d in ('audio', 'audio/voice'):
@@ -111,7 +111,7 @@ def build_zip(version):
     with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
         for f in root_files:
             z.write(f, f)
-        for d in ('art/items', 'art/chars', 'art/cards', 'art/scene'):
+        for d in ('art/items', 'art/chars', 'art/cards', 'art/scene', 'art/deco'):
             for f in sorted(glob.glob(d + '/*')):
                 if f.endswith(keep_ext):
                     z.write(f, f)

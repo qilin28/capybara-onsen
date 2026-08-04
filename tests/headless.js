@@ -741,10 +741,10 @@ ST.level = 1;
 ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 1, 'Lv1 只开放食堂');
 ST.level = 5;
 ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 3, 'Lv5 开放到钓鱼（食堂+梦境+钓鱼）');
+ST.level = 6;
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 4, 'Lv6 再开造町');
 ST.level = 10;
-ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 4, 'Lv10 再开汤屋');
-ST.level = 20;
-ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 5, 'Lv20 全开');
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 5, 'Lv10 汤屋开放后全部解锁');
 
 // 红点提示
 ST.level = 15;
@@ -786,6 +786,63 @@ gT.stopTick();
   ok(third.bgm === 88, '迁移只做一次，之后玩家自己调的值会保留');
   gM.stopTick();
 }
+
+// ---------- V2.4 造町布置 ----------
+const gDc = makeEnv(new Map());
+const SDc = gDc.S();
+ok(Object.keys(gDc.DECOS).length === 12, '12 种摆件');
+ok(gDc.DECO_POS.length === gDc.DECO_SLOTS, '锚点数量与坐标表一致');
+ok(gDc.DECO_POS.every(function(p2){ return p2.x > 0 && p2.x < 100 && p2.y > 0 && p2.y < 100; }),
+   '所有锚点都落在地图内');
+ok(gDc.decoUnlocked() === false, 'Lv1 时造町未开放');
+SDc.level = 6;
+ok(gDc.decoUnlocked() === true, 'Lv6 开放造町');
+
+// 买与放
+SDc.coins = 5000; SDc.stars = 100; SDc.shells = 100;
+ok(gDc.buyDeco('lantern') === true, '金币够时可以买摆件');
+ok(gDc.decoOwned('lantern') === true, '买过的摆件进仓库');
+ok(gDc.buyDeco('lantern') === false, '同一件不会重复买');
+SDc.coins = 0;
+ok(gDc.buyDeco('bench') === false, '钱不够买不了');
+SDc.coins = 5000;
+
+ok(gDc.placeDeco(0, 'lantern') === true, '可以摆到锚点上');
+ok(SDc.decoMap[0] === 'lantern', '锚点记录了摆件');
+ok(gDc.decoPlaced() === 1, '已摆放数量正确');
+// 同一件挪到别处不会占两格
+gDc.placeDeco(4, 'lantern');
+ok(SDc.decoMap[0] === undefined && SDc.decoMap[4] === 'lantern', '挪位置后原处清空');
+ok(gDc.decoPlaced() === 1, '挪位置不会重复占格');
+ok(gDc.placeDeco(4, null) === true, '可以收回');
+ok(gDc.decoPlaced() === 0, '收回后锚点为空');
+ok(gDc.placeDeco(99, 'lantern') === false, '越界的锚点会被拒绝');
+ok(gDc.placeDeco(1, 'cat') === false, '没买的摆件放不上去');
+
+// 增益真的接进数值
+gDc.buyDeco('board'); gDc.placeDeco(2, 'board');
+ok(Math.abs(gDc.decoBuff('order') - 0.05) < 1e-6, '告示板提供订单增益');
+gDc.buyDeco('stone'); gDc.placeDeco(3, 'stone');
+ok(Math.abs(gDc.decoBuff('regen') - 0.06) < 1e-6, '石灯笼提供回充增益');
+ok(gDc.decoBuff('tip') === 0, '没摆的类别增益为 0');
+// 生成器回充确实变快了
+const ivBefore = gDc.regenIv('basket');
+gDc.placeDeco(3, null);
+const ivAfter = gDc.regenIv('basket');
+ok(ivBefore < ivAfter, '石灯笼摆上后生成器回充间隔变短');
+gDc.stopTick();
+
+// 造町数据可存档
+const decoStore = new Map();
+const gDc2 = makeEnv(decoStore);
+gDc2.S().decoOwn = ['lantern', 'cat'];
+gDc2.S().decoMap = { 0: 'lantern', 7: 'cat' };
+gDc2.save();
+const gDc3 = makeEnv(decoStore);
+ok(gDc3.decoOwned('cat') === true, '已购摆件可存档恢复');
+ok(gDc3.S().decoMap[7] === 'cat', '摆放位置可存档恢复');
+ok(gDc3.decoPlaced() === 2, '读档后布置数量正确');
+gDc2.stopTick(); gDc3.stopTick();
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
