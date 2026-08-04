@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>水豚温泉町 页面结构设计稿</title>
+<title>水豚温泉町 页面设计稿 v2</title>
 <style>
   :root{
     --sky1:#DCEFC8; --sky2:#C7E39A; --sky3:#B0D97F; --sky4:#9BCB6C;
@@ -13,94 +13,98 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   body{background:#EDEDE6; font-family:"PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
     color:#3A3A3A; padding:24px 16px 60px;}
-  .wrap{max-width:1180px; margin:0 auto;}
+  .wrap{max-width:960px; margin:0 auto;}
   h1{font-size:21px; letter-spacing:1px; margin-bottom:4px;}
-  .lead{font-size:13px; color:#6E6E6E; line-height:1.75; margin-bottom:22px; max-width:760px;}
+  .lead{font-size:13px; color:#6E6E6E; line-height:1.75; margin-bottom:22px; max-width:800px;}
   .lead b{color:#C4761F;}
   .row{display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start;}
-  .col{flex:1 1 330px; min-width:300px; max-width:390px;}
+  .col{flex:1 1 380px; min-width:340px; max-width:420px;}
   .colhd{display:flex; align-items:baseline; gap:8px; margin-bottom:3px;}
   .colhd b{font-size:15px;}
   .colhd i{font-style:normal; font-size:11px; color:#8A8A8A;}
   .note{font-size:11.5px; color:#7A7A7A; line-height:1.7; margin:9px 2px 0;}
-  .note s{color:#B04A4A; text-decoration:none;}
-  .note em{font-style:normal; color:#3E7A3E;}
+  .note em{font-style:normal; color:#3E7A3E; font-weight:700;}
 
-  /* 手机外框 */
   .phone{width:100%; aspect-ratio:390/844; border-radius:26px; overflow:hidden;
     border:8px solid #2E2E2E; background:linear-gradient(180deg,var(--sky1),var(--sky4));
-    display:flex; flex-direction:column; padding:6px; position:relative;}
+    display:flex; flex-direction:column; position:relative;}
 
-  /* 通用组件 */
-  .bar{flex:0 0 auto; display:flex; align-items:center; gap:5px; padding:3px 2px 5px;}
-  .pill{background:var(--paper); border:1.5px solid var(--pline); border-radius:999px;
+  /* --- 入口页：整张地图 + 浮动热点 --- */
+  .mapwrap{position:absolute; inset:0;}
+  .mapwrap img{width:100%; height:100%; object-fit:cover;}
+  .topbar{position:absolute; left:0; right:0; top:0; display:flex; gap:4px;
+    padding:calc(6px + env(safe-area-inset-top)) 8px 8px;
+    background:linear-gradient(180deg,rgba(20,40,20,.34),transparent);}
+  .pill{background:rgba(255,253,246,.94); border:1.5px solid var(--pline); border-radius:999px;
     padding:2px 8px; font-size:9px; font-weight:900; color:var(--ink); white-space:nowrap;}
   .pill.lv{flex:1; text-align:center;}
-  .back{background:var(--paper); border:1.5px solid var(--pline); border-radius:8px;
-    padding:2px 7px; font-size:9px; font-weight:900; color:var(--ink);}
 
-  /* --- 首页 --- */
-  .hero{flex:0 0 auto; position:relative; height:31%; border-radius:12px; overflow:hidden;
-    border:2px solid #C7A87A;}
-  .hero img{width:100%; height:100%; object-fit:cover;}
-  .heroTitle{position:absolute; left:8px; top:7px; background:rgba(255,253,246,.92);
-    border-radius:9px; padding:4px 9px;}
-  .heroTitle b{display:block; font-size:12px; letter-spacing:1px; color:#5C4A2E;}
-  .heroTitle span{display:block; font-size:8px; color:var(--lant); font-weight:900;}
-  .heroCapy{position:absolute; right:4px; bottom:0; width:66px;}
-  .heroCapy img{width:100%; height:auto; object-fit:contain;}
+  /* 浮动热点 */
+  .hot{position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column;
+    align-items:center; gap:2px;}
+  .hotpin{width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(180deg,rgba(255,253,246,.97),rgba(246,232,206,.97));
+    border:2.5px solid #C9A063; box-shadow:0 3px 8px rgba(40,60,30,.4);
+    display:flex; align-items:center; justify-content:center; font-size:15px; position:relative;}
+  .hotpin.big{width:46px; height:46px; border-color:#E08A32; border-width:3px;
+    background:linear-gradient(180deg,#FFF6E2,#F7DFAE);}
+  .hotlb{background:rgba(50,42,28,.82); color:#FFF8EC; font-size:9px; font-weight:900;
+    border-radius:999px; padding:1px 8px; white-space:nowrap;}
+  .hotlb.main{background:rgba(200,110,30,.92); font-size:10.5px; padding:2px 10px;}
+  .dot{position:absolute; right:-2px; top:-2px; width:14px; height:14px; border-radius:50%;
+    background:#E8563F; border:2px solid #FFF; font-size:8px; color:#FFF; font-weight:900;
+    display:flex; align-items:center; justify-content:center;}
+  .dot.g{background:#5FA83A;}
+  .hot.lock .hotpin{background:rgba(210,205,195,.9); border-color:#9A9A90;}
+  .hot.lock .hotlb{background:rgba(70,70,65,.7);}
+  .ring{position:absolute; inset:-6px; border-radius:50%; border:2px solid rgba(255,220,120,.85);
+    animation:pulse 2s ease-out infinite;}
+  @keyframes pulse{ from{transform:scale(.85); opacity:.9;} to{transform:scale(1.25); opacity:0;} }
 
-  .grid{flex:1 1 auto; min-height:0; display:grid; gap:6px; margin-top:7px;
-    grid-template-columns:1fr 1fr; grid-auto-rows:1fr;}
-  .card{background:linear-gradient(180deg,var(--paper),var(--paper2));
-    border:2px solid var(--pline); border-bottom-width:3px; border-radius:13px;
-    padding:7px 8px; display:flex; flex-direction:column; justify-content:center; position:relative;}
-  .card b{font-size:11.5px; color:var(--ink);}
-  .card span{font-size:8.5px; color:var(--sub); line-height:1.45; margin-top:1px;}
-  .card.main{grid-column:1 / -1; background:linear-gradient(180deg,#FFF0D4,#F7DFAE);
-    border-color:#D9A45E;}
-  .card.main b{font-size:14px;}
-  .badge{position:absolute; right:6px; top:6px; background:#E8563F; color:#FFF;
-    font-size:8px; font-weight:900; border-radius:999px; padding:1px 6px;}
-  .badge.g{background:#7FB84F;}
-  .card.lock{opacity:.45;}
-  .mini{flex:0 0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-top:6px;}
-  .mbtn{background:var(--paper); border:2px solid var(--pline); border-bottom-width:3px;
+  .botbar{position:absolute; left:0; right:0; bottom:0; display:grid;
+    grid-template-columns:repeat(5,1fr); gap:5px; padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    background:linear-gradient(0deg,rgba(20,40,20,.42),transparent);}
+  .mbtn{background:rgba(255,253,246,.95); border:2px solid var(--pline); border-bottom-width:3px;
     border-radius:10px; padding:5px 2px; text-align:center; font-size:8.5px;
     font-weight:900; color:var(--ink);}
 
-  /* --- 合成页 --- */
-  .ordbar{flex:0 0 auto; display:flex; gap:4px; overflow:hidden; padding:1px 0 3px;}
-  .ord{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px;}
-  .ordbox{display:flex; gap:2px; padding:2px 3px; background:var(--paper);
-    border:1.5px solid var(--pline); border-radius:8px; position:relative;}
-  .ordit{width:22px; height:22px; background:#F6EEDC; border:1px solid #EDE0C2; border-radius:5px;}
-  .ordav{position:absolute; left:-4px; top:-4px; width:13px; height:13px; border-radius:50%;
-    border:1.5px solid #FFF; overflow:hidden; background:var(--paper);}
+  /* --- 食堂页 --- */
+  .fbar{flex:0 0 auto; display:flex; align-items:center; gap:5px; padding:6px 6px 4px;}
+  .back{background:var(--paper); border:1.5px solid var(--pline); border-radius:8px;
+    padding:3px 8px; font-size:9px; font-weight:900; color:var(--ink);}
+  .ordbar{flex:0 0 auto; display:flex; gap:5px; overflow:hidden; padding:2px 6px 5px;}
+  .ord{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .ordbox{display:flex; gap:3px; padding:4px 5px; background:var(--paper);
+    border:2px solid var(--pline); border-radius:11px; position:relative;
+    box-shadow:0 2px 0 rgba(160,130,90,.22);}
+  .ordit{width:30px; height:30px; background:#F6EEDC; border:1.5px solid #EDE0C2;
+    border-radius:8px; position:relative;}
+  .ordcnt{position:absolute; right:-3px; bottom:-3px; background:#FFF9EC; border:1px solid var(--pline);
+    border-radius:999px; font-size:7px; font-weight:900; color:#A0522D; padding:0 3px;}
+  .ordav{position:absolute; left:-6px; top:-6px; width:18px; height:18px; border-radius:50%;
+    border:2px solid #FFF; overflow:hidden; background:var(--paper);}
   .ordav img{width:100%; height:100%; object-fit:cover;}
-  .ordtag{font-size:7.5px; font-weight:900; color:var(--sub);}
-  .ordtag.go{color:#FFF; background:#7FB84F; border-radius:999px; padding:0 5px;}
-  .quest{flex:0 0 auto; background:var(--paper); border:1.5px solid var(--pline);
-    border-radius:8px; padding:3px 8px; font-size:8.5px; font-weight:900; color:var(--ink);
-    display:flex; justify-content:space-between; margin-bottom:4px;}
+  .ordtag{font-size:8.5px; font-weight:900; color:var(--sub);}
+  .ordtag.go{color:#FFF; background:linear-gradient(180deg,#8FCB5C,#6FA83F);
+    border:1px solid #4F7A34; border-radius:999px; padding:1px 8px;}
+  .quest{flex:0 0 auto; margin:0 6px 5px; background:var(--paper);
+    border:2px solid var(--pline); border-radius:10px; padding:5px 10px; font-size:9.5px;
+    font-weight:900; color:var(--ink); display:flex; justify-content:space-between;}
   .board{flex:1 1 auto; min-height:0; display:grid; grid-template-columns:repeat(7,1fr);
-    gap:3px; padding:6px; background:rgba(255,255,255,.34);
-    border:2px solid rgba(255,255,255,.75); border-radius:14px;}
-  .cell{background:rgba(255,255,255,.5); border-radius:5px;}
-  .cell.f{background:#F6EEDC; border:1px solid #EDE0C2;}
+    gap:4px; padding:7px; margin:0 6px; background:rgba(255,255,255,.34);
+    border:2.5px solid rgba(255,255,255,.8); border-radius:16px;}
+  .cell{background:rgba(255,255,255,.5); border-radius:7px;}
+  .cell.f{background:#F6EEDC; border:1.5px solid #EDE0C2;}
   .cell.lk{background:rgba(150,180,120,.3);}
-  .dock{flex:0 0 auto; display:flex; align-items:center; gap:6px; margin-top:5px;
+  .dock{flex:0 0 auto; display:flex; align-items:center; gap:6px; margin:6px;
     background:linear-gradient(180deg,var(--paper),var(--paper2));
-    border:2px solid var(--pline); border-bottom-width:3px; border-radius:11px; padding:4px 7px;}
-  .dockic{width:26px; height:26px; background:#F6EEDC; border:1.5px solid #EDE0C2; border-radius:7px;}
+    border:2px solid var(--pline); border-bottom-width:3px; border-radius:12px; padding:5px 8px;}
+  .dockic{width:30px; height:30px; background:#F6EEDC; border:1.5px solid #EDE0C2; border-radius:8px;}
   .docktx{flex:1; min-width:0;}
-  .docktx b{display:block; font-size:9.5px; color:var(--ink);}
-  .docktx span{display:block; font-size:7.5px; color:var(--sub);}
-  .dockbtn{background:var(--paper); border:1.5px solid var(--pline); border-radius:8px;
-    padding:4px 7px; font-size:8.5px; font-weight:900; color:var(--ink); text-align:center;}
-
-  .pct{position:absolute; right:8px; font-size:9px; font-weight:900; color:#3E7A3E;
-    background:rgba(255,255,255,.9); border-radius:999px; padding:1px 7px;}
+  .docktx b{display:block; font-size:10.5px; color:var(--ink);}
+  .docktx span{display:block; font-size:8px; color:var(--sub);}
+  .dockbtn{background:var(--paper); border:1.5px solid var(--pline); border-radius:9px;
+    padding:5px 8px; font-size:9px; font-weight:900; color:var(--ink); text-align:center;}
 
   .cmp{margin-top:30px; background:#FFF; border:1px solid #DDD; border-radius:12px; padding:16px 18px;}
   .cmp h2{font-size:14px; margin-bottom:9px;}
@@ -115,71 +119,73 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>水豚温泉町 · 页面结构设计稿</h1>
+  <h1>水豚温泉町 · 页面设计稿 v2</h1>
   <p class="lead">
-    按你说的把<b>入口页</b>和<b>合成页</b>拆开。合成页不再顶着场景大图，省下的高度全部给棋盘；
-    场景图移到入口页当主视觉，所有玩法从那里进。<b>先看这版结构，确认后我再动手改代码。</b>
+    按你说的改了两处：入口页做成<b>一整张小镇地图</b>，建筑上浮动可点的标记；
+    食堂页把<b>任务栏和棋盘都放大</b>，去掉场景大图后省出的空间全给这两块。
   </p>
 
   <div class="row">
 
     <!-- 入口页 -->
     <div class="col">
-      <div class="colhd"><b>页面 1 · 温泉町（入口）</b><i>打开游戏先看到这里</i></div>
+      <div class="colhd"><b>页面 1 · 温泉町全貌</b><i>点建筑进入</i></div>
       <div class="phone">
-        <div class="bar">
+        <div class="mapwrap"><img src="art/scene/townmap.png" alt=""></div>
+
+        <div class="topbar">
           <span class="pill">金 5008</span>
           <span class="pill">星 42</span>
           <span class="pill">贝 17</span>
           <span class="pill lv">Lv 15</span>
         </div>
 
-        <div class="hero">
-          <img src="art/scene/town.png" alt="">
-          <div class="heroTitle"><b>水豚温泉町</b><span>汤屋食堂篇</span></div>
-          <div class="heroCapy"><img src="art/chars/capy.png" alt=""></div>
+        <!-- 热点：坐标按地图上的建筑位置 -->
+        <div class="hot" style="left:19%; top:53%;">
+          <div class="hotpin big"><span class="ring"></span>食<span class="dot">2</span></div>
+          <div class="hotlb main">汤屋食堂</div>
         </div>
 
-        <div class="grid">
-          <div class="card main">
-            <span class="badge">2 单可交</span>
-            <b>汤屋食堂</b>
-            <span>合成食材、招待客人 · 主玩法</span>
-          </div>
-          <div class="card">
-            <b>汐见川</b><span>钓鱼 · 看准时机</span>
-          </div>
-          <div class="card">
-            <span class="badge g">可收</span>
-            <b>温泉汤屋</b><span>放置 · 泡汤收小费</span>
-          </div>
-          <div class="card">
-            <b>梦境</b><span>解谜 · 4/30 关</span>
-          </div>
-          <div class="card">
-            <b>造町</b><span>布置 · 7/12 件</span>
-          </div>
+        <div class="hot" style="left:74%; top:79%;">
+          <div class="hotpin">汤<span class="dot g">收</span></div>
+          <div class="hotlb">温泉汤屋</div>
         </div>
 
-        <div class="mini">
+        <div class="hot" style="left:56%; top:40%;">
+          <div class="hotpin">钓</div>
+          <div class="hotlb">汐见川</div>
+        </div>
+
+        <div class="hot" style="left:88%; top:22%;">
+          <div class="hotpin">梦</div>
+          <div class="hotlb">梦境</div>
+        </div>
+
+        <div class="hot" style="left:37%; top:73%;">
+          <div class="hotpin">町</div>
+          <div class="hotlb">造町</div>
+        </div>
+
+        <div class="botbar">
           <div class="mbtn">图鉴</div>
           <div class="mbtn">装修</div>
           <div class="mbtn">商店</div>
+          <div class="mbtn">扭蛋</div>
           <div class="mbtn">设置</div>
         </div>
       </div>
       <p class="note">
-        场景图放这里当门面，<em>水豚仍可点（掉食材）</em>。<br>
-        卡片带红点提示：有单可交、汤屋可收工时一眼看到。<br>
-        未解锁的玩法显示为灰色并写明解锁条件。
+        整张地图铺满，建筑上浮动标记，<em>有事做的会亮红点</em>（2 单可交 / 汤屋可收）。<br>
+        主玩法「汤屋食堂」的标记更大，还有一圈呼吸光环。<br>
+        未解锁的显示为灰色。底部一行是次要功能。
       </p>
     </div>
 
-    <!-- 合成页 -->
+    <!-- 食堂页 -->
     <div class="col">
-      <div class="colhd"><b>页面 2 · 汤屋食堂（合成）</b><i>从入口页进来</i></div>
-      <div class="phone">
-        <div class="bar">
+      <div class="colhd"><b>页面 2 · 汤屋食堂</b><i>任务与棋盘都放大</i></div>
+      <div class="phone" style="background:linear-gradient(180deg,var(--sky1),var(--sky4));">
+        <div class="fbar">
           <span class="back">‹ 温泉町</span>
           <span class="pill">金 5008</span>
           <span class="pill">星 42</span>
@@ -189,22 +195,18 @@
         <div class="ordbar">
           <div class="ord">
             <div class="ordbox"><div class="ordav"><img src="art/chars/rabbit.png" alt=""></div>
-              <div class="ordit"></div></div>
+              <div class="ordit"><span class="ordcnt">1/1</span></div></div>
             <span class="ordtag go">交付 +8</span>
           </div>
           <div class="ord">
             <div class="ordbox"><div class="ordav"><img src="art/chars/panda.png" alt=""></div>
-              <div class="ordit"></div><div class="ordit"></div></div>
+              <div class="ordit"><span class="ordcnt">0/2</span></div>
+              <div class="ordit"><span class="ordcnt">1/1</span></div></div>
             <span class="ordtag">+32</span>
           </div>
           <div class="ord">
             <div class="ordbox"><div class="ordav"><img src="art/chars/shiba.png" alt=""></div>
-              <div class="ordit"></div></div>
-            <span class="ordtag">+16</span>
-          </div>
-          <div class="ord">
-            <div class="ordbox"><div class="ordav"><img src="art/chars/hedge.png" alt=""></div>
-              <div class="ordit"></div></div>
+              <div class="ordit"><span class="ordcnt">0/1</span></div></div>
             <span class="ordtag">+16</span>
           </div>
         </div>
@@ -238,32 +240,30 @@
         </div>
       </div>
       <p class="note">
-        <s>去掉了顶部 108px 的场景大图</s> → 棋盘从 66% 提到 <em>约 76%</em>。<br>
-        顶部只留一条细状态栏，左边是返回入口页。<br>
-        底部保留物品详情，右侧放两个高频入口（烹饪台/储物间）。
+        订单卡放大：食材格 <em>34 → 30px 但整卡更高</em>，客人头像 18px 挂角，进度数字更清楚。<br>
+        棋盘格间距与圆角加大，<em>格子边长约 52px</em>（现在 46px）。<br>
+        目标条加高加粗，一眼能读。
       </p>
     </div>
 
   </div>
 
   <div class="cmp">
-    <h2>改动前后对照</h2>
+    <h2>三处关键变化</h2>
     <table>
-      <tr><th>区块</th><th>现在（V2.2）</th><th>改后</th></tr>
-      <tr><td>场景大图</td><td>合成页顶部，108px</td><td><b>移到入口页</b>，合成页不再有</td></tr>
-      <tr><td>棋盘占比</td><td>约 66%</td><td><b>约 76%</b>（格子边长 46 → 53px）</td></tr>
-      <tr><td>玩法入口</td><td>顶部图标条（挤了 6-8 个小图标）</td><td><b>入口页卡片</b>，带名称说明与红点提示</td></tr>
-      <tr><td>次要功能</td><td>「更多」抽屉里翻</td><td>入口页底部一行，直接可见</td></tr>
-      <tr><td>层级</td><td>合成页是主页，其他都是它的子页</td><td><b>入口页是主页</b>，各玩法平级</td></tr>
+      <tr><th>位置</th><th>现在（V2.2）</th><th>改后</th></tr>
+      <tr><td>入口</td><td>合成页顶部一条小图标栏</td><td><b>整张小镇地图</b>，建筑上点标记进入</td></tr>
+      <tr><td>任务栏</td><td>高 63px，食材格 34px</td><td><b>高约 82px</b>，食材格 30px 但卡片更高更清楚</td></tr>
+      <tr><td>棋盘</td><td>占 66%，格子 46px</td><td><b>占约 74%，格子约 52px</b></td></tr>
     </table>
   </div>
 
   <div class="ask">
-    <b>确认这几点后我就开工：</b><br>
-    1. 入口页的卡片布局是否合适（主玩法大卡 + 其余四个小卡 + 底部一行次要入口）？<br>
-    2. 合成页顶部只留一条细状态栏，够不够用？<br>
-    3. 打开游戏默认落在<b>入口页</b>，还是记住上次所在页面？<br>
-    4. 造町（V2.3）的布置界面我按同样风格出图，还是先把这版结构改完再说？
+    <b>确认这几点我就开工：</b><br>
+    1. <b>这张小镇地图</b>能用吗？（画风比游戏里的图标精细一些；要更扁平的话我重出）<br>
+    2. 热点标记现在用文字（食/汤/钓/梦/町），要不要改成<b>小图标</b>？<br>
+    3. 地图上五个位置对不对得上你想要的建筑？<br>
+    4. 食堂页这个比例（任务栏 + 棋盘各放大）合不合适？
   </div>
 </div>
 </body>
