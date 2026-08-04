@@ -1527,9 +1527,13 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.3';
+var GAME_VER = 'V2.3.1';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.3.1', d:'2026-08-05', t:'修复音量调节', li:[
+    '修复 iPhone 上背景音与配音的音量滑块无效的问题',
+    '原因是 iOS 会忽略网页设置的音量，改用另一套音频通道后可正常调节'
+  ]},
   { v:'V2.3', d:'2026-08-05', t:'温泉町全貌', li:[
     '新增小镇入口页：一整张地图，点建筑进各个玩法',
     '哪里有事做就亮红点，扫一眼就知道去哪',
@@ -3181,7 +3185,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '20';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '21';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4390,6 +4394,39 @@ var PENT = [523.25, 587.33, 659.25, 783.99, 880];
    循环播放，音量压得低（只做底噪不抢戏）；跟随音效开关一起静音。
    浏览器不允许自动播放，所以等玩家第一次触碰界面再启动。 */
 var bgmEl = null, bgmReady = false;
+/* iOS Safari 会忽略 audio.volume（音量只能由物理按键控制），
+   所以背景音与配音都要接到 Web Audio 的增益节点上才能真正调音量。 */
+var bgmGain = null, bgmNode = null, voiceGain = null, voiceNode = null;
+function mediaGain(elm, which){
+  if(!actx) return null;
+  try{
+    if(which === 'bgm'){
+      if(!bgmNode){
+        bgmNode = actx.createMediaElementSource(elm);
+        bgmGain = actx.createGain();
+        bgmNode.connect(bgmGain);
+        bgmGain.connect(actx.destination);
+        elm.volume = 1;          // 音量交给增益节点，元素自身开满
+      }
+      return bgmGain;
+    }
+    if(!voiceNode){
+      voiceNode = actx.createMediaElementSource(elm);
+      voiceGain = actx.createGain();
+      voiceNode.connect(voiceGain);
+      voiceGain.connect(actx.destination);
+      elm.volume = 1;
+    }
+    return voiceGain;
+  }catch(e){ return null; }
+}
+/* 统一设音量：优先走增益节点（iOS 唯一有效的路径），拿不到再退回 volume 属性 */
+function setMediaVol(elm, which, v){
+  if(!elm) return;
+  var g = mediaGain(elm, which);
+  if(g){ try{ g.gain.value = v; return; }catch(e){} }
+  try{ elm.volume = v; }catch(e){}
+}
 /* 三档独立音量（0-100）。背景音默认压到 30，免得盖住音效与配音 */
 var VOL_DEF = { sfx: 80, bgm: 30, voice: 90 };
 function volOf(kind){
@@ -4402,15 +4439,14 @@ function bgmInit(){
   try{
     bgmEl = new Audio('audio/bgm.mp3?v=' + ART_VER);
     bgmEl.loop = true;
-    bgmEl.volume = volOf('bgm');
     bgmEl.preload = 'none';
   }catch(e){ bgmEl = null; }
 }
 function bgmPlay(){
   bgmInit();
   if(!bgmEl || S.mute) return;
-  bgmEl.volume = volOf('bgm');
   if(volOf('bgm') <= 0){ bgmStop(); return; }
+  setMediaVol(bgmEl, 'bgm', volOf('bgm'));
   try{
     var pr = bgmEl.play();
     if(pr && pr.catch) pr.catch(function(){});   // 未交互时会被拒绝，忽略即可
@@ -4428,7 +4464,7 @@ function playVoice(key){
   try{
     if(!voiceEl){ voiceEl = new Audio(); voiceEl.preload = 'none'; }
     voiceEl.pause();
-    voiceEl.volume = volOf('voice');
+    setMediaVol(voiceEl, 'voice', volOf('voice'));
     voiceEl.src = 'audio/voice/' + key + '.mp3?v=' + ART_VER;
     var pr = voiceEl.play();
     if(pr && pr.catch) pr.catch(function(){});
@@ -4437,14 +4473,20 @@ function playVoice(key){
 function stopVoice(){ if(voiceEl){ try{ voiceEl.pause(); }catch(e){} } }
 
 function bgmSync(){
-  if(bgmEl) bgmEl.volume = volOf('bgm');
+  if(bgmEl) setMediaVol(bgmEl, 'bgm', volOf('bgm'));
   if(S.mute || volOf('bgm') <= 0) bgmStop(); else bgmPlay();
 }
 
 function audioInit(){
+  // 必须先建 AudioContext，bgmPlay 才能把音乐接到增益节点上（否则 iOS 调不了音量）
+  if(!actx){
+    try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+  }
+  // iOS 上 AudioContext 初始是 suspended，要在用户手势里唤醒
+  if(actx && actx.state === 'suspended'){
+    try{ actx.resume(); }catch(e){}
+  }
   bgmPlay();          // 借第一次交互启动背景音乐
-  if(actx) return;
-  try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
 }
 function tone(f, dur, vol, type, delay){
   if(S.mute || !actx || volOf('sfx') <= 0) return;
@@ -4918,7 +4960,8 @@ window.__game = {
   fishRoll: fishRoll, buyRod: buyRod, rodLevel: rodLevel, fishUnlocked: fishUnlocked,
   RODS: RODS, FISH_POOL: FISH_POOL, FISH_COST: FISH_COST, FS: function(){ return FISH_STATE; },
   volOf: volOf, VOL_DEF: VOL_DEF, playVoice: playVoice, stopVoice: stopVoice,
-  bgmPlay: bgmPlay, bgmStop: bgmStop, bgmSync: bgmSync,
+  bgmPlay: bgmPlay, bgmStop: bgmStop, bgmSync: bgmSync, BGM: function(){ return bgmEl; },
+  BGMGain: function(){ return bgmGain; }, setMediaVol: setMediaVol,
   DREAMS: DREAMS, dreamStart: dreamStart, dreamMove: dreamMove, dreamWin: dreamWin,
   dreamStars: dreamStars, dreamFinish: dreamFinish, dreamUnlocked: dreamUnlocked,
   dreamTotalStars: dreamTotalStars, dreamCount: dreamCount, DM: function(){ return DM; },

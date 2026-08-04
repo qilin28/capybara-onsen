@@ -752,6 +752,19 @@ ST.onsen = null;
 ok(gT.spotBadge('onsen') === null, '汤屋没在营业时不提醒');
 gT.stopTick();
 
+// ---------- 音量走 Web Audio 增益（iOS 忽略 audio.volume） ----------
+{
+  const src2 = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+  ok(src2.indexOf('createMediaElementSource') >= 0, '背景音与配音接到了 Web Audio 增益节点');
+  ok(src2.indexOf('function setMediaVol') >= 0, '有统一的媒体音量入口');
+  // audioInit 必须先建 AudioContext 再播音乐，否则接不上增益节点
+  const ai = src2.slice(src2.indexOf('function audioInit'), src2.indexOf('function audioInit') + 420);
+  ok(ai.indexOf('new (window.AudioContext') < ai.indexOf('bgmPlay()'),
+     'audioInit 先建 AudioContext 再启动音乐');
+  ok(ai.indexOf('resume()') >= 0, 'audioInit 会唤醒 iOS 上挂起的 AudioContext');
+  ok(src2.indexOf("bgmEl.volume = volOf('bgm')") < 0, '不再直接写 audio.volume（iOS 上无效）');
+}
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
