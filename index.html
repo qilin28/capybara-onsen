@@ -3241,7 +3241,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '23';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '24';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
