@@ -564,13 +564,20 @@ gD2.stopTick(); gD3.stopTick();
 // ---------- V1.6 三档音量 ----------
 const gV = makeEnv(new Map());
 const SV = gV.S();
-ok(SV.vol.sfx === 80 && SV.vol.bgm === 30 && SV.vol.voice === 90, '三档音量有默认值，背景音默认压低到 30');
-ok(gV.volOf('bgm') === 0.3, '音量换算为 0-1 系数');
+ok(SV.vol.sfx === 80 && SV.vol.bgm === 40 && SV.vol.voice === 90, '三档音量有默认值');
+ok(gV.volOf('sfx') === 0.8, '音效按滑块线性换算');
+// 背景音是底噪：走平方曲线且有上限，同样的滑块位置比音效轻得多
+ok(gV.volOf('bgm') < 0.1, '背景音默认档位很轻（' + gV.volOf('bgm').toFixed(3) + '）');
+ok(gV.volOf('bgm') < gV.volOf('sfx') / 5, '背景音明显低于音效，不会盖住其它声音');
 SV.vol.bgm = 0;
 ok(gV.volOf('bgm') === 0, '背景音可拉到 0');
 SV.vol.bgm = 200;
-ok(gV.volOf('bgm') === 1, '超范围的值会被夹到上限');
-SV.vol.bgm = 30;
+ok(gV.volOf('bgm') <= 0.45, '背景音拉满也有上限，不会吵');
+SV.vol.bgm = 20;
+const q20 = gV.volOf('bgm');
+SV.vol.bgm = 60;
+ok(gV.volOf('bgm') > q20 * 5, '平方曲线让中段的调节听感差别明显');
+SV.vol.bgm = 40;
 SV.mute = true;
 ok(gV.volOf('sfx') === 0 && gV.volOf('bgm') === 0 && gV.volOf('voice') === 0, '总静音时三档全部为 0');
 SV.mute = false;
@@ -579,7 +586,8 @@ gV.stopTick();
 // 音量设置可存档
 const volStore = new Map();
 const gV1 = makeEnv(volStore);
-gV1.S().vol = { sfx: 55, bgm: 10, voice: 100 };
+// curve2 标记表示已经历过背景音曲线迁移，玩家自己调的值不会再被覆盖
+gV1.S().vol = { sfx: 55, bgm: 10, voice: 100, curve2: 1 };
 gV1.save();
 const gV2 = makeEnv(volStore);
 ok(gV2.S().vol.bgm === 10 && gV2.S().vol.sfx === 55, '音量设置可存档恢复');
@@ -596,7 +604,8 @@ const SS2 = gS2.S();
 SS2.mute = true;
 ok(gS2.volOf('bgm') === 0, '静音时音量系数为 0');
 SS2.mute = false; SS2.vol.bgm = 45;
-ok(gS2.volOf('bgm') === 0.45, '取消静音后按滑块值出声');
+ok(gS2.volOf('bgm') > 0, '取消静音后恢复出声');
+ok(gS2.volOf('sfx') === 0.8, '音效档位不受背景音曲线影响');
 gS2.stopTick();
 
 // ---------- V2.1 汐见川钓鱼 ----------
@@ -763,6 +772,19 @@ gT.stopTick();
      'audioInit 先建 AudioContext 再启动音乐');
   ok(ai.indexOf('resume()') >= 0, 'audioInit 会唤醒 iOS 上挂起的 AudioContext');
   ok(src2.indexOf("bgmEl.volume = volOf('bgm')") < 0, '不再直接写 audio.volume（iOS 上无效）');
+}
+
+// 老档的背景音数值迁移
+{
+  const gM = makeEnv(new Map());
+  const oldVol = gM.migrateVol({ sfx: 55, bgm: 30, voice: 100 });
+  ok(oldVol.bgm === gM.VOL_DEF.bgm, '老档的背景音数值被拉回新默认档');
+  ok(oldVol.sfx === 55 && oldVol.voice === 100, '音效与配音的设置保留不动');
+  const again = gM.migrateVol(oldVol);
+  again.bgm = 88;
+  const third = gM.migrateVol(again);
+  ok(third.bgm === 88, '迁移只做一次，之后玩家自己调的值会保留');
+  gM.stopTick();
 }
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();

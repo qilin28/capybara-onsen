@@ -1527,9 +1527,14 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.3.1';
+var GAME_VER = 'V2.3.2';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.3.2', d:'2026-08-05', t:'背景音调轻', li:[
+    '背景音默认音量降到原来的四分之一',
+    '滑块改用听感曲线，小音量区的调节更容易听出差别',
+    '背景音拉满也有上限，不会盖住音效和配音'
+  ]},
   { v:'V2.3.1', d:'2026-08-05', t:'修复音量调节', li:[
     '修复 iPhone 上背景音与配音的音量滑块无效的问题',
     '原因是 iOS 会忽略网页设置的音量，改用另一套音频通道后可正常调节'
@@ -1740,7 +1745,7 @@ function initNew(){
     gens: {},
     orders:[null,null,null], sold:null,
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
-    vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
+    vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
     pool:0, onsen:null, rep:0, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
@@ -1795,7 +1800,7 @@ function load(){
     thx: Array.isArray(d.thx) ? d.thx : [],
     fav: (d.fav && typeof d.fav === 'object') ? d.fav : {},   // V1.7 老档默认空好感
     endless: d.endless || 0,
-    vol: (d.vol && typeof d.vol === 'object') ? d.vol : { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
+    vol: migrateVol(d.vol),
     rod: d.rod || 0, fishCount: d.fishCount || 0,
     pool: d.pool || 0, onsen: d.onsen || null, rep: d.rep || 0,
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
@@ -3185,7 +3190,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '21';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '22';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4428,11 +4433,31 @@ function setMediaVol(elm, which, v){
   try{ elm.volume = v; }catch(e){}
 }
 /* 三档独立音量（0-100）。背景音默认压到 30，免得盖住音效与配音 */
-var VOL_DEF = { sfx: 80, bgm: 30, voice: 90 };
+var VOL_DEF = { sfx: 80, bgm: 40, voice: 90 };
+/* 背景音是底噪，不该和音效同一量级。滑块拉满也只到 0.45，
+   而且用平方曲线映射——小滑块位置的变化听起来才明显。 */
+var BGM_CEIL = 0.45;
+/* 老档迁移：背景音改用平方曲线后，旧的滑块数值会被算得过轻，统一拉回默认档 */
+function migrateVol(v){
+  var def = { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice };
+  if(!v || typeof v !== 'object') return def;
+  var out = {
+    sfx: typeof v.sfx === 'number' ? v.sfx : def.sfx,
+    bgm: typeof v.bgm === 'number' ? v.bgm : def.bgm,
+    voice: typeof v.voice === 'number' ? v.voice : def.voice
+  };
+  if(!v.curve2) out.bgm = def.bgm;   // 只迁移一次，之后玩家自己调的值就保留
+  out.curve2 = 1;
+  return out;
+}
 function volOf(kind){
   if(S.mute) return 0;
   var v = (S.vol && typeof S.vol[kind] === 'number') ? S.vol[kind] : VOL_DEF[kind];
-  return Math.max(0, Math.min(100, v)) / 100;
+  var p = Math.max(0, Math.min(100, v)) / 100;
+  // 人耳对音量的感知接近对数，线性映射在小音量区几乎听不出差别，
+  // 所以背景音用平方曲线并压低上限
+  if(kind === 'bgm') return p * p * BGM_CEIL;
+  return p;
 }
 function bgmInit(){
   if(bgmEl) return;
@@ -4948,6 +4973,7 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  migrateVol: migrateVol, BGM_CEIL: BGM_CEIL,
   openTown: openTown, closeTown: closeTown, openDiner: openDiner,
   rTown: rTown, TOWN_SPOTS: TOWN_SPOTS, spotBadge: spotBadge, spotOpen: spotOpen,
   onsenStart: onsenStart, onsenCollect: onsenCollect, onsenLeft: onsenLeft,
