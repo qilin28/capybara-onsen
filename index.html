@@ -402,7 +402,6 @@ body{
   background:radial-gradient(circle at 50% 45%, #F5D76E 0 42%, transparent 43%);
   filter:drop-shadow(0 0 1px rgba(0,0,0,.15));}
 .dtile .dst i.on{background:radial-gradient(circle at 50% 45%, #F5B942 0 42%, transparent 43%);}
-.dreamPanel{max-width:400px;}
 .dmbar{display:flex; align-items:center; justify-content:space-between; gap:8px;
   background:rgba(120,86,50,.08); border-radius:11px; padding:6px 10px; margin-bottom:10px;
   font-size:11.5px; font-weight:900;}
@@ -428,6 +427,44 @@ body{
   background:radial-gradient(circle at 50% 45%, #F5D76E 0 42%, transparent 43%);}
 .dmwin .dst i.on{background:radial-gradient(circle at 50% 45%, #F5B942 0 42%, transparent 43%);}
 
+/* ---------- 温泉汤屋 ---------- */
+#bath{position:relative; height:clamp(150px,26vh,210px); border-radius:18px; overflow:hidden;
+  background:linear-gradient(180deg,#F6E8D8 0%,#EBD6BE 38%,#D9BFA0 100%);
+  border:2.5px solid var(--pline); box-shadow:inset 0 3px 12px rgba(120,80,40,.25);}
+#bath .bwater{position:absolute; left:8%; right:8%; bottom:14%; height:46%;
+  border-radius:50%/28%; background:linear-gradient(180deg,#CFEAF2,#9FD4E4);
+  box-shadow:inset 0 4px 12px rgba(60,120,140,.35);}
+#bath.busy .bwater{animation:bathRipple 3.6s ease-in-out infinite;}
+@keyframes bathRipple{50%{ transform:scaleX(1.02) scaleY(.97); }}
+#bath .bsteam{position:absolute; left:0; right:0; bottom:44%; height:40%; pointer-events:none;}
+#bath .bsteam i{position:absolute; bottom:0; width:16px; height:16px; border-radius:50%;
+  background:rgba(255,255,255,.55); opacity:0;}
+#bath .bsteam i:nth-child(1){left:32%; animation:steamUp 3.4s ease-out infinite;}
+#bath .bsteam i:nth-child(2){left:50%; animation:steamUp 3.4s ease-out .9s infinite;}
+#bath .bsteam i:nth-child(3){left:66%; animation:steamUp 3.4s ease-out 1.8s infinite;}
+@keyframes steamUp{ 0%{opacity:0; transform:translateY(0) scale(.6);}
+  30%{opacity:.7;} 100%{opacity:0; transform:translateY(-70px) scale(1.7);} }
+#bath .bcap{position:absolute; left:50%; bottom:24%; transform:translateX(-50%);
+  width:62px; height:62px;}
+#bath.busy .bcap{animation:capSoak 3.6s ease-in-out infinite;}
+@keyframes capSoak{50%{ transform:translateX(-50%) translateY(4px); }}
+#bath .bcap .art{width:100%; height:100%;}
+#bath .bname{position:absolute; left:10px; top:9px; font-size:12px; font-weight:900;
+  color:#FFF8EC; background:rgba(110,80,50,.6); border-radius:999px; padding:3px 11px;}
+.onstat{margin-top:10px; background:rgba(120,86,50,.07); border:2px solid var(--pline);
+  border-radius:13px; padding:9px 12px;}
+.onrow{display:flex; align-items:center; justify-content:space-between; padding:3px 0;
+  font-size:12px; color:var(--sub);}
+.onrow b{font-size:13px; font-weight:900; color:var(--ink);}
+.suprow{display:flex; gap:7px; flex-wrap:wrap;}
+.supit{display:flex; flex-direction:column; align-items:center; gap:2px; width:60px;
+  background:rgba(120,86,50,.06); border:2px solid var(--pline); border-radius:12px;
+  padding:5px 3px; cursor:pointer; font-family:inherit;}
+.supit .art{width:36px; height:36px;}
+.supit .supn{font-size:10px; font-weight:900; color:var(--sub);}
+.supit.on{border-color:#7FB84F; background:#EFFAEF; box-shadow:0 0 0 2px rgba(127,184,79,.3);}
+.supnone{font-size:11.5px; color:var(--sub);}
+
 /* ---------- 更新记录 ---------- */
 .logitem{border:2px solid var(--pline); border-radius:12px; margin-bottom:7px; overflow:hidden;
   background:rgba(120,86,50,.05);}
@@ -440,16 +477,38 @@ body{
 .logitem.on .logli{display:block;}
 .logli li{font-size:11.5px; line-height:1.75; color:var(--sub);}
 
+/* ---------- 整页视图 ---------- */
+#page{display:none; position:fixed; inset:0; z-index:60; flex-direction:column;
+  width:100%; max-width:520px; margin:0 auto;
+  padding:env(safe-area-inset-top) 8px calc(6px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 30%,var(--sky3) 62%,var(--sky4) 100%);
+  overflow:hidden;}
+#page.on{display:flex;}
+#pageBar{flex:0 0 auto; display:flex; align-items:center; gap:9px; padding:7px 2px 8px;}
+.pgback{display:flex; align-items:center; gap:3px; flex:none;
+  background:linear-gradient(180deg,var(--paper),var(--paper2)),var(--grain);
+  border:2px solid var(--pline); border-bottom-width:3px; border-radius:11px;
+  padding:5px 10px 5px 7px; cursor:pointer; color:var(--ink);
+  font-family:inherit; font-weight:900; font-size:11.5px;}
+.pgback:active{transform:translateY(1.5px); border-bottom-width:1.5px;}
+.pgback svg{width:15px; height:15px;}
+#pgTitle{flex:1; min-width:0; font-size:16px; font-weight:900; letter-spacing:1px;
+  color:#5C4A2E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+#pgSub{flex:none; font-size:11px; font-weight:900; color:#6B7A4A;}
+#pageBody{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding-bottom:8px;}
+#pageBody::-webkit-scrollbar{width:0;}
+
 /* ---------- 汐见川钓鱼 ---------- */
-#pond{position:relative; height:150px; border-radius:16px; overflow:hidden;
+#pond{position:relative; height:clamp(180px,34vh,280px); border-radius:16px; overflow:hidden;
   background:linear-gradient(180deg,#BFE3F0 0%,#8CC7DE 45%,#6BAFCB 100%);
   border:2.5px solid var(--pline); box-shadow:inset 0 3px 10px rgba(20,60,90,.25);}
 #pondWater{position:absolute; inset:0;
   background:repeating-linear-gradient(115deg, rgba(255,255,255,.16) 0 3px, transparent 3px 22px);
   animation:pondFlow 7s linear infinite;}
 @keyframes pondFlow{to{ transform:translateX(-22px); }}
-#float{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
-  width:30px; height:30px; pointer-events:none;}
+#float{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:38px; height:38px; pointer-events:none;}
 #float .fbody{position:absolute; inset:0; border-radius:50%;
   background:linear-gradient(180deg,#FFF3E0 0 48%, #E8563F 48% 100%);
   border:2.5px solid #8A3B2C; box-shadow:0 3px 8px rgba(20,60,90,.4);}
@@ -458,10 +517,10 @@ body{
   border-radius:50%; opacity:0;}
 /* 待机：轻轻上下浮动 */
 #pond.wait #float{ animation:floatBob 2.4s ease-in-out infinite; }
-@keyframes floatBob{ 50%{ top:calc(52% + 5px); } }
+@keyframes floatBob{ 50%{ top:calc(50% + 6px); } }
 /* 上钩：猛地沉下去 + 涟漪，这一刻要点 */
 #pond.bite #float{ animation:floatDip .55s cubic-bezier(.3,0,.2,1) forwards; }
-@keyframes floatDip{ to{ top:calc(52% + 22px); } }
+@keyframes floatDip{ to{ top:calc(50% + 30px); } }
 #pond.bite #float .fring{ animation:floatRing .55s ease-out 2; }
 @keyframes floatRing{ from{ opacity:.9; transform:translate(-50%,-50%) scale(.6);}
   to{ opacity:0; transform:translate(-50%,-50%) scale(2.6);} }
@@ -1089,6 +1148,11 @@ body{
   <circle cx="20.5" cy="9.5" r=".8" fill="currentColor" stroke="none"/></g></symbol>
 <symbol id="i-menu" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
   <path d="M4 7h16M4 12h16M4 17h16"/></g></symbol>
+<symbol id="i-onsen" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+  <path d="M4 15h16v2a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-2Z"/>
+  <path d="M8.5 10.5c0-1.5 1.5-2 1.5-3.5M12 10c0-1.5 1.5-2 1.5-3.5M15.5 10.5c0-1.5 1.5-2 1.5-3.5"/></g></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 5l-7 7 7 7"/></g></symbol>
 <symbol id="i-fish" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
   <path d="M3 12c3-4 7-6 10-6s6 2 7.5 6c-1.5 4-4.5 6-7.5 6s-7-2-10-6Z"/>
   <path d="M3 12l-1.2-3M3 12l-1.2 3"/><circle cx="15.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/></g></symbol>
@@ -1124,6 +1188,16 @@ body{
   <path d="M9 11.5 V4.5 a1.5 1.5 0 0 1 3 0 V10 m0 -3 a1.5 1.5 0 0 1 3 0 V11 m0 -2 a1.5 1.5 0 0 1 3 0 V14 q0 6 -5.5 6 Q9 20 7.5 16.5 L5.5 12.5 a1.4 1.4 0 0 1 2.4 -1.4 L9 12.6"/></g></symbol>
 </defs>
 </svg>
+
+<!-- 整页视图：大玩法（钓鱼/梦境/汤屋）各占一整屏，不再挤在弹窗里 -->
+<div id="page">
+  <div id="pageBar">
+    <button class="pgback" id="pgBack"><svg><use href="#i-back"/></svg><span>回店里</span></button>
+    <b id="pgTitle">汐见川</b>
+    <span id="pgSub"></span>
+  </div>
+  <div id="pageBody"></div>
+</div>
 
 <div id="app">
   <!-- 场景 -->
@@ -1258,6 +1332,7 @@ body{
       <button class="mbtn" id="helpBtn"><svg><use href="#i-help"/></svg><span>玩法</span></button>
       <button class="mbtn" id="dreamBtn"><svg><use href="#i-moon"/></svg><span>梦境</span></button>
       <button class="mbtn" id="fishBtn"><svg><use href="#i-fish"/></svg><span>钓鱼</span></button>
+      <button class="mbtn" id="onsenBtn"><svg><use href="#i-onsen"/></svg><span>汤屋</span></button>
       <button class="mbtn" id="setBtn"><svg><use href="#i-gear"/></svg><span>设置</span></button>
       <button class="mbtn" id="sndBtn"><svg id="sndIc"><use href="#i-snd"/></svg><span id="sndTx">声音</span></button>
     </div>
@@ -1336,27 +1411,7 @@ body{
 </div></div>
 
 <!-- 梦境解谜：关卡选择 -->
-<div id="dreamM" class="modal"><div class="panel">
-  <button class="pclose" data-close="dreamM"><svg><use href="#i-close"/></svg></button>
-  <h2>水豚的梦境</h2><div class="psub" id="dreamSub"></div>
-  <div class="dlist" id="dreamList"></div>
-</div></div>
-
 <!-- 梦境对局 -->
-<div id="dreamP" class="modal"><div class="panel dreamPanel">
-  <button class="pclose" data-close="dreamP"><svg><use href="#i-close"/></svg></button>
-  <h2 id="dmName">梦境</h2>
-  <div class="dmbar">
-    <span class="dmgoal" id="dmGoal"></span>
-    <span class="dmmv">剩余步数 <b id="dmLeft">0</b></span>
-  </div>
-  <div id="dmBoard"></div>
-  <div class="setrow" style="margin-top:12px">
-    <button class="sbtn" id="dmRetry">重来</button>
-    <button class="sbtn" id="dmQuit">离开梦境</button>
-  </div>
-</div></div>
-
 <!-- 声音 -->
 <div id="sndM" class="modal"><div class="panel">
   <button class="pclose" data-close="sndM"><svg><use href="#i-close"/></svg></button>
@@ -1372,26 +1427,6 @@ body{
   <div class="setrow" style="margin-top:6px">
     <button class="sbtn" id="muteBtn">全部静音</button>
   </div>
-</div></div>
-
-<!-- 汐见川钓鱼 -->
-<div id="fishM" class="modal"><div class="panel">
-  <button class="pclose" data-close="fishM"><svg><use href="#i-close"/></svg></button>
-  <h2>汐见川</h2><div class="psub" id="fishSub"></div>
-
-  <div id="pond">
-    <div id="pondWater"></div>
-    <div id="float"><span class="fbody"></span><span class="fring"></span></div>
-    <div id="fishHint">点「抛竿」开始</div>
-  </div>
-
-  <div class="setrow" style="justify-content:center; margin-top:12px">
-    <button class="bigbtn" id="castBtn">抛竿（20 金币）</button>
-  </div>
-  <div id="fishRes"></div>
-
-  <div class="dxh" style="margin-top:14px"><i style="background:#7FB8D4"></i>鱼竿</div>
-  <div id="rodBox"></div>
 </div></div>
 
 <!-- 订单详情（点顶部客人图标展开） -->
@@ -1467,7 +1502,9 @@ var CHAINS = {
   cook1: { n: '暖心料理', color: '#E8955C', cooked: 1, items: ['k1','k2','k3','k4','k5'] },
   cook2: { n: '幸福甜品', color: '#E8A0C0', cooked: 1, items: ['t1','t2','t3','t4','t5'] },
   fish: { n: '汐见川', color: '#7FB8D4', items: ['f1','f2','f3','f4','f5','f6','f7'] },
-  cook3: { n: '河鲜料理', color: '#6FA8C8', cooked: 1, items: ['r1','r2','r3','r4','r5'] }
+  cook3: { n: '河鲜料理', color: '#6FA8C8', cooked: 1, items: ['r1','r2','r3','r4','r5'] },
+  wash: { n: '汤屋布草', color: '#D8C7E8', items: ['w1','w2','w3'] },
+  aroma: { n: '香氛坊', color: '#C8A8D8', items: ['a1','a2','a3','a4'] }
 };
 var BASECH = ['veg','bun','dairy'];
 var ITEM_NAMES = {
@@ -1477,7 +1514,9 @@ var ITEM_NAMES = {
   k1:'鸡蛋灌饼', k2:'番茄炒蛋', k3:'菜肉大包', k4:'南瓜奶露', k5:'芝士小笼',
   t1:'焦糖布丁', t2:'香酥蛋挞', t3:'云朵舒芙蕾', t4:'南瓜派', t5:'星空慕斯',
   f1:'小银鱼', f2:'青花鱼', f3:'橙斑鱼', f4:'河蚌', f5:'红蟹', f6:'鲭鱼', f7:'金鲤',
-  r1:'盐烤小鱼', r2:'鲜贝汤', r3:'蟹肉可乐饼', r4:'汐见渔火锅', r5:'金鲤宴'
+  r1:'盐烤小鱼', r2:'鲜贝汤', r3:'蟹肉可乐饼', r4:'汐见渔火锅', r5:'金鲤宴',
+  w1:'手巾', w2:'叠好的浴巾', w3:'桧木浴桶',
+  a1:'香油', a2:'浴盐', a3:'药草束', a4:'秘制汤引'
 
 };
 var ITEMS = {};
@@ -1492,6 +1531,8 @@ var RECIPES = [
   { r:'k3', a:'bun6', b:'veg6', hint:'实在的面点装满一篮鲜蔬' },
   { r:'k4', a:'veg5', b:'d5',   hint:'圆滚滚的甜与丝滑相遇' },
   { r:'k5', a:'bun7', b:'d6',   hint:'笼屉里的拉丝惊喜' },
+  { r:'w1', a:'veg2', b:'d1',   hint:'柔软的棉与温热的水' },
+  { r:'a1', a:'veg3', b:'d2',   hint:'把草木的香气锁进小瓶子' },
   { r:'r1', a:'f2',   b:'bun2', hint:'河边的小鱼，撒点盐上火烤' },
   { r:'r2', a:'f4',   b:'veg3', hint:'贝壳张开时，鲜味就出来了' },
   { r:'r3', a:'f5',   b:'bun5', hint:'把横行的家伙裹进酥皮里' },
@@ -1518,9 +1559,16 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.1';
+var GAME_VER = 'V2.2';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.2', d:'2026-08-04', t:'温泉汤屋', li:[
+    '新玩法：等级 10 开放汤屋，投入毛巾与香氛让客人泡汤收小费',
+    '关掉游戏也在赚，回来再收（最多累计 8 小时）',
+    '新增布草链与香氛链，主棋盘产物有了新去处',
+    '汤池 3 级可升，声望随经营累积',
+    '钓鱼与梦境改为整页显示，不再挤在小弹窗里'
+  ]},
   { v:'V2.1', d:'2026-08-04', t:'汐见川钓鱼', li:[
     '新玩法：等级 5 开放钓鱼，盯准浮标下沉的瞬间提竿',
     '完美判定有机会钓到更大的鱼，还可能是闪光的',
@@ -1715,7 +1763,8 @@ function initNew(){
     orders:[null,null,null], sold:null,
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
-    rod:0, fishCount:0, dream:{}, shells:0,
+    rod:0, fishCount:0,
+    pool:0, onsen:null, rep:0, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1744,6 +1793,7 @@ function save(){
       cells:cells, gens:S.gens, orders:S.orders, t:now(),
       story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless, vol:S.vol,
       rod:S.rod, fishCount:S.fishCount,
+      pool:S.pool, onsen:S.onsen, rep:S.rep,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -1769,6 +1819,7 @@ function load(){
     endless: d.endless || 0,
     vol: (d.vol && typeof d.vol === 'object') ? d.vol : { sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice },
     rod: d.rod || 0, fishCount: d.fishCount || 0,
+    pool: d.pool || 0, onsen: d.onsen || null, rep: d.rep || 0,
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -3156,7 +3207,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '18';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '19';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3269,6 +3320,7 @@ function rOrders(){
   // 功能入口并入同一条：任务在前，工具在后，中间用分隔标记
   html += '<span class="tsep"></span>';
   var tools = [
+    ['onsen', 'i-onsen',   '汤屋'],
     ['fish',  'i-fish',    '钓鱼'],
     ['cook',  'i-pot',     '烹饪台'],
     ['gacha', 'i-capsule', '扭蛋机'],
@@ -3281,6 +3333,7 @@ function rOrders(){
   tools = tools.filter(function(t){
     if(t[0] === 'dream') return S.level >= 3;
     if(t[0] === 'fish')  return fishUnlocked();
+    if(t[0] === 'onsen') return onsenUnlocked();
     return true;
   });
   tools.forEach(function(t){
@@ -3290,11 +3343,279 @@ function rOrders(){
   });
   wrap.innerHTML = html;
 }
+/* ================= 温泉汤屋（V2.2） =================
+   放置经营：把毛巾和香氛投进汤池，客人泡完给小费。
+   与前面三个玩法的区别是"不需要一直盯着"——离线也在赚，一天看两三次就行。 */
+var POOLS = [
+  { id:'p1', n:'岩汤',   cost:0,    dur:30, tip:18,  desc:'外婆留下的老池子' },
+  { id:'p2', n:'桧木汤', cost:600,  dur:45, tip:34,  desc:'木香扑鼻，客人愿意多待会儿' },
+  { id:'p3', n:'花见汤', cost:1800, dur:70, tip:62,  desc:'池边种了樱花，小费最丰厚' }
+];
+var ONSEN_MAX_HOURS = 8;         // 离线结算上限，防止长期不上线爆收益
+/* 投入的物资等级越高，小费加成越多 */
+function onsenBonus(towel, aroma){
+  var t = towel ? (ITEMS[towel] ? ITEMS[towel].tier : 0) : 0;
+  var a = aroma ? (ITEMS[aroma] ? ITEMS[aroma].tier : 0) : 0;
+  return 1 + t * 0.18 + a * 0.22;      // 都不投就是 1 倍
+}
+function onsenUnlocked(){ return S.level >= 10; }
+function poolOwned(i){ return i <= (S.pool || 0); }
+function poolCur(){ return POOLS[Math.min(S.pool || 0, POOLS.length - 1)]; }
+
+/* 开一轮：消耗投入的物资，记录开始时间 */
+function onsenStart(towelId, aromaId){
+  if(!onsenUnlocked()) return false;
+  if(S.onsen && S.onsen.at) return false;          // 已经在泡了
+  // 物资从储物间或棋盘扣
+  if(towelId && !consumeItem(towelId)) { toast('没有' + ITEMS[towelId].n); return false; }
+  if(aromaId && !consumeItem(aromaId)) { toast('没有' + ITEMS[aromaId].n); return false; }
+  var p = poolCur();
+  S.onsen = { at: Date.now(), pool: p.id, towel: towelId || null, aroma: aromaId || null };
+  save();
+  return true;
+}
+/* 从棋盘或储物间消耗一个指定物品 */
+function consumeItem(id){
+  for(var i = 0; i < S.board.length; i++){
+    var c = S.board[i];
+    if(c && c.t === 'i' && c.id === id){ S.board[i] = null; rCell(i); return true; }
+  }
+  for(var j = 0; j < S.store.length; j++){
+    if(S.store[j] === id){ S.store[j] = null; return true; }
+  }
+  return false;
+}
+/* 还剩多久（秒）；已完成返回 0 */
+function onsenLeft(){
+  if(!S.onsen || !S.onsen.at) return -1;
+  var p = POOLS.filter(function(x){ return x.id === S.onsen.pool; })[0] || POOLS[0];
+  var passed = (Date.now() - S.onsen.at) / 1000;
+  return Math.max(0, Math.round(p.dur * 60 - passed));
+}
+/* 收小费：按池子基础 x 物资加成 x 满客轮数 */
+function onsenCollect(){
+  if(!S.onsen || !S.onsen.at) return null;
+  if(onsenLeft() > 0) return null;
+  var p = POOLS.filter(function(x){ return x.id === S.onsen.pool; })[0] || POOLS[0];
+  var passed = (Date.now() - S.onsen.at) / 1000 / 60;      // 分钟
+  var cycles = Math.floor(passed / p.dur);
+  cycles = Math.max(1, Math.min(cycles, Math.floor(ONSEN_MAX_HOURS * 60 / p.dur)));
+  var bonus = onsenBonus(S.onsen.towel, S.onsen.aroma);
+  var coins = Math.round(p.tip * bonus * cycles);
+  var rep = cycles;                                         // 声望：每轮 1 点
+  S.coins += coins;
+  S.rep = (S.rep || 0) + rep;
+  S.onsen = null;
+  checkQuest('onsen');
+  rPills(); save();
+  return { coins: coins, cycles: cycles, rep: rep, bonus: bonus };
+}
+function buyPool(){
+  var next = (S.pool || 0) + 1;
+  if(next >= POOLS.length){ toast('汤池已经是最好的了'); return false; }
+  var p = POOLS[next];
+  if(S.coins < p.cost){ toast('还差 ' + (p.cost - S.coins) + ' 金币'); return false; }
+  S.coins -= p.cost; S.pool = next;
+  toast('开出了' + p.n + '！' + p.desc);
+  sfx('level'); rPills(); save();
+  return true;
+}
+/* 手上有哪些可投的物资（棋盘 + 储物间去重） */
+function onsenSupplies(chainKey){
+  var ids = CHAINS[chainKey].items, out = [];
+  ids.forEach(function(id){
+    var n = 0;
+    for(var i = 0; i < S.board.length; i++){
+      var c = S.board[i];
+      if(c && c.t === 'i' && c.id === id) n++;
+    }
+    for(var j = 0; j < S.store.length; j++) if(S.store[j] === id) n++;
+    if(n > 0) out.push({ id: id, n: n });
+  });
+  return out;
+}
+
+/* ================= 整页视图切换 =================
+   大玩法（钓鱼、梦境、汤屋）各占一整屏。弹窗适合"看一眼"，
+   但这些玩法要待上几分钟，整页才不憋屈。 */
+var curPage = null;
+function openPage(id, title, sub, html){
+  curPage = id;
+  var pg = el('page');
+  if(el('pgTitle')) el('pgTitle').textContent = title;
+  if(el('pgSub')) el('pgSub').textContent = sub || '';
+  if(el('pageBody')) el('pageBody').innerHTML = html;
+  if(pg && pg.classList) pg.classList.add('on');
+  var app = el('app');
+  if(app && app.style) app.style.display = 'none';
+}
+function closePage(){
+  var pg = el('page');
+  if(pg && pg.classList) pg.classList.remove('on');
+  var app = el('app');
+  if(app && app.style) app.style.display = '';
+  if(curPage === 'fish') fishReset();
+  if(curPage === 'dream') DM = null;   // 退出梦境时丢弃当前对局
+  curPage = null;
+  rAll();
+}
+function pageSub(text){ if(el('pgSub')) el('pgSub').textContent = text; }
+
+/* 汤屋整页：上面是汤池状态，下面选投入的物资 */
+var onsenTimer = null;
+function openOnsenPage(){
+  openPage('onsen', '温泉汤屋', '', '<div id="onsenBody"></div>');
+  rOnsen();
+  if(onsenTimer) clearInterval(onsenTimer);
+  onsenTimer = setInterval(function(){
+    if(curPage !== 'onsen'){ clearInterval(onsenTimer); onsenTimer = null; return; }
+    rOnsenTimer();
+  }, 1000);
+}
+function fmtLeft(sec){
+  if(sec <= 0) return '可以收工了';
+  var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s2 = sec % 60;
+  if(h > 0) return h + ' 小时 ' + m + ' 分';
+  if(m > 0) return m + ' 分 ' + s2 + ' 秒';
+  return s2 + ' 秒';
+}
+function rOnsenTimer(){
+  var t = el('onLeft'); if(!t) return;
+  var left = onsenLeft();
+  if(left < 0) return;
+  t.textContent = fmtLeft(left);
+  var btn = el('onCollect');
+  if(btn && left <= 0){ btn.disabled = false; btn.textContent = '收工，取小费'; }
+}
+function rOnsen(){
+  var box = el('onsenBody'); if(!box) return;
+  var p = poolCur(), busy = !!(S.onsen && S.onsen.at), left = onsenLeft();
+  pageSub('声望 ' + (S.rep || 0));
+
+  var html = '<div id="bath" class="' + (busy ? 'busy' : '') + '">' +
+    '<div class="bwater"></div>' +
+    '<div class="bsteam"><i></i><i></i><i></i></div>' +
+    '<div class="bcap">' + artUse('c-capy','','chars') + '</div>' +
+    '<div class="bname">' + p.n + '</div>' +
+    '</div>';
+
+  if(busy){
+    var b = onsenBonus(S.onsen.towel, S.onsen.aroma);
+    html += '<div class="onstat">' +
+      '<div class="onrow"><span>还需</span><b id="onLeft">' + fmtLeft(left) + '</b></div>' +
+      '<div class="onrow"><span>小费加成</span><b>x' + b.toFixed(2) + '</b></div>' +
+      '<div class="onrow"><span>投入</span><b>' +
+        (S.onsen.towel ? ITEMS[S.onsen.towel].n : '无') + ' · ' +
+        (S.onsen.aroma ? ITEMS[S.onsen.aroma].n : '无') + '</b></div>' +
+      '</div>' +
+      '<div class="setrow" style="justify-content:center; margin:10px 0">' +
+      '<button class="bigbtn" id="onCollect"' + (left > 0 ? ' disabled' : '') + '>' +
+      (left > 0 ? '客人还在泡……' : '收工，取小费') + '</button></div>';
+  } else {
+    html += '<p class="sethint" style="margin:10px 2px">' +
+      '投入毛巾和香氛，客人泡得越舒服小费越多。开工后可以关掉游戏，' +
+      '回来再收（最多累计 ' + ONSEN_MAX_HOURS + ' 小时）。</p>' +
+      '<div class="dxh"><i style="background:#D8C7E8"></i>毛巾（可不放）</div>' +
+      '<div class="suprow" id="supTowel"></div>' +
+      '<div class="dxh" style="margin-top:10px"><i style="background:#C8A8D8"></i>香氛（可不放）</div>' +
+      '<div class="suprow" id="supAroma"></div>' +
+      '<div class="setrow" style="justify-content:center; margin:12px 0">' +
+      '<button class="bigbtn" id="onStart">开工（' + p.dur + ' 分钟）</button></div>';
+  }
+
+  html += '<div class="dxh" style="margin-top:8px"><i style="background:#7ECBB4"></i>汤池</div><div id="poolBox"></div>';
+  box.innerHTML = html;
+
+  if(!busy){ rSupplies('supTowel', 'wash'); rSupplies('supAroma', 'aroma'); }
+  rPools();
+  bindOnsen();
+}
+var onsenPick = { towel: null, aroma: null };
+function rSupplies(boxId, chainKey){
+  var box = el(boxId); if(!box) return;
+  var list = onsenSupplies(chainKey);
+  var key = boxId === 'supTowel' ? 'towel' : 'aroma';
+  if(!list.length){
+    box.innerHTML = '<span class="supnone">还没有' + CHAINS[chainKey].n + '，去烹饪台做一个</span>';
+    onsenPick[key] = null;
+    return;
+  }
+  var html = '';
+  list.forEach(function(it){
+    var on = onsenPick[key] === it.id;
+    html += '<button class="supit' + (on ? ' on' : '') + '" data-sup="' + key + '" data-id="' + it.id + '">' +
+      itemArt(it.id) + '<span class="supn">' + it.n + '</span></button>';
+  });
+  box.innerHTML = html;
+}
+function rPools(){
+  var box = el('poolBox'); if(!box) return;
+  var cur = S.pool || 0, html = '';
+  POOLS.forEach(function(p, i){
+    var own = i <= cur;
+    html += '<div class="rodrow' + (own ? ' own' : '') + '" style="margin-bottom:7px">' +
+      '<div class="rodi"><b>' + p.n + (i === cur ? '（使用中）' : '') + '</b>' +
+      '<span>' + p.desc + ' · ' + p.dur + ' 分钟一轮，基础小费 ' + p.tip + '</span></div>' +
+      (own ? '<span class="rcost">已有</span>'
+           : (i === cur + 1 ? '<button class="sbtn" id="poolBuy">' + p.cost + ' 金币</button>'
+                            : '<span class="rcost">' + p.cost + '</span>')) +
+      '</div>';
+  });
+  box.innerHTML = html;
+  if(el('poolBuy')) el('poolBuy').onclick = function(){ if(buyPool()) rOnsen(); };
+}
+function bindOnsen(){
+  if(el('onStart')) el('onStart').onclick = function(){
+    audioInit();
+    if(onsenStart(onsenPick.towel, onsenPick.aroma)){
+      onsenPick = { towel: null, aroma: null };
+      sfx('coin'); rOnsen();
+    }
+  };
+  if(el('onCollect')) el('onCollect').onclick = function(){
+    audioInit();
+    var r = onsenCollect();
+    if(!r) return;
+    sfx('level');
+    toast('客人满意而归，+' + r.coins + ' 金币、声望 +' + r.rep);
+    showStory([{ c:'capy', t:'泡了 ' + r.cycles + ' 轮，收了 ' + r.coins + ' 金币的小费。汤屋的名声，就是这样一点点传开的。' }]);
+    rOnsen();
+  };
+}
+
+/* 钓鱼整页：水面占大半屏，手机上更有"站在河边"的感觉 */
+function openFishPage(){
+  var html =
+    '<div id="pond">' +
+      '<div id="pondWater"></div>' +
+      '<div id="float"><span class="fbody"></span><span class="fring"></span></div>' +
+      '<div id="fishHint">点「抛竿」开始</div>' +
+    '</div>' +
+    '<div id="fishRes"></div>' +
+    '<div class="setrow" style="justify-content:center; margin:4px 0 10px">' +
+      '<button class="bigbtn" id="castBtn">抛竿</button>' +
+    '</div>' +
+    '<div class="dxh"><i style="background:#7FB8D4"></i>鱼竿</div>' +
+    '<div id="rodBox"></div>';
+  openPage('fish', '汐见川', '', html);
+  bindFish();
+  fishReset(); rFish();
+}
+function bindFish(){
+  if(el('castBtn')) el('castBtn').onclick = function(){
+    audioInit();
+    if(FISH_STATE && FISH_STATE.phase === 'wait') doStrike();
+    else doCast();
+  };
+  if(el('pond')) el('pond').onclick = function(){
+    if(FISH_STATE && FISH_STATE.phase === 'wait'){ audioInit(); doStrike(); }
+  };
+}
+
 /* 钓鱼界面：抛竿 -> 等待 -> 浮标下沉 -> 点击判定 -> 收鱼 */
 var fishTimer = null;
 function rFish(){
-  var sub = el('fishSub');
-  if(sub) sub.textContent = '钓上来的鱼可以合成、交订单、下锅。已钓 ' + (S.fishCount || 0) + ' 条';
+  pageSub('已钓 ' + (S.fishCount || 0) + ' 条');
   var btn = el('castBtn');
   if(btn){
     btn.textContent = '抛竿（' + FISH_COST + ' 金币）';
@@ -3464,6 +3785,13 @@ function rDreamBoard(){
   if(DM.done) showDreamWin();
   else if(DM.left <= 0) showDreamLose();
 }
+function backToDreamList(){
+  DM = null;
+  if(el('pgTitle')) el('pgTitle').textContent = '梦境';
+  el('pageBody').innerHTML = '<div id="dreamList"></div>';
+  rDreamList();
+  pageSub('已得 ' + dreamTotalStars() + ' / ' + (DREAMS.length * 3) + ' 星');
+}
 function showDreamWin(){
   var box = el('dmBoard'); if(!box) return;
   var res = dreamFinish();
@@ -3479,11 +3807,7 @@ function showDreamWin(){
   box.appendChild(ov);
   sfx('level');
   var nb = el('dmNext');
-  if(nb) nb.onclick = function(){
-    el('dreamP').classList.remove('on');
-    rDreamList();
-    el('dreamM').classList.add('on');
-  };
+  if(nb) nb.onclick = function(){ backToDreamList(); };
 }
 function showDreamLose(){
   var box = el('dmBoard'); if(!box) return;
@@ -3497,13 +3821,30 @@ function showDreamLose(){
   var ab = el('dmAgain');
   if(ab) ab.onclick = function(){ dreamStart(DM.lv.id); rDreamBoard(); };
 }
+/* 梦境整页：关卡列表与对局共用一页，返回时逐层退回 */
+function openDreamPage(){
+  openPage('dream', '梦境', '', '<div id="dreamList"></div>');
+  rDreamList();
+  pageSub('已得 ' + dreamTotalStars() + ' / ' + (DREAMS.length * 3) + ' 星');
+}
 function openDream(id){
   if(!dreamStart(id)) return;
-  var nm = el('dmName');
-  if(nm) nm.textContent = '第 ' + DM.lv.id + ' 关 · ' + DM.lv.n;
+  el('pageBody').innerHTML =
+    '<div class="dmbar">' +
+      '<span class="dmgoal" id="dmGoal"></span>' +
+      '<span class="dmmv">剩余步数 <b id="dmLeft">0</b></span>' +
+    '</div>' +
+    '<div id="dmBoard"></div>' +
+    '<div class="setrow" style="margin-top:12px">' +
+      '<button class="sbtn" id="dmRetry">重来</button>' +
+      '<button class="sbtn" id="dmQuit">返回关卡</button>' +
+    '</div>';
+  if(el('pgTitle')) el('pgTitle').textContent = '第 ' + DM.lv.id + ' 关 · ' + DM.lv.n;
+  pageSub('');
+  bindDream();
+  if(el('dmRetry')) el('dmRetry').onclick = function(){ dreamStart(DM.lv.id); rDreamBoard(); };
+  if(el('dmQuit')) el('dmQuit').onclick = function(){ backToDreamList(); };
   rDreamBoard();
-  el('dreamM').classList.remove('on');
-  el('dreamP').classList.add('on');
 }
 /* 梦境拖拽：独立一套，不碰主棋盘的 drag 状态 */
 var dmDrag = null;
@@ -4168,7 +4509,7 @@ function bindUi(){
     if(tl){
       audioInit();
       var map = {cook:'cookBtn', gacha:'gachaBtn', ware:'wareBtn',
-                 reno:'renoBtn', shop:'shopBtn', dex:'dexBtn', dream:'dreamBtn', fish:'fishBtn'};
+                 reno:'renoBtn', shop:'shopBtn', dex:'dexBtn', dream:'dreamBtn', fish:'fishBtn', onsen:'onsenBtn'};
       var target = el(map[tl.getAttribute('data-tool')]);
       if(target && target.onclick) target.onclick();
       return;
@@ -4208,21 +4549,24 @@ function bindUi(){
     if(e.target && e.target.closest && e.target.closest('.mbtn')) setTimeout(function(){ menuToggle(false); }, 60);
   });
   if(el('dreamBtn')) el('dreamBtn').onclick = function(){
-    audioInit(); rDreamList(); el('dreamM').classList.add('on');
+    audioInit();
+    if(S.level < 3){ toast('等级 3 之后，阿汤才会打盹做梦'); return; }
+    openDreamPage();
   };
-  var dl = el('dreamList');
-  if(dl && dl.addEventListener) dl.addEventListener('click', function(e){
+  // 委托挂在 #pageBody 上：整页内容是动态替换的，挂在子元素上会失效
+  var pb = el('pageBody');
+  if(pb && pb.addEventListener) pb.addEventListener('click', function(e){
     var t = e.target && e.target.closest ? e.target.closest('[data-dream]') : null;
-    if(t){ audioInit(); openDream(+t.getAttribute('data-dream')); }
+    if(t){ audioInit(); openDream(+t.getAttribute('data-dream')); return; }
+    var sp = e.target && e.target.closest ? e.target.closest('[data-sup]') : null;
+    if(sp){
+      audioInit();
+      var key = sp.getAttribute('data-sup'), id = sp.getAttribute('data-id');
+      onsenPick[key] = (onsenPick[key] === id) ? null : id;    // 再点一次取消
+      rSupplies(key === 'towel' ? 'supTowel' : 'supAroma', key === 'towel' ? 'wash' : 'aroma');
+      sfx('tap');
+    }
   });
-  if(el('dmRetry')) el('dmRetry').onclick = function(){
-    if(DM){ dreamStart(DM.lv.id); rDreamBoard(); }
-  };
-  if(el('dmQuit')) el('dmQuit').onclick = function(){
-    el('dreamP').classList.remove('on');
-    rDreamList(); el('dreamM').classList.add('on');
-  };
-  bindDream();
   // 三档音量滑块：声音弹窗与设置面板各一套，共用同一份数据
   ['sfx','bgm','voice'].forEach(function(kind){
     var Cap = kind.charAt(0).toUpperCase() + kind.slice(1);
@@ -4246,17 +4590,14 @@ function bindUi(){
   if(el('fishBtn')) el('fishBtn').onclick = function(){
     audioInit();
     if(!fishUnlocked()){ toast('等级 5 之后，水獭渔夫会带你去汐见川'); return; }
-    fishReset(); rFish(); el('fishM').classList.add('on');
+    openFishPage();
   };
-  if(el('castBtn')) el('castBtn').onclick = function(){
+  if(el('onsenBtn')) el('onsenBtn').onclick = function(){
     audioInit();
-    if(FISH_STATE && FISH_STATE.phase === 'wait') doStrike();   // 同一个按钮兼作提竿
-    else doCast();
+    if(!onsenUnlocked()){ toast('等级 10 之后，隔壁的老汤屋会交到你手上'); return; }
+    openOnsenPage();
   };
-  // 点水面也能提竿，手机上更好按
-  if(el('pond')) el('pond').onclick = function(){
-    if(FISH_STATE && FISH_STATE.phase === 'wait'){ audioInit(); doStrike(); }
-  };
+  if(el('pgBack')) el('pgBack').onclick = function(){ audioInit(); closePage(); };
   if(el('verTag')) el('verTag').textContent = GAME_VER;
   if(el('setSub')) el('setSub').textContent = '当前版本 ' + GAME_VER;
   if(el('setBtn')) el('setBtn').onclick = function(){
@@ -4338,7 +4679,7 @@ function bindUi(){
     var b5 = e.target && e.target.closest ? e.target.closest('[data-ws]') : null;
     if(b5){ audioInit(); storeTake(+b5.getAttribute('data-ws')); }
   });
-  ['dexM','tut','renoM','shopM','gachaM','cookM','wareM','setM','taskM','dreamM','dreamP'].forEach(function(m){
+  ['dexM','tut','renoM','shopM','gachaM','cookM','wareM','setM','taskM','sndM'].forEach(function(m){
     var mm = el(m);
     if(mm && mm.addEventListener) mm.addEventListener('click', function(e){
       if(e.target === mm && m !== 'tut') mm.classList.remove('on');
@@ -4437,6 +4778,11 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  onsenStart: onsenStart, onsenCollect: onsenCollect, onsenLeft: onsenLeft,
+  onsenBonus: onsenBonus, buyPool: buyPool, poolCur: poolCur, POOLS: POOLS,
+  onsenUnlocked: onsenUnlocked, onsenSupplies: onsenSupplies, openOnsenPage: openOnsenPage,
+  openPage: openPage, closePage: closePage, openFishPage: openFishPage,
+  openDreamPage: openDreamPage, backToDreamList: backToDreamList,
   CHANGELOG: CHANGELOG, syncVolUI: syncVolUI,
   fishCast: fishCast, fishStrike: fishStrike, fishCollect: fishCollect,
   fishRoll: fishRoll, buyRod: buyRod, rodLevel: rodLevel, fishUnlocked: fishUnlocked,

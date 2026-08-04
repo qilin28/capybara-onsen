@@ -644,6 +644,65 @@ ok(gFi3.S().rod === 2 && gFi3.rodLevel() === 2, '鱼竿等级可存档恢复');
 ok(gFi3.S().fishCount === 17, '钓鱼数可存档恢复');
 gFi.stopTick(); gFi2.stopTick(); gFi3.stopTick();
 
+// ---------- V2.2 温泉汤屋 ----------
+const gOn = makeEnv(new Map());
+const SOn = gOn.S();
+ok(gOn.onsenUnlocked() === false, 'Lv1 时汤屋未开放');
+SOn.level = 10; SOn.coins = 5000;
+ok(gOn.onsenUnlocked() === true, 'Lv10 开放汤屋');
+ok(gOn.POOLS.length === 3, '三档汤池');
+ok(gOn.poolCur().id === 'p1', '初始是岩汤');
+
+// 加成：不投物资就是 1 倍，投越高级加成越多
+ok(gOn.onsenBonus(null, null) === 1, '不投物资无加成');
+ok(gOn.onsenBonus('w1', null) > 1, '投毛巾有加成');
+ok(gOn.onsenBonus('w2', 'a2') > gOn.onsenBonus('w1', 'a1'), '物资等级越高加成越多');
+
+// 开工消耗物资
+gOn.spawn('w2'); gOn.spawn('a2');
+ok(gOn.onsenSupplies('wash').length > 0, '能查到手上的毛巾');
+ok(gOn.onsenStart('w2', 'a2') === true, '可以开工');
+ok(!!SOn.onsen && !!SOn.onsen.at, '开工后有运行记录');
+ok(gOn.onsenSupplies('wash').filter(function(x){ return x.id === 'w2'; }).length === 0, '投入的毛巾被消耗');
+ok(gOn.onsenStart('w1', null) === false, '已在营业时不能重复开工');
+
+// 未到时间收不了
+ok(gOn.onsenLeft() > 0, '刚开工还需等待');
+ok(gOn.onsenCollect() === null, '没泡完不能收小费');
+
+// 到点收工
+SOn.onsen.at = Date.now() - 31 * 60 * 1000;
+ok(gOn.onsenLeft() === 0, '超过时长后可收工');
+const coinsOn = SOn.coins;
+const rOn = gOn.onsenCollect();
+ok(rOn && rOn.coins > 0, '收工拿到小费');
+ok(SOn.coins === coinsOn + rOn.coins, '小费入账');
+ok(SOn.rep > 0, '声望增加');
+ok(SOn.onsen === null, '收工后状态清空');
+
+// 离线收益有上限
+gOn.onsenStart(null, null);
+SOn.onsen.at = Date.now() - 48 * 3600 * 1000;
+const rLong = gOn.onsenCollect();
+ok(rLong.cycles === 16, '挂 48 小时只结算 8 小时上限（岩汤 30 分钟一轮共 16 轮）');
+
+// 汤池升级
+ok(gOn.buyPool() === true, '金币够时可开新汤池');
+ok(gOn.poolCur().id === 'p2', '换到桧木汤');
+SOn.coins = 0;
+ok(gOn.buyPool() === false, '钱不够时开不了');
+
+// 汤屋数据可存档
+const onStore = new Map();
+const gOn2 = makeEnv(onStore);
+gOn2.S().pool = 2; gOn2.S().rep = 42;
+gOn2.S().onsen = { at: Date.now(), pool: 'p3', towel: 'w2', aroma: 'a1' };
+gOn2.save();
+const gOn3 = makeEnv(onStore);
+ok(gOn3.S().pool === 2 && gOn3.S().rep === 42, '汤池等级与声望可存档');
+ok(gOn3.S().onsen && gOn3.S().onsen.pool === 'p3', '营业中的状态可存档，关掉游戏也在泡');
+gOn.stopTick(); gOn2.stopTick(); gOn3.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
