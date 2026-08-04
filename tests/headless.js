@@ -545,6 +545,22 @@ ok(gD3.S().dream[1] === 3 && gD3.S().shells === 17, '梦境星数与贝币可存
 ok(gD3.dreamTotalStars() === 5, '读档后星星合计正确');
 gD2.stopTick(); gD3.stopTick();
 
+// ---------- 样式完整性 ----------
+// CSS 括号失衡会让后续规则被浏览器整段丢弃，页面看着"样式全没了"，
+// 但 JS 测试照样全过——所以必须单独查一次。
+{
+  const css = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+  let depth = 0, minDepth = 0;
+  for (const ch of css) {
+    if (ch === '{') depth++;
+    else if (ch === '}') { depth--; if (depth < minDepth) minDepth = depth; }
+  }
+  ok(depth === 0, 'CSS 花括号闭合平衡（当前深度 ' + depth + '）');
+  ok(minDepth === 0, 'CSS 没有多余的右花括号');
+  ok(css.indexOf('#board{') >= 0 && css.indexOf('.modal') >= 0 && css.indexOf('.art{') >= 0,
+     '关键样式规则都还在');
+}
+
 // ---------- V1.6 三档音量 ----------
 const gV = makeEnv(new Map());
 const SV = gV.S();
@@ -702,6 +718,39 @@ const gOn3 = makeEnv(onStore);
 ok(gOn3.S().pool === 2 && gOn3.S().rep === 42, '汤池等级与声望可存档');
 ok(gOn3.S().onsen && gOn3.S().onsen.pool === 'p3', '营业中的状态可存档，关掉游戏也在泡');
 gOn.stopTick(); gOn2.stopTick(); gOn3.stopTick();
+
+// ---------- V2.3 温泉町入口页 ----------
+const gT = makeEnv(new Map());
+const ST = gT.S();
+ok(gT.TOWN_SPOTS.length === 5, '小镇有 5 个入口');
+ok(gT.TOWN_SPOTS.every(function(sp){ return sp.x > 0 && sp.x < 100 && sp.y > 0 && sp.y < 100; }),
+   '所有热点坐标都在图内');
+ok(gT.TOWN_SPOTS.filter(function(sp){ return sp.main; }).length === 1, '只有一个主入口');
+
+// 解锁随等级推进
+ST.level = 1;
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 1, 'Lv1 只开放食堂');
+ST.level = 5;
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 3, 'Lv5 开放到钓鱼（食堂+梦境+钓鱼）');
+ST.level = 10;
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 4, 'Lv10 再开汤屋');
+ST.level = 20;
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 5, 'Lv20 全开');
+
+// 红点提示
+ST.level = 15;
+ST.orders = [null, null, null];
+ok(gT.spotBadge('diner') === null, '没有可交订单时食堂不亮红点');
+gT.setOrder(0, [['veg1', 1]], 'rabbit');
+gT.spawn('veg1');
+const bd = gT.spotBadge('diner');
+ok(bd && bd.t === '1', '有 1 单可交时食堂亮红点 1');
+ST.onsen = { at: Date.now() - 99 * 60 * 1000, pool: 'p1', towel: null, aroma: null };
+const ob = gT.spotBadge('onsen');
+ok(ob && ob.g === true, '汤屋泡好了亮绿点提醒收工');
+ST.onsen = null;
+ok(gT.spotBadge('onsen') === null, '汤屋没在营业时不提醒');
+gT.stopTick();
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');

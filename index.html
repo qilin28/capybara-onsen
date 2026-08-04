@@ -41,42 +41,73 @@ body{
 
 /* ---------- 顶部场景 ---------- */
 /* 场景图一直铺到状态栏后面，顶部不再留纯色空档 */
-#scene{position:relative; margin:0 -8px; flex:0 0 auto;
-  height:calc(clamp(84px, 13vh, 108px) + env(safe-area-inset-top));
-  padding-top:env(safe-area-inset-top);
-  overflow:hidden; border-bottom:3px solid var(--woodD);}
-#sceneBg, #scene > svg{top:0; height:100%;}
-#scene > svg{position:absolute; inset:0; width:100%; height:100%;}
-#sceneBg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 58%;}
-/* 装修改造层：按场景框百分比定位，不依赖 SVG 坐标系（背景换图也不会错位） */
-.scfx{position:absolute; pointer-events:none; z-index:2;}
-#scGlow{inset:0; background:
-  radial-gradient(circle at 26% 40%, rgba(255,196,110,.55), transparent 16%),
-  radial-gradient(circle at 41% 34%, rgba(255,196,110,.5), transparent 13%),
-  radial-gradient(circle at 55% 38%, rgba(255,196,110,.5), transparent 13%),
-  radial-gradient(circle at 68% 32%, rgba(255,196,110,.45), transparent 12%);}
-#scSign, #scGold{left:33%; top:52%; width:18%; height:12%; display:flex; align-items:center; justify-content:center;}
-.plaque{width:100%; height:100%; border-radius:5px; border:2.5px solid #7A5230;
-  background:linear-gradient(180deg,#C9873F,#A9682C); box-shadow:0 2px 0 rgba(90,60,30,.45);
-  position:relative;}
-.plaque::after{content:""; position:absolute; inset:22% 12%; border-radius:2px; background:#FFE1A8; opacity:.9;}
-.plaque.gold{background:linear-gradient(180deg,#F7CE5C,#E0A93A); border-color:#8A5F1E;
-  box-shadow:0 2px 0 rgba(120,85,25,.5), 0 0 12px rgba(255,214,120,.85);}
-.plaque.gold::after{background:#FFF6D8;}
-/* 生图背景加载成功后，隐藏手绘回退层；装修改造图层仍浮在背景之上 */
-#scene.hasbg #sceneArt, #scene.hasbg #sceneSky{display:none;}
-#sceneTop{position:absolute; top:6px; left:10px; right:8px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none;}
-#title{background:linear-gradient(180deg,#FFFDF6,var(--paper2)); border:2.5px solid #FFFDF5;
-  box-shadow:0 3px 0 rgba(150,120,80,.28), 0 6px 14px rgba(90,110,60,.22);
-  border-radius:12px; padding:3px 9px 4px; text-align:center;}
-#title h1{margin:0; font-size:15px; letter-spacing:1.5px; color:#7A5A36; font-weight:900;}
-#title span{display:inline-block; margin-top:2px; font-size:10.5px; color:#FFF6E2; letter-spacing:2px;
-  background:var(--lant2); border-radius:999px; padding:1px 10px;}
+/* ---------- 温泉町全貌页 ---------- */
+#town{display:none; position:fixed; inset:0; z-index:50; overflow:hidden;
+  width:100%; max-width:520px; margin:0 auto; background:var(--sky1);}
+#town.on{display:block;}
+#townBg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+#townTop{position:absolute; left:0; right:0; top:0; display:flex; gap:5px; align-items:center;
+  padding:calc(10px + env(safe-area-inset-top)) 8px 14px;
+  background:linear-gradient(180deg,rgba(25,45,25,.42),transparent);}
+#townTop .pill{background:rgba(255,253,246,.96);}
+.hot{position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column;
+  align-items:center; gap:3px; cursor:pointer; background:none; border:none; padding:0;
+  font-family:inherit;}
+.hotpin{position:relative; width:44px; height:44px; border-radius:14px;
+  background:linear-gradient(180deg,#FFFDF6,#F3E4C6); border:2.5px solid var(--wood2);
+  box-shadow:0 4px 0 rgba(120,90,50,.45), 0 6px 12px rgba(30,50,25,.32);
+  display:flex; align-items:center; justify-content:center; padding:8px;}
+.hotpin svg{width:100%; height:100%; color:#A0763C;}
+.hot:active .hotpin{transform:translateY(2px); box-shadow:0 2px 0 rgba(120,90,50,.45);}
+.hot.main .hotpin{width:56px; height:56px; border-radius:17px; padding:10px;
+  border-color:#E08A32; background:linear-gradient(180deg,#FFF7E4,#F8DCA8);
+  box-shadow:0 5px 0 rgba(180,110,30,.5), 0 8px 16px rgba(30,50,25,.34);}
+.hot.main .hotpin svg{color:#D4762A;}
+.hotlb{background:rgba(48,40,26,.85); color:#FFF8EC; font-size:9.5px; font-weight:900;
+  border-radius:999px; padding:2px 9px; white-space:nowrap;}
+.hot.main .hotlb{background:rgba(198,108,28,.94); font-size:11px; padding:2.5px 12px;}
+.hotdot{position:absolute; right:-5px; top:-5px; min-width:18px; height:18px; padding:0 4px;
+  border-radius:999px; background:#E8563F; border:2.5px solid #FFF8EC;
+  font-size:9.5px; color:#FFF; font-weight:900; line-height:14px; text-align:center;
+  box-shadow:0 2px 4px rgba(0,0,0,.3);}
+.hotdot.g{background:#5FA83A;}
+.hotring{position:absolute; inset:-7px; border-radius:20px;
+  border:2.5px solid rgba(255,214,120,.9); pointer-events:none;
+  animation:hotPulse 2.1s ease-out infinite;}
+@keyframes hotPulse{ from{transform:scale(.9); opacity:.95;} to{transform:scale(1.22); opacity:0;} }
+.hot.lock .hotpin{background:rgba(206,202,192,.92); border-color:#96958C;
+  box-shadow:0 4px 0 rgba(90,90,84,.4);}
+.hot.lock .hotpin svg{color:#7C7B72;}
+.hot.lock .hotlb{background:rgba(72,72,66,.75);}
+#townBot{position:absolute; left:0; right:0; bottom:0; display:grid;
+  grid-template-columns:repeat(5,1fr); gap:6px;
+  padding:10px 8px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(0deg,rgba(25,45,25,.46),transparent);}
+#townBot button{display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:rgba(255,253,246,.96); border:2px solid var(--pline); border-bottom-width:3px;
+  border-radius:12px; padding:6px 2px 5px; font-size:8.5px; font-weight:900; color:var(--ink);
+  cursor:pointer; font-family:inherit;}
+#townBot button:active{transform:translateY(1.5px); border-bottom-width:1.5px;}
+#townBot button svg{width:17px; height:17px; color:#B0763A;}
+
+/* ---------- 资源条（原场景大图的位置） ---------- */
+#resbar{flex:0 0 auto; display:flex; align-items:center; gap:5px;
+  padding:calc(9px + env(safe-area-inset-top)) 0 7px;}
+#toTown{display:flex; align-items:center; gap:3px; flex:none;
+  background:linear-gradient(180deg,#FFF3DC,#F2DDB4); border:2.5px solid var(--wood2);
+  border-bottom-width:4px; border-radius:13px; padding:6px 11px 6px 8px;
+  font-size:13px; font-weight:900; color:var(--ink); cursor:pointer; font-family:inherit;
+  box-shadow:0 2px 0 rgba(140,105,60,.28);}
+#toTown:active{transform:translateY(2px); border-bottom-width:2px;}
+#toTown svg{width:17px; height:17px;}
+#resbar .lvp{flex:1; justify-content:center; gap:6px; font-size:12.5px;}
+#resbar .lvp i{font-style:normal; font-size:11px; color:var(--sub);}
+
 #pills{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; align-items:flex-start; pointer-events:auto; max-width:min(58vw,210px); z-index:4;}
-.pill{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#FFFCF2,var(--paper));
-  border:2px solid var(--pline); box-shadow:0 2px 0 rgba(160,130,90,.25);
-  color:var(--ink); border-radius:999px; padding:3px 10px; font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums;}
-.pill svg{width:15px; height:15px;}
+.pill{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#FFFDF6,var(--paper));
+  border:2.5px solid var(--wood2); border-bottom-width:3px; box-shadow:0 2px 0 rgba(140,105,60,.28);
+  color:var(--ink); border-radius:999px; padding:5px 12px 5px 8px; font-size:14px; font-weight:900; font-variant-numeric:tabular-nums;}
+.pill svg{width:21px; height:21px; flex:none;}
 /* 经验条：文字压在条上，胶囊更紧凑，避免右侧伸到水豚底下 */
 #xpwrap{position:relative; width:74px; height:13px; border-radius:7px;
   background:rgba(150,120,70,.22); overflow:hidden; flex:none;}
@@ -97,12 +128,12 @@ body{
   animation:tin .25s ease; transition:opacity .4s, transform .4s;}
 .tchip.out{opacity:0; transform:translateY(-6px);}
 @keyframes tin{0%{opacity:0; transform:translateY(-8px);}100%{opacity:1;}}
-#capyBtn{position:absolute; right:-2px; bottom:-8px; width:clamp(80px,23vw,98px); height:clamp(72px,21vw,90px); background:none; border:none; padding:0; cursor:pointer; z-index:3;}
+#capyBtn{position:relative; flex:none; width:46px; height:46px; padding:0; background:none; border:none; cursor:pointer; background:none; border:none; padding:0; cursor:pointer; z-index:3;}
 #capyBtn svg{width:100%; height:100%; filter:drop-shadow(0 4px 6px rgba(90,110,60,.35));}
 #capyBtn .art{filter:drop-shadow(0 4px 6px rgba(90,110,60,.35));}
 #capyBtn .art > img{object-fit:contain;}
 #capyBtn.squish svg, #capyBtn.squish .art{animation:squish .3s ease; transform-origin:bottom center;}
-#capyCh{position:absolute; bottom:8px; left:2px;}
+#capyCh{position:absolute; right:-4px; bottom:-3px; transform:scale(.8); transform-origin:right bottom;}
 .chb{background:var(--lant); color:#4A2A14; border:2px solid var(--ink); border-radius:999px; font-size:10.5px; font-weight:900; padding:0 6px; line-height:15px; box-shadow:0 2px 0 rgba(20,12,30,.4);}
 .chb.empty{background:#8B7B6B; color:#EEE2CC;}
 
@@ -165,8 +196,10 @@ body{
 /* ---------- 棋盘 ---------- */
 #boardWrap{position:relative; flex:1 1 auto; min-height:0; width:100%;
   display:flex; align-items:center; justify-content:center;}
+/* 7 列 9 行的格子必须是正方形：锁 7:9 比例，优先吃满高度，宽度不足时再缩 */
 #board{display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(9,1fr);
-  gap:clamp(3px,.9vh,5px); aspect-ratio:7/9.05; height:100%; max-height:100%; max-width:min(100%,446px);
+  gap:clamp(3px,.9vh,5px); aspect-ratio:7/9; width:min(100%,446px); height:auto;
+  max-height:100%;
   padding:clamp(6px,1.1vh,10px); border-radius:20px;
   touch-action:none; user-select:none; -webkit-user-select:none;
   background:linear-gradient(180deg,#EDF6DC 0%,var(--boardBg) 45%,#D6E8B8 100%);
@@ -369,7 +402,7 @@ body{
 #gachaResult .grare.SR{background:linear-gradient(90deg,#FFE08A,#F5B942); color:#7A4E12;}
 #gachaResult.pop{animation:popIn .34s cubic-bezier(.34,1.56,.64,1);}
 .dxs .cnum{display:block; font-size:9.5px; font-weight:900; color:#B0763A;}
-#giftBtn{position:absolute; left:8px; bottom:4px; width:38px; height:38px; background:none; border:none;
+#giftBtn{position:relative; flex:none; width:42px; height:42px; background:none; border:none;
   padding:0; cursor:pointer; z-index:4; filter:drop-shadow(0 3px 5px rgba(90,110,60,.35));}
 #giftBtn .art{width:100%; height:100%;}
 #giftBtn.empty{opacity:.45;}
@@ -593,18 +626,18 @@ body{
 .tsk{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px;
   background:none; border:none; padding:0; cursor:pointer; font-family:inherit;}
 /* 订单：主体是需要的食材，客人头像缩成左上角小徽章 */
-.titems{position:relative; display:flex; gap:3px; padding:3px 4px;
+.titems{position:relative; display:flex; gap:5px; padding:7px;
   background:linear-gradient(180deg,#FFFDF6,var(--paper)); border:2px solid var(--pline);
-  border-radius:11px; box-shadow:0 2px 0 rgba(160,130,90,.25);}
-.titem{position:relative; width:34px; height:34px; background:var(--cellBg);
-  border:1.5px solid #EDE0C2; border-radius:8px;}
+  border-radius:15px; box-shadow:0 3px 0 rgba(140,105,60,.35);}
+.titem{position:relative; width:52px; height:52px; background:var(--cellBg);
+  border:2px solid #EDE0C2; border-radius:13px;}
 .titem .art{width:100%; height:100%;}
 .titem.ok{border-color:#9CC69C; background:#EFFAEF;}
 .tcnt{position:absolute; bottom:-4px; right:-4px; font-size:8.5px; font-weight:900;
   background:#FFF9EC; border:1.5px solid var(--pline); border-radius:999px; padding:0 3px;
   color:#A0522D; z-index:2; line-height:1.4;}
 .titem.ok .tcnt{color:#2F7B4F; border-color:#9CC69C; background:#EFFAEF;}
-.tcust{position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%;
+.tcust{position:absolute; top:-10px; left:-10px; width:31px; height:31px; border-radius:50%;
   border:2px solid #FFFDF5; overflow:hidden; background:var(--paper); z-index:3;
   box-shadow:0 1px 3px rgba(90,110,60,.3);}
 .tcust .art{width:100%; height:100%;}
@@ -614,12 +647,12 @@ body{
   display:flex; align-items:center; justify-content:center;}
 .tsk .tav svg{width:22px; height:22px; color:#B0763A;}
 .tsk .tav .art{width:100%; height:100%;}
-.tgo{display:block; font-size:9.5px; font-weight:900; color:#FFF6E8; white-space:nowrap;
+.tgo{display:block; font-size:11.5px; font-weight:900; color:#FFF6E8; white-space:nowrap;
   background:linear-gradient(180deg,#8FCB5C,#6FA83F); border:1.5px solid #4F7A34;
-  border-radius:999px; padding:1px 8px; box-shadow:0 2px 0 #4F7A34; cursor:pointer;}
+  border-radius:999px; padding:3px 13px; box-shadow:0 2px 0 #4F7A34; cursor:pointer;}
 .tgo:active{transform:translateY(1.5px); box-shadow:0 0.5px 0 #4F7A34;}
-.tsk .tbadge{font-size:9px; font-weight:900; color:var(--sub); white-space:nowrap;
-  max-width:80px; overflow:hidden; text-overflow:ellipsis;}
+.tsk .tbadge{font-size:11.5px; font-weight:900; color:var(--sub); white-space:nowrap;
+  max-width:120px; overflow:hidden; text-overflow:ellipsis;}
 /* 备齐：整块亮绿圈呼吸，一眼看到该交了 */
 .tsk.ready .titems{border-color:#7FB84F; box-shadow:0 0 0 2px rgba(127,184,79,.35), 0 2px 0 rgba(120,160,70,.3);
   animation:tskGlow 1.6s ease-in-out infinite;}
@@ -642,17 +675,17 @@ body{
 
 #dock{flex:0 0 auto; display:flex; align-items:center; gap:8px;
   background:linear-gradient(180deg,var(--paper),var(--paper2)),var(--grain);
-  border:2px solid var(--pline); border-bottom-width:3px; border-radius:13px; padding:5px 8px;}
-#infoIcon{width:38px; height:38px; flex:none; background:var(--cellBg);
-  border:2px solid #EDE0C2; border-radius:10px; padding:2px;}
+  border:2.5px solid var(--wood2); border-bottom-width:4px; border-radius:15px; padding:9px 10px;}
+#infoIcon{width:48px; height:48px; flex:none; background:var(--cellBg);
+  border:2px solid #EDE0C2; border-radius:13px; padding:2px;}
 #infoIcon .art{width:100%; height:100%;}
 #infoIcon.empty{opacity:.3;}
 #infoText{flex:1; min-width:0;}
-#infoText b{display:block; font-size:12.5px; font-weight:900; color:var(--ink);
+#infoText b{display:block; font-size:13.5px; font-weight:900; color:var(--ink);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 #infoText span{display:block; font-size:10px; color:var(--sub);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-#dock .dbtn{flex:0 0 auto; width:50px; border-radius:11px;}
+#dock .dbtn{flex:0 0 auto; width:60px; border-radius:15px; padding:11px 2px;}
 
 /* 展开面板：默认收起不占版面，点"更多"从底部滑出 */
 /* 用 bottom 位移而非百分比 transform：translate 的百分比基准是元素自身尺寸，
@@ -1165,6 +1198,10 @@ body{
   <path d="M3.4 12 H20.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
   <circle cx="9" cy="8" r="1.5" fill="#FFF6E2"/>
 </symbol>
+<symbol id="i-shell" viewBox="0 0 24 24"><path d="M12 4c4 0 7 3.4 7 7.8S16 20 12 20s-7-4-7-8.2S8 4 12 4Z" fill="#E4B7D8" stroke="#7A4E72" stroke-width="1.9"/>
+<path d="M12 6.2v11.4M8.6 9.6h6.8M9.4 13.4h5.2" stroke="#7A4E72" stroke-width="1.4" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="i-house" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+<path d="M6 10.5 12 5l6 5.5V19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-8.5Z"/><path d="M10 20v-5h4v5"/></g></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5 L14.9 8.6 L21.5 9.5 L16.7 14.1 L17.9 20.7 L12 17.5 L6.1 20.7 L7.3 14.1 L2.5 9.5 L9.1 8.6 Z" fill="#F2C14E" stroke="#8A5A1E" stroke-width="1.8" stroke-linejoin="round"/></symbol>
 <symbol id="i-hammer" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
   <path d="M4 20.5 L11.5 13"/><path d="M10.5 7 L14.5 3 Q19.5 4.2 21 9 L18.5 11.5 L15 8 Z"/><path d="M13 11.5 L15.5 9"/></g></symbol>
@@ -1189,10 +1226,24 @@ body{
 </defs>
 </svg>
 
+<!-- 温泉町：进游戏先看到的全貌页，点建筑进各个玩法 -->
+<div id="town">
+  <img id="townBg" src="art/scene/townmap.png?v=1" alt="">
+  <div id="townTop"></div>
+  <div id="townHots"></div>
+  <div id="townBot">
+    <button data-tb="dex"><svg><use href="#i-book"/></svg>图鉴</button>
+    <button data-tb="reno"><svg><use href="#i-hammer"/></svg>装修</button>
+    <button data-tb="shop"><svg><use href="#i-bag"/></svg>商店</button>
+    <button data-tb="gacha"><svg><use href="#i-capsule"/></svg>扭蛋</button>
+    <button data-tb="set"><svg><use href="#i-gear"/></svg>设置</button>
+  </div>
+</div>
+
 <!-- 整页视图：大玩法（钓鱼/梦境/汤屋）各占一整屏，不再挤在弹窗里 -->
 <div id="page">
   <div id="pageBar">
-    <button class="pgback" id="pgBack"><svg><use href="#i-back"/></svg><span>回店里</span></button>
+    <button class="pgback" id="pgBack"><svg><use href="#i-back"/></svg><span>温泉町</span></button>
     <b id="pgTitle">汐见川</b>
     <span id="pgSub"></span>
   </div>
@@ -1201,99 +1252,16 @@ body{
 
 <div id="app">
   <!-- 场景 -->
-  <div id="scene">
-    <img id="sceneBg" src="art/scene/town.png?v=3" alt=""
-         onload="this.parentNode.classList.add('hasbg')"
-         onerror="this.style.display='none'">
-    <svg viewBox="0 0 390 178" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-      <rect id="sceneSky" width="390" height="178" fill="url(#skyg)"/>
-      <g id="sceneArt" transform="translate(0,28)">
-      <g fill="#FFFFFF" opacity=".92">
-        <g class="tw"><ellipse cx="52" cy="26" rx="19" ry="10"/><ellipse cx="38" cy="30" rx="13" ry="8"/><ellipse cx="68" cy="31" rx="14" ry="8"/></g>
-        <g class="tw" style="animation-delay:1.8s"><ellipse cx="196" cy="18" rx="17" ry="9"/><ellipse cx="182" cy="22" rx="12" ry="7"/><ellipse cx="211" cy="22" rx="12" ry="7"/></g>
-        <g class="tw" style="animation-delay:3.2s"><ellipse cx="330" cy="30" rx="16" ry="8.5"/><ellipse cx="318" cy="34" rx="11" ry="6.5"/><ellipse cx="343" cy="33" rx="11" ry="6.5"/></g>
-      </g>
-      <path d="M0 92 Q54 60 112 86 Q170 54 232 88 Q296 62 390 84 V150 H0 Z" fill="#8FC163"/>
-      <path d="M0 104 Q60 82 124 102 Q188 78 250 104 Q312 84 390 100 V150 H0 Z" fill="url(#hillg)"/>
-      <g>
-        <ellipse cx="26" cy="92" rx="20" ry="17" fill="#7BB24C"/><ellipse cx="26" cy="86" rx="14" ry="12" fill="#8CC65C"/>
-        <ellipse cx="96" cy="86" rx="17" ry="15" fill="#74A946"/><ellipse cx="96" cy="81" rx="12" ry="10" fill="#88C158"/>
-        <ellipse cx="300" cy="88" rx="19" ry="16" fill="#7BB24C"/><ellipse cx="300" cy="82" rx="13" ry="11" fill="#8CC65C"/>
-        <ellipse cx="368" cy="94" rx="17" ry="14" fill="#74A946"/><ellipse cx="368" cy="89" rx="11" ry="9" fill="#88C158"/>
-      </g>
-      <g fill="#C8905A">
-        <rect x="130" y="86" width="52" height="26" rx="5"/><rect x="206" y="82" width="58" height="30" rx="5"/>
-      </g>
-      <g fill="#E8734A">
-        <path d="M124 88 H188 L182 78 H130 Z"/><path d="M200 84 H270 L263 73 H207 Z"/>
-      </g>
-      <g fill="#FFE9B0">
-        <rect class="wink" x="140" y="94" width="12" height="11" rx="2.5"/><rect x="160" y="94" width="12" height="11" rx="2.5" opacity=".9"/>
-        <rect class="wink" x="218" y="91" width="13" height="12" rx="2.5" style="animation-delay:2.4s"/><rect x="240" y="91" width="13" height="12" rx="2.5" opacity=".9"/>
-      </g>
-      <g fill="#FFF3D0">
-        <circle cx="60" cy="118" r="3.6"/><circle cx="78" cy="126" r="3"/><circle cx="286" cy="120" r="3.4"/><circle cx="342" cy="128" r="3"/>
-        <circle cx="16" cy="126" r="3.2"/>
-      </g>
-      <g fill="#F7C948">
-        <circle cx="60" cy="118" r="1.5"/><circle cx="78" cy="126" r="1.3"/><circle cx="286" cy="120" r="1.4"/><circle cx="342" cy="128" r="1.3"/>
-        <circle cx="16" cy="126" r="1.3"/>
-      </g>
-      <path d="M-4 30 Q195 58 394 20" stroke="#C8905A" stroke-width="2.4" fill="none"/>
-      <g class="sway" style="transform-origin:70px 45px">
-        <circle cx="70" cy="58" r="17" fill="url(#lg)" opacity=".6"/>
-        <path d="M70 45 v4" stroke="#241A10" stroke-width="2"/>
-        <rect x="62" y="49" width="16" height="21" rx="7" fill="#E8734A" stroke="#3A2417" stroke-width="2"/>
-        <rect x="65" y="46.5" width="10" height="4" rx="2" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.6"/>
-        <rect x="65" y="69.5" width="10" height="3.6" rx="1.8" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.6"/>
-        <path d="M66 52 v14 M74 52 v14" stroke="#B34A28" stroke-width="1.6"/>
-        <path d="M70 73 v5" stroke="#B34A28" stroke-width="1.8"/><circle cx="70" cy="80" r="1.8" fill="#F2C14E"/>
-      </g>
-      <g class="sway" style="transform-origin:168px 56px; animation-delay:1.3s">
-        <circle cx="168" cy="68" r="15" fill="url(#lg)" opacity=".55"/>
-        <path d="M168 56 v4" stroke="#241A10" stroke-width="2"/>
-        <rect x="161" y="60" width="14" height="18" rx="6" fill="#E8734A" stroke="#3A2417" stroke-width="2"/>
-        <rect x="163.5" y="57.5" width="9" height="3.6" rx="1.8" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
-        <rect x="163.5" y="77.5" width="9" height="3.2" rx="1.6" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
-        <path d="M164.5 62 v12 M171.5 62 v12" stroke="#B34A28" stroke-width="1.4"/>
-        <path d="M168 81 v4" stroke="#B34A28" stroke-width="1.6"/><circle cx="168" cy="87" r="1.6" fill="#F2C14E"/>
-      </g>
-      <g class="sway" style="transform-origin:258px 52px; animation-delay:.6s">
-        <circle cx="258" cy="64" r="15" fill="url(#lg)" opacity=".55"/>
-        <path d="M258 52 v4" stroke="#241A10" stroke-width="2"/>
-        <rect x="251" y="56" width="14" height="18" rx="6" fill="#E8734A" stroke="#3A2417" stroke-width="2"/>
-        <rect x="253.5" y="53.5" width="9" height="3.6" rx="1.8" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
-        <rect x="253.5" y="73.5" width="9" height="3.2" rx="1.6" fill="#8C4A2E" stroke="#3A2417" stroke-width="1.5"/>
-        <path d="M254.5 58 v12 M261.5 58 v12" stroke="#B34A28" stroke-width="1.4"/>
-        <path d="M258 77 v4" stroke="#B34A28" stroke-width="1.6"/><circle cx="258" cy="83" r="1.6" fill="#F2C14E"/>
-      </g>
-      <rect y="138" width="390" height="12" fill="#D9BE92"/>
-      <path d="M0 138 H390" stroke="#C0A171" stroke-width="2"/>
-      <path d="M40 138 v12 M110 138 v12 M180 138 v12 M250 138 v12 M320 138 v12" stroke="#C0A171" stroke-width="1.6" opacity=".8"/>
-    </g>
-</svg>
-    <div id="sceneTop">
-      <div id="title"><h1>水豚温泉町</h1><span>汤屋食堂篇 <b id="verTag"></b></span></div>
-      <div id="pills">
-        <div class="pill"><svg><use href="#i-coin"/></svg><b id="coinN">0</b></div>
-        <div class="pill"><svg><use href="#i-star"/></svg><b id="starN">0</b></div>
-        <div class="pill">Lv <b id="lvN">1</b><span id="xpwrap"><span id="xpb"></span><span id="xpTxt"></span></span></div>
-      </div>
-    </div>
-    <div id="scGlow" class="scfx"></div>
-    <div id="scSign" class="scfx"><span class="plaque"></span></div>
-    <div id="scGold" class="scfx"><span class="plaque gold"></span></div>
-    <button id="giftBtn" aria-label="门口的礼盒">
-      <span class="art"><svg><use href="#s-chest"/></svg><img src="art/items/chest.png?v=4" alt="" onerror="artFail(this)"></span>
-      <span id="giftCh" class="chb">1</span>
-    </button>
-    <button id="capyBtn" class="bob" aria-label="阿汤">
-      <span class="art"><svg><use href="#g-capy"/></svg><img src="art/chars/capy.png?v=3" alt="" onerror="artFail(this)"></span>
-      <span id="capyCh" class="chb">15</span>
-    </button>
+  <!-- 资源条：返回小镇 + 货币 + 等级 + 水豚生成器 -->
+  <div id="resbar">
+    <button id="toTown"><svg><use href="#i-back"/></svg>温泉町</button>
+    <span class="pill"><svg><use href="#i-coin"/></svg><b id="coinN">0</b></span>
+    <span class="pill"><svg><use href="#i-star"/></svg><b id="starN">0</b></span>
+    <span class="pill lvp"><b id="lvN">Lv 1</b><i id="xpN">0/35</i></span>
+    <button id="capyBtn" title="摸摸阿汤"><span class="art"><svg><use href="#g-capy"/></svg><img src="" alt="" onerror="artFail(this)"></span><span class="chb" id="capyCh">15</span></button>
+    <button id="giftBtn" style="display:none"><span class="art"><svg><use href="#s-chest"/></svg><img src="" alt="" onerror="artFail(this)"></span><span class="gn" id="giftN">1</span></button>
   </div>
 
-  <!-- 订单 -->
   <div id="orders"></div>
 
   <!-- 主线目标 -->
@@ -1559,9 +1527,15 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.2';
+var GAME_VER = 'V2.3';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.3', d:'2026-08-05', t:'温泉町全貌', li:[
+    '新增小镇入口页：一整张地图，点建筑进各个玩法',
+    '哪里有事做就亮红点，扫一眼就知道去哪',
+    '食堂页去掉场景大图，任务块与底栏放大，棋盘格子改回正方形',
+    '所有玩法统一从小镇进出'
+  ]},
   { v:'V2.2', d:'2026-08-04', t:'温泉汤屋', li:[
     '新玩法：等级 10 开放汤屋，投入毛巾与香氛让客人泡汤收小费',
     '关掉游戏也在赚，回来再收（最多累计 8 小时）',
@@ -3207,7 +3181,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '19';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '20';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3279,9 +3253,10 @@ function rCapy(){
 function rPills(){
   if(el('coinN')) el('coinN').textContent = S.coins;
   if(el('starN')) el('starN').textContent = S.stars;
-  if(el('lvN')) el('lvN').textContent = S.level;
-  if(el('xpb') && el('xpb').style) el('xpb').style.width = Math.min(100, Math.round(S.xp / xpNeed(S.level) * 100)) + '%';
-  if(el('xpTxt')) el('xpTxt').textContent = S.xp + '/' + xpNeed(S.level);
+  if(el('lvN')) el('lvN').textContent = 'Lv ' + S.level;
+  if(el('xpN')) el('xpN').textContent = S.xp + '/' + xpNeed(S.level);
+  var t = el('town');
+  if(t && t.classList && t.classList.contains('on')) rTown();
 }
 /* 订单图标条：一个客人一个圆头像，备齐会亮绿圈，点开看详情。
    参考肥鹅健身房顶部活动栏——用图标承载入口，把版面高度让给棋盘 */
@@ -3498,6 +3473,70 @@ function onsenSupplies(chainKey){
   return out;
 }
 
+/* ================= 温泉町全貌页（V2.3） =================
+   进游戏先看到整个小镇，点建筑进各玩法。哪里有事做就亮红点，扫一眼就知道去哪。 */
+var TOWN_SPOTS = [
+  { id:'diner', n:'汤屋食堂', x:21, y:62, main:true, sym:'i-pot' },
+  { id:'onsen', n:'温泉汤屋', x:17, y:31, sym:'i-onsen', lv:10 },
+  { id:'fish',  n:'汐见川',   x:23, y:88, sym:'i-fish',  lv:5 },
+  { id:'dream', n:'梦境',     x:76, y:16, sym:'i-moon',  lv:3 },
+  { id:'deco',  n:'造町',     x:87, y:78, sym:'i-house', lv:20 }
+];
+function spotBadge(id){
+  if(id === 'diner'){
+    var n = 0;
+    for(var i = 0; i < S.orders.length; i++) if(S.orders[i] && canDeliver(S.orders[i])) n++;
+    return n > 0 ? { t: String(n) } : null;
+  }
+  if(id === 'onsen'){
+    if(!onsenUnlocked()) return null;
+    if(S.onsen && S.onsen.at && onsenLeft() <= 0) return { t:'收', g:true };
+    return null;
+  }
+  if(id === 'fish')  return (fishUnlocked() && !S.fishCount) ? { t:'新' } : null;
+  if(id === 'dream') return (S.level >= 3 && dreamTotalStars() === 0) ? { t:'新' } : null;
+  return null;
+}
+function spotOpen(sp){ return !sp.lv || S.level >= sp.lv; }
+function rTown(){
+  var box = el('townHots');
+  if(box){
+    var html = '';
+    TOWN_SPOTS.forEach(function(sp){
+      var open = spotOpen(sp), bd = open ? spotBadge(sp.id) : null;
+      html += '<button class="hot' + (sp.main ? ' main' : '') + (open ? '' : ' lock') + '" ' +
+        'data-spot="' + sp.id + '" style="left:' + sp.x + '%; top:' + sp.y + '%">' +
+        '<span class="hotpin">' + (sp.main && open ? '<span class="hotring"></span>' : '') +
+        svgUse(sp.sym) +
+        (bd ? '<span class="hotdot' + (bd.g ? ' g' : '') + '">' + bd.t + '</span>' : '') +
+        '</span><span class="hotlb">' + sp.n + (open ? '' : ' Lv' + sp.lv) + '</span></button>';
+    });
+    box.innerHTML = html;
+  }
+  var top = el('townTop');
+  if(top){
+    top.innerHTML =
+      '<span class="pill">' + svgUse('i-coin') + '<b>' + S.coins + '</b></span>' +
+      '<span class="pill">' + svgUse('i-star') + '<b>' + S.stars + '</b></span>' +
+      (S.shells ? '<span class="pill">' + svgUse('i-shell') + '<b>' + S.shells + '</b></span>' : '') +
+      '<span class="pill lvp"><b>Lv ' + S.level + '</b><i>' + S.xp + '/' + xpNeed(S.level) + '</i></span>';
+  }
+}
+function openTown(){
+  closePage();
+  var a = el('app'); if(a && a.style) a.style.display = 'none';
+  var t = el('town'); if(t && t.classList) t.classList.add('on');
+  rTown();
+}
+function closeTown(){
+  var t = el('town'); if(t && t.classList) t.classList.remove('on');
+}
+function openDiner(){
+  closeTown();
+  var a = el('app'); if(a && a.style) a.style.display = '';
+  rAll();
+}
+
 /* ================= 整页视图切换 =================
    大玩法（钓鱼、梦境、汤屋）各占一整屏。弹窗适合"看一眼"，
    但这些玩法要待上几分钟，整页才不憋屈。 */
@@ -3515,12 +3554,9 @@ function openPage(id, title, sub, html){
 function closePage(){
   var pg = el('page');
   if(pg && pg.classList) pg.classList.remove('on');
-  var app = el('app');
-  if(app && app.style) app.style.display = '';
   if(curPage === 'fish') fishReset();
   if(curPage === 'dream') DM = null;   // 退出梦境时丢弃当前对局
   curPage = null;
-  rAll();
 }
 function pageSub(text){ if(el('pgSub')) el('pgSub').textContent = text; }
 
@@ -4074,11 +4110,8 @@ function rWare(){
   }
   gd.innerHTML = html;
 }
-function rScene(){
-  var sg = el('scSign'); if(sg && sg.style) sg.style.display = (renoHas('sign') && !renoHas('gold')) ? '' : 'none';
-  var gg = el('scGold'); if(gg && gg.style) gg.style.display = renoHas('gold') ? '' : 'none';
-  var lg2 = el('scGlow'); if(lg2 && lg2.style) lg2.style.display = renoHas('lantern') ? '' : 'none';
-}
+/* 场景大图已移除，装修的视觉体现挪到小镇页；留空函数兼容旧调用 */
+function rScene(){}
 /* 扭蛋弹窗：费用行 + 结果区 + 收藏册 */
 function rGacha(){
   var sub = el('gachaSub');
@@ -4660,7 +4693,34 @@ function bindUi(){
     if(!onsenUnlocked()){ toast('等级 10 之后，隔壁的老汤屋会交到你手上'); return; }
     openOnsenPage();
   };
-  if(el('pgBack')) el('pgBack').onclick = function(){ audioInit(); closePage(); };
+  // 小镇热点：点建筑进对应玩法
+  var th = el('townHots');
+  if(th && th.addEventListener) th.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('[data-spot]') : null;
+    if(!b) return;
+    audioInit();
+    var id = b.getAttribute('data-spot');
+    var sp = TOWN_SPOTS.filter(function(x){ return x.id === id; })[0];
+    if(!sp) return;
+    if(!spotOpen(sp)){ toast(sp.n + ' 需要等级 ' + sp.lv); sfx('err'); return; }
+    sfx('tap');
+    if(id === 'diner'){ openDiner(); return; }
+    closeTown();
+    if(id === 'fish')  openFishPage();
+    else if(id === 'dream') openDreamPage();
+    else if(id === 'onsen') openOnsenPage();
+    else if(id === 'deco'){ toast('造町还在施工中'); openTown(); }
+  });
+  if(el('townBot')) el('townBot').addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('[data-tb]') : null;
+    if(!b) return;
+    audioInit();
+    var map = { dex:'dexBtn', reno:'renoBtn', shop:'shopBtn', gacha:'gachaBtn', set:'setBtn' };
+    var t = el(map[b.getAttribute('data-tb')]);
+    if(t && t.onclick) t.onclick();
+  });
+  if(el('toTown')) el('toTown').onclick = function(){ audioInit(); openTown(); };
+  if(el('pgBack')) el('pgBack').onclick = function(){ audioInit(); closePage(); openTown(); };
   if(el('verTag')) el('verTag').textContent = GAME_VER;
   if(el('setSub')) el('setSub').textContent = '当前版本 ' + GAME_VER;
   if(el('setBtn')) el('setBtn').onclick = function(){
@@ -4821,13 +4881,18 @@ function boot(){
   bindInput(); bindUi();
   startTick();
   if(!S.story.intro){
+    // 新玩家直接进食堂：一上来就丢张地图会不知道点哪
     S.story.intro = 1;
+    openDiner();
     showStory(STORY_INTRO, function(){
       S.tut = true; save();
-      toast('点一点菜篮子、面粉袋，或摸摸泡温泉的阿汤');
+      toast('点一点菜篮子、面粉袋，或摸摸阿汤');
     });
     save();
-  } else if(!S.tut && el('tut')) el('tut').classList.add('on');
+  } else {
+    openTown();          // 老玩家从小镇进，一眼看到哪里有事做
+    if(!S.tut && el('tut')) el('tut').classList.add('on');
+  }
 }
 boot();
 
@@ -4841,6 +4906,8 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  openTown: openTown, closeTown: closeTown, openDiner: openDiner,
+  rTown: rTown, TOWN_SPOTS: TOWN_SPOTS, spotBadge: spotBadge, spotOpen: spotOpen,
   onsenStart: onsenStart, onsenCollect: onsenCollect, onsenLeft: onsenLeft,
   onsenBonus: onsenBonus, buyPool: buyPool, poolCur: poolCur, POOLS: POOLS,
   onsenUnlocked: onsenUnlocked, onsenSupplies: onsenSupplies, openOnsenPage: openOnsenPage,
