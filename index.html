@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#C7E39A">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="水豚温泉町">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
@@ -43,10 +43,10 @@ body{
 /* 场景图一直铺到状态栏后面，顶部不再留纯色空档 */
 /* ---------- 温泉町全貌页 ---------- */
 #town{display:none; position:fixed; inset:0; z-index:50; overflow:hidden;
-  width:100%; max-width:520px; margin:0 auto; background:var(--sky1);}
+  width:100%; max-width:520px; margin:0 auto; background:var(--sky3);}
 #town.on{display:block;}
 #townBg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
-#townTop{position:absolute; left:0; right:0; top:0; display:flex; gap:5px; align-items:center;
+#townTop{position:absolute; left:0; right:0; top:0; z-index:3; display:flex; gap:5px; align-items:center;
   padding:calc(10px + env(safe-area-inset-top)) 8px 14px;
   background:linear-gradient(180deg,rgba(25,45,25,.42),transparent);}
 #townTop .pill{background:rgba(255,253,246,.96);}
@@ -80,7 +80,7 @@ body{
 .hot.lock .hotpin svg{color:#7C7B72;}
 .hot.lock .hotlb{background:rgba(72,72,66,.75);}
 #townBot{position:absolute; left:0; right:0; bottom:0; display:grid;
-  grid-template-columns:repeat(5,1fr); gap:6px;
+  grid-template-columns:repeat(5,1fr); gap:6px; z-index:3;
   padding:10px 8px calc(12px + env(safe-area-inset-bottom));
   background:linear-gradient(0deg,rgba(25,45,25,.46),transparent);}
 #townBot button{display:flex; flex-direction:column; align-items:center; gap:2px;
@@ -1565,9 +1565,14 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.4';
+var GAME_VER = 'V2.4.1';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.4.1', d:'2026-08-05', t:'界面修复', li:[
+    '修复梦境关卡列表挤成一列的问题',
+    '修复小镇页顶部露出绿边、钓鱼入口被底栏挡住',
+    '造町摆件重画，改为与食材同款的柔和风格'
+  ]},
   { v:'V2.4', d:'2026-08-05', t:'造町布置', li:[
     '新玩法：等级 6 开放造町，在小镇地图上摆放 12 种装饰',
     '摆件带实际增益：订单金币、生成器回充、闪光率、汤屋小费、扭蛋概率',
@@ -3241,7 +3246,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '24';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '25';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3544,9 +3549,9 @@ function onsenSupplies(chainKey){
 var TOWN_SPOTS = [
   { id:'diner', n:'汤屋食堂', x:21, y:62, main:true, sym:'i-pot' },
   { id:'onsen', n:'温泉汤屋', x:17, y:31, sym:'i-onsen', lv:10 },
-  { id:'fish',  n:'汐见川',   x:23, y:88, sym:'i-fish',  lv:5 },
-  { id:'dream', n:'梦境',     x:76, y:16, sym:'i-moon',  lv:3 },
-  { id:'deco',  n:'造町',     x:87, y:78, sym:'i-house', lv:6 }
+  { id:'fish',  n:'汐见川',   x:20, y:79, sym:'i-fish',  lv:5 },
+  { id:'dream', n:'梦境',     x:76, y:21, sym:'i-moon',  lv:3 },
+  { id:'deco',  n:'造町',     x:86, y:70, sym:'i-house', lv:6 }
 ];
 function spotBadge(id){
   if(id === 'diner'){
@@ -4006,7 +4011,7 @@ function rDreamBoard(){
 function backToDreamList(){
   DM = null;
   if(el('pgTitle')) el('pgTitle').textContent = '梦境';
-  el('pageBody').innerHTML = '<div id="dreamList"></div>';
+  el('pageBody').innerHTML = '<div id="dreamList" class="dlist"></div>';
   rDreamList();
   pageSub('已得 ' + dreamTotalStars() + ' / ' + (DREAMS.length * 3) + ' 星');
 }
@@ -4041,7 +4046,7 @@ function showDreamLose(){
 }
 /* 梦境整页：关卡列表与对局共用一页，返回时逐层退回 */
 function openDreamPage(){
-  openPage('dream', '梦境', '', '<div id="dreamList"></div>');
+  openPage('dream', '梦境', '', '<div id="dreamList" class="dlist"></div>');
   rDreamList();
   pageSub('已得 ' + dreamTotalStars() + ' / ' + (DREAMS.length * 3) + ' 星');
 }
