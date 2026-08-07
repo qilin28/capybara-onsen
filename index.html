@@ -50,6 +50,20 @@ body{
   padding:calc(10px + env(safe-area-inset-top)) 8px 14px;
   background:linear-gradient(180deg,rgba(25,45,25,.42),transparent);}
 #townTop .pill{background:rgba(255,253,246,.96);}
+/* 季节色调与祭典横幅 */
+#townTint{position:absolute; inset:0; pointer-events:none; mix-blend-mode:soft-light;
+  transition:background .6s, opacity .6s;}
+#festBar{position:absolute; left:8px; right:8px; z-index:3;
+  top:calc(env(safe-area-inset-top) + 52px);
+  display:flex; flex-direction:column; gap:1px; align-items:center;
+  background:linear-gradient(180deg,rgba(255,247,228,.97),rgba(248,220,168,.97));
+  border:2.5px solid #E08A32; border-bottom-width:3px; border-radius:14px;
+  padding:6px 12px; box-shadow:0 3px 0 rgba(180,110,30,.4);
+  animation:festIn .5s cubic-bezier(.34,1.56,.64,1);}
+#festBar b{font-size:13px; font-weight:900; color:#C4761F; letter-spacing:1px;}
+#festBar span{font-size:10.5px; font-weight:900; color:#8A6A3A; text-align:center;}
+@keyframes festIn{ from{ transform:translateY(-14px); opacity:0; } }
+
 .hot{position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column;
   align-items:center; gap:3px; cursor:pointer; background:none; border:none; padding:0;
   font-family:inherit;}
@@ -1269,6 +1283,8 @@ body{
 <!-- 温泉町：进游戏先看到的全貌页，点建筑进各个玩法 -->
 <div id="town">
   <img id="townBg" src="art/scene/townmap.png?v=1" alt="">
+  <div id="townTint"></div>
+  <div id="festBar" style="display:none"></div>
   <div id="townTop"></div>
   <div id="townHots"></div>
   <div id="townBot">
@@ -1567,9 +1583,15 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.4.1';
+var GAME_VER = 'V2.5';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V2.5', d:'2026-08-05', t:'四季与祭典', li:[
+    '小镇随真实季节换色，春粉夏蓝秋黄冬白',
+    '每年四场祭典：春樱祭、夏夜祭、秋灯祭、冬雪祭，各开一周',
+    '祭典期间指定食材的订单奖励 x1.5',
+    '祭典每天首次进小镇送扭蛋券和贝币，错过不惩罚，来年再开'
+  ]},
   { v:'V2.4.1', d:'2026-08-05', t:'界面修复', li:[
     '修复梦境关卡列表挤成一列的问题',
     '修复小镇页顶部露出绿边、钓鱼入口被底栏挡住',
@@ -1799,7 +1821,7 @@ function initNew(){
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
-    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, dream:{}, shells:0,
+    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1829,7 +1851,7 @@ function save(){
       story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless, vol:S.vol,
       rod:S.rod, fishCount:S.fishCount,
       pool:S.pool, onsen:S.onsen, rep:S.rep,
-      decoOwn:S.decoOwn, decoMap:S.decoMap,
+      decoOwn:S.decoOwn, decoMap:S.decoMap, fest:S.fest,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -1858,6 +1880,7 @@ function load(){
     pool: d.pool || 0, onsen: d.onsen || null, rep: d.rep || 0,
     decoOwn: Array.isArray(d.decoOwn) ? d.decoOwn : [],
     decoMap: (d.decoMap && typeof d.decoMap === 'object') ? d.decoMap : {},
+    fest: (d.fest && typeof d.fest === 'object') ? d.fest : {},
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -2767,7 +2790,11 @@ function howToGet(id){
 }
 function orderReward(o){
   var coins = 0, xp = 0;
-  o.needs.forEach(function(nd){ coins += ITEMS[nd[0]].val * 8 * nd[1]; xp += ITEMS[nd[0]].val * 3 * nd[1]; });
+  o.needs.forEach(function(nd){
+    var fb = festBonus(nd[0]);          // 祭典期间指定食材奖励翻倍
+    coins += Math.round(ITEMS[nd[0]].val * 8 * nd[1] * fb);
+    xp += ITEMS[nd[0]].val * 3 * nd[1];
+  });
   if(renoHas('tables')) coins = Math.round(coins * 1.1);
   coins = Math.round(coins * (1 + decoBuff('order')));   // 告示板等摆件加成
   return { coins:coins, xp:xp };
@@ -3249,7 +3276,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '26';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '27';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3547,6 +3574,66 @@ function onsenSupplies(chainKey){
   return out;
 }
 
+/* ================= 四季与祭典（V2.5） =================
+   按手机本地日期判定，零联网。错过不惩罚，来年照常再开。 */
+var SEASONS = [
+  { id:'spring', n:'春',  m:[3,4,5],    tint:'#F6D9E4', desc:'樱花开了' },
+  { id:'summer', n:'夏',  m:[6,7,8],    tint:'#CFEAF2', desc:'蝉鸣与凉面' },
+  { id:'autumn', n:'秋',  m:[9,10,11],  tint:'#F5E0BE', desc:'枫叶与新米' },
+  { id:'winter', n:'冬',  m:[12,1,2],   tint:'#E6EEF6', desc:'雪与热汤' }
+];
+/* 祭典：每年固定日期开一周，按月日判定 */
+var FESTIVALS = [
+  { id:'sakura',  n:'春樱祭', from:[4,1],  to:[4,7],  season:'spring',
+    desc:'樱花铺满石阶的一周', item:'veg3', bonus:1.5 },
+  { id:'natsu',   n:'夏夜祭', from:[7,20], to:[7,26], season:'summer',
+    desc:'河边放灯笼，摊子摆到深夜', item:'f2', bonus:1.5 },
+  { id:'tsukimi', n:'秋灯祭', from:[10,5], to:[10,11], season:'autumn',
+    desc:'满月下的赏灯之夜', item:'bun3', bonus:1.5 },
+  { id:'yuki',    n:'冬雪祭', from:[12,20], to:[12,26], season:'winter',
+    desc:'雪里的一碗热汤', item:'k1', bonus:1.5 }
+];
+function curSeason(d){
+  var m = (d || new Date()).getMonth() + 1;
+  for(var i = 0; i < SEASONS.length; i++){
+    if(SEASONS[i].m.indexOf(m) >= 0) return SEASONS[i];
+  }
+  return SEASONS[0];
+}
+/* 日期落在祭典区间内就返回该祭典，否则 null */
+function curFest(d){
+  var now = d || new Date();
+  var m = now.getMonth() + 1, day = now.getDate();
+  for(var i = 0; i < FESTIVALS.length; i++){
+    var f = FESTIVALS[i];
+    var a = f.from[0] * 100 + f.from[1], b = f.to[0] * 100 + f.to[1], t = m * 100 + day;
+    if(t >= a && t <= b) return f;
+  }
+  return null;
+}
+/* 祭典期间：指定食材的订单奖励翻倍，且每天首次登录送祭典礼包 */
+function festBonus(itemId){
+  var f = curFest();
+  if(!f || f.item !== itemId) return 1;
+  return f.bonus;
+}
+function festCheck(){
+  var f = curFest();
+  if(!f) return null;
+  if(!S.fest) S.fest = {};
+  var key = f.id + '-' + today();
+  if(S.fest[key]) return null;        // 今天已领
+  S.fest[key] = 1;
+  // 清掉过期记录，避免存档越滚越大
+  var keep = {};
+  Object.keys(S.fest).forEach(function(k){ if(k.indexOf(f.id) === 0) keep[k] = 1; });
+  S.fest = keep;
+  S.tickets = (S.tickets || 0) + 1;
+  S.shells = (S.shells || 0) + 5;
+  save();
+  return f;
+}
+
 /* ================= 温泉町全貌页（V2.3） =================
    进游戏先看到整个小镇，点建筑进各玩法。哪里有事做就亮红点，扫一眼就知道去哪。 */
 var TOWN_SPOTS = [
@@ -3594,6 +3681,23 @@ function rTown(){
     });
     box.innerHTML = html;
   }
+  // 季节给地图罩一层淡色，祭典期间挂条横幅
+  var tint = el('townTint');
+  if(tint && tint.style){
+    var se = curSeason();
+    tint.style.background = se.tint;
+    tint.style.opacity = '.16';
+  }
+  var fb = el('festBar'), f = curFest();
+  if(fb){
+    if(f){
+      fb.style.display = '';
+      fb.innerHTML = '<b>' + f.n + '</b><span>' + f.desc + ' · ' +
+        ITEM_NAMES[f.item] + ' 订单奖励 x' + f.bonus + '</span>';
+    } else {
+      fb.style.display = 'none';
+    }
+  }
   var top = el('townTop');
   if(top){
     top.innerHTML =
@@ -3605,6 +3709,11 @@ function rTown(){
 }
 function openTown(){
   closePage();
+  var got = festCheck();
+  if(got){
+    toast(got.n + '开幕！领到 1 张扭蛋券和 5 枚贝币');
+    sfx('level');
+  }
   var a = el('app'); if(a && a.style) a.style.display = 'none';
   var t = el('town'); if(t && t.classList) t.classList.add('on');
   rTown();
@@ -5124,6 +5233,9 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  ITEM_NAMES: ITEM_NAMES,
+  SEASONS: SEASONS, FESTIVALS: FESTIVALS, curSeason: curSeason, curFest: curFest,
+  festBonus: festBonus, festCheck: festCheck,
   DECOS: DECOS, DECO_POS: DECO_POS, DECO_SLOTS: DECO_SLOTS,
   buyDeco: buyDeco, placeDeco: placeDeco, decoBuff: decoBuff, decoOwned: decoOwned,
   decoPlaced: decoPlaced, decoUnlocked: decoUnlocked, openDecoPage: openDecoPage,

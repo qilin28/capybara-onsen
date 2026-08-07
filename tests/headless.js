@@ -844,6 +844,53 @@ ok(gDc3.S().decoMap[7] === 'cat', '摆放位置可存档恢复');
 ok(gDc3.decoPlaced() === 2, '读档后布置数量正确');
 gDc2.stopTick(); gDc3.stopTick();
 
+// ---------- V2.5 四季与祭典 ----------
+const gFe = makeEnv(new Map());
+// 季节按月份判定
+ok(gFe.curSeason(new Date(2026, 3, 15)).id === 'spring', '四月是春天');
+ok(gFe.curSeason(new Date(2026, 6, 1)).id === 'summer', '七月是夏天');
+ok(gFe.curSeason(new Date(2026, 9, 20)).id === 'autumn', '十月是秋天');
+ok(gFe.curSeason(new Date(2026, 0, 5)).id === 'winter', '一月是冬天');
+ok(gFe.SEASONS.reduce(function(a, s2){ return a.concat(s2.m); }, []).length === 12,
+   '十二个月都归属到某个季节，没有空档');
+
+// 祭典按月日判定
+ok(gFe.curFest(new Date(2026, 3, 3)).id === 'sakura', '4 月 3 日在春樱祭期间');
+ok(gFe.curFest(new Date(2026, 3, 1)).id === 'sakura', '祭典首日算在内');
+ok(gFe.curFest(new Date(2026, 3, 7)).id === 'sakura', '祭典末日算在内');
+ok(gFe.curFest(new Date(2026, 3, 8)) === null, '祭典结束后就没有了');
+ok(gFe.curFest(new Date(2026, 4, 15)) === null, '平常日子没有祭典');
+ok(gFe.curFest(new Date(2026, 6, 22)).id === 'natsu', '7 月下旬是夏夜祭');
+ok(gFe.curFest(new Date(2026, 11, 24)).id === 'yuki', '12 月下旬是冬雪祭');
+// 四个祭典分属四季，且日期不重叠
+const fIds = gFe.FESTIVALS.map(function(f){ return f.season; });
+ok(new Set(fIds).size === 4, '四个祭典分属四季');
+ok(gFe.FESTIVALS.every(function(f){ return gFe.ITEM_NAMES[f.item]; }), '祭典指定的食材都真实存在');
+gFe.stopTick();
+
+// 祭典礼包每天只领一次
+const gFe2 = makeEnv(new Map());
+const SFe = gFe2.S();
+const realFest = gFe2.curFest();
+if (realFest) {
+  const t0 = SFe.tickets;
+  ok(gFe2.festCheck() !== null, '祭典期间首次进小镇可领礼包');
+  ok(SFe.tickets === t0 + 1, '礼包发放扭蛋券');
+  ok(gFe2.festCheck() === null, '同一天不会重复领');
+} else {
+  ok(gFe2.festCheck() === null, '非祭典期间没有礼包');
+}
+gFe2.stopTick();
+
+// 祭典数据可存档
+const feStore = new Map();
+const gFe3 = makeEnv(feStore);
+gFe3.S().fest = { 'sakura-2026-04-03': 1 };
+gFe3.save();
+const gFe4 = makeEnv(feStore);
+ok(gFe4.S().fest['sakura-2026-04-03'] === 1, '祭典领取记录可存档');
+gFe3.stopTick(); gFe4.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
