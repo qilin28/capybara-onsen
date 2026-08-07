@@ -100,7 +100,7 @@ body{
   box-shadow:0 2px 0 rgba(140,105,60,.28);}
 #toTown:active{transform:translateY(2px); border-bottom-width:2px;}
 #toTown svg{width:17px; height:17px;}
-#resbar .lvp{flex:1; justify-content:center; gap:6px; font-size:12.5px;}
+#resbar .lvp{flex:1; justify-content:center; gap:5px; font-size:12.5px; white-space:nowrap; min-width:0;}
 #resbar .lvp i{font-style:normal; font-size:11px; color:var(--sub);}
 
 #pills{display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; align-items:flex-start; pointer-events:auto; max-width:min(58vw,210px); z-index:4;}
@@ -657,8 +657,10 @@ body{
 .sbtn.warn{background:linear-gradient(180deg,#F09A9A,#E07A7A); border-bottom-color:#B85555; color:#FFF6F0;}
 
 /* ---------- 顶部图标条（任务 + 工具，横向滚动） ---------- */
-#orders{flex:0 0 auto; display:flex; gap:6px; align-items:center;
-  overflow-x:auto; overflow-y:hidden; padding:1px 0 3px;
+/* 图标条横向铺满屏宽：用负边距抵消 #app 的内边距，右侧留白避免最后一个被切 */
+#orders{flex:0 0 auto; display:flex; gap:6px; align-items:flex-start;
+  margin:0 -8px; padding:1px 10px 3px 8px;
+  overflow-x:auto; overflow-y:hidden;
   -webkit-overflow-scrolling:touch; scrollbar-width:none;}
 #orders::-webkit-scrollbar{display:none;}
 .tsk{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px;
@@ -1571,6 +1573,7 @@ var CHANGELOG = [
   { v:'V2.4.1', d:'2026-08-05', t:'界面修复', li:[
     '修复梦境关卡列表挤成一列的问题',
     '修复小镇页顶部露出绿边、钓鱼入口被底栏挡住',
+    '修复等级显示换行、顶部图标条最后一项被切',
     '造町摆件重画，改为与食材同款的柔和风格'
   ]},
   { v:'V2.4', d:'2026-08-05', t:'造町布置', li:[
@@ -3246,7 +3249,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '25';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '26';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
