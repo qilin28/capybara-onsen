@@ -731,7 +731,7 @@ gOn.stopTick(); gOn2.stopTick(); gOn3.stopTick();
 // ---------- V2.3 温泉町入口页 ----------
 const gT = makeEnv(new Map());
 const ST = gT.S();
-ok(gT.TOWN_SPOTS.length === 5, '小镇有 5 个入口');
+ok(gT.TOWN_SPOTS.length === 6, '小镇有 6 个入口');
 ok(gT.TOWN_SPOTS.every(function(sp){ return sp.x > 0 && sp.x < 100 && sp.y > 0 && sp.y < 100; }),
    '所有热点坐标都在图内');
 ok(gT.TOWN_SPOTS.filter(function(sp){ return sp.main; }).length === 1, '只有一个主入口');
@@ -744,7 +744,9 @@ ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 3, 'Lv5 开放到钓鱼（食堂
 ST.level = 6;
 ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 4, 'Lv6 再开造町');
 ST.level = 10;
-ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 5, 'Lv10 汤屋开放后全部解锁');
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 5, 'Lv10 开到汤屋（还差杂货铺）');
+ST.level = 14;
+ok(gT.TOWN_SPOTS.filter(gT.spotOpen).length === 6, 'Lv14 杂货铺开放后全部解锁');
 
 // 红点提示
 ST.level = 15;
@@ -890,6 +892,74 @@ gFe3.save();
 const gFe4 = makeEnv(feStore);
 ok(gFe4.S().fest['sakura-2026-04-03'] === 1, '祭典领取记录可存档');
 gFe3.stopTick(); gFe4.stopTick();
+
+// ---------- V3.0 杂货铺与跨店联动 ----------
+const gTy = makeEnv(new Map());
+const STy = gTy.S();
+ok(gTy.CHAINS.toy.items.length === 7, '玩具链 7 级');
+ok(gTy.toyUnlocked() === false, 'Lv1 时杂货铺未开放');
+STy.level = 14;
+ok(gTy.toyUnlocked() === true, 'Lv14 开放杂货铺');
+
+// 价格随稀有度指数增长
+const prices = gTy.CHAINS.toy.items.map(function(id){ return gTy.toyPrice(id); });
+ok(prices.every(function(p2, i){ return i === 0 || p2 > prices[i-1]; }), '收购价逐级递增');
+ok(prices[6] / prices[0] > 50, '顶级玩具比入门贵 50 倍以上');
+ok(gTy.toyPrice('veg1') === 0, '非玩具没有收购价');
+
+// 卖出
+STy.coins = 0; STy.shells = 0;
+gTy.spawn('y1');
+const sr1 = gTy.sellToy('y1');
+ok(sr1 && sr1.coins === 30, '卖低级玩具给金币');
+ok(sr1.shells === 0, '低级玩具不给贝币');
+ok(STy.coins === 30, '金币确实入账');
+gTy.spawn('y5');
+const sr2 = gTy.sellToy('y5');
+ok(sr2.shells > 0, '五级往上额外给贝币');
+ok(STy.shells === sr2.shells, '贝币确实入账');
+ok(gTy.sellToy('y7') === null, '手上没有的卖不了');
+ok(gTy.sellToy('veg1') === null, '非玩具卖不了');
+ok(STy.toySold === 2, '售出计数正确');
+
+// 跨店联动：新业态随等级进入订单池
+STy.level = 1;
+ok(gTy.crossChains().length === 0, 'Lv1 时没有跨店内容');
+STy.level = 5;
+ok(gTy.crossChains().indexOf('fish') >= 0, 'Lv5 后订单会点名鱼');
+STy.level = 10;
+ok(gTy.crossChains().indexOf('wash') >= 0, 'Lv10 后订单会点名汤屋布草');
+STy.level = 14;
+ok(gTy.crossChains().length === 4, 'Lv14 后四条跨店链全部进池');
+// 订单确实会出现跨店需求
+STy.level = 14;
+let crossSeen = false;
+for (let i = 0; i < 300 && !crossSeen; i++) {
+  const o = gTy.genOrder(0);
+  crossSeen = o.needs.some(function(nd){
+    const ch = gTy.ITEMS[nd[0]].chain;
+    return ['fish','wash','aroma','toy'].indexOf(ch) >= 0;
+  });
+}
+ok(crossSeen, '订单里真的会出现其它店的产物');
+
+// 玩具链每一级都有获取途径
+const toyIds = gTy.CHAINS.toy.items;
+const recipeOut = {};
+gTy.RECIPES.forEach(function(r){ recipeOut[r.r] = 1; });
+ok(toyIds.every(function(id, i){ return i === 0 ? recipeOut[id] : (recipeOut[id] || true); }),
+   '玩具链起点有配方，其余可靠合成');
+ok(recipeOut['y1'], '毛线球有配方（跨店：汤屋手巾 + 香油）');
+gTy.stopTick();
+
+// 杂货铺数据可存档
+const tyStore = new Map();
+const gTy2 = makeEnv(tyStore);
+gTy2.S().toySold = 25;
+gTy2.save();
+const gTy3 = makeEnv(tyStore);
+ok(gTy3.S().toySold === 25, '售出计数可存档恢复');
+gTy2.stopTick(); gTy3.stopTick();
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');

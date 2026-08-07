@@ -474,6 +474,27 @@ body{
   background:radial-gradient(circle at 50% 45%, #F5D76E 0 42%, transparent 43%);}
 .dmwin .dst i.on{background:radial-gradient(circle at 50% 45%, #F5B942 0 42%, transparent 43%);}
 
+/* ---------- 杂货铺 ---------- */
+.tanuki{display:flex; align-items:center; gap:11px;
+  background:linear-gradient(180deg,#FFF6E4,#F5E3C4); border:2.5px solid var(--wood2);
+  border-radius:15px; padding:10px 12px; box-shadow:0 3px 0 rgba(140,105,60,.3);}
+.tanuki .art{width:54px; height:54px; flex:none;}
+.tanuki .tkw{flex:1; min-width:0;}
+.tanuki .tkw b{display:block; font-size:13px; font-weight:900; color:var(--ink);}
+.tanuki .tkw span{display:block; font-size:11px; color:var(--sub); line-height:1.6; margin-top:2px;}
+.pricelist{display:flex; flex-direction:column; gap:5px;}
+.prow{display:flex; align-items:center; gap:9px;
+  background:rgba(120,86,50,.06); border:2px solid var(--pline);
+  border-radius:11px; padding:6px 10px;}
+.prow .pimg{width:34px; height:34px; flex:none; display:flex; align-items:center; justify-content:center;}
+.prow .pimg .art{width:100%; height:100%;}
+.prow .pimg i{font-style:normal; font-size:16px; font-weight:900; color:var(--sub);}
+.prow b{flex:1; min-width:0; font-size:12.5px; font-weight:900; color:var(--ink);}
+.prow > span{display:flex; align-items:center; gap:4px; font-size:12px; font-weight:900; color:#B0763A;}
+.prow > span svg{width:15px; height:15px;}
+.prow.unk{opacity:.5;}
+.prow.unk b{color:var(--sub);}
+
 /* ---------- 造町 ---------- */
 #decoMap{position:relative; width:100%; aspect-ratio:640/1384; max-height:46vh;
   margin:0 auto; border-radius:16px; overflow:hidden;
@@ -1528,9 +1549,23 @@ var CHAINS = {
   fish: { n: '汐见川', color: '#7FB8D4', items: ['f1','f2','f3','f4','f5','f6','f7'] },
   cook3: { n: '河鲜料理', color: '#6FA8C8', cooked: 1, items: ['r1','r2','r3','r4','r5'] },
   wash: { n: '汤屋布草', color: '#D8C7E8', items: ['w1','w2','w3'] },
-  aroma: { n: '香氛坊', color: '#C8A8D8', items: ['a1','a2','a3','a4'] }
+  aroma: { n: '香氛坊', color: '#C8A8D8', items: ['a1','a2','a3','a4'] },
+  toy: { n: '杂货铺', color: '#E8A87C', items: ['y1','y2','y3','y4','y5','y6','y7'] }
 };
 var BASECH = ['veg','bun','dairy'];
+/* 跨店联动订单：解锁新业态后，客人会点名其它店的产物，
+   老棋盘的东西因此一直有用，不会做完一章就废掉 */
+var CROSS_CH = [
+  { ck:'fish',  lv:5  },   // 汐见川的鱼
+  { ck:'wash',  lv:10 },   // 汤屋的布草
+  { ck:'aroma', lv:10 },   // 汤屋的香氛
+  { ck:'toy',   lv:14 }    // 杂货铺的玩具
+];
+function crossChains(){
+  var lv = S ? S.level : 1, out = [];
+  CROSS_CH.forEach(function(c){ if(lv >= c.lv) out.push(c.ck); });
+  return out;
+}
 var ITEM_NAMES = {
   veg1:'种子', veg2:'嫩芽', veg3:'小白菜', veg4:'番茄', veg5:'南瓜', veg6:'蔬菜篮', veg7:'有机菜盒',
   bun1:'面粉', bun2:'面团', bun3:'馒头', bun4:'花卷', bun5:'葱油饼', bun6:'肉包', bun7:'小笼包', bun8:'蟹黄灌汤包',
@@ -1540,7 +1575,8 @@ var ITEM_NAMES = {
   f1:'小银鱼', f2:'青花鱼', f3:'橙斑鱼', f4:'河蚌', f5:'红蟹', f6:'鲭鱼', f7:'金鲤',
   r1:'盐烤小鱼', r2:'鲜贝汤', r3:'蟹肉可乐饼', r4:'汐见渔火锅', r5:'金鲤宴',
   w1:'手巾', w2:'叠好的浴巾', w3:'桧木浴桶',
-  a1:'香油', a2:'浴盐', a3:'药草束', a4:'秘制汤引'
+  a1:'香油', a2:'浴盐', a3:'药草束', a4:'秘制汤引',
+  y1:'毛线球', y2:'纸鹤', y3:'风车', y4:'手鼓', y5:'剑玉', y6:'达摩', y7:'八音盒'
 
 };
 var ITEMS = {};
@@ -1555,6 +1591,9 @@ var RECIPES = [
   { r:'k3', a:'bun6', b:'veg6', hint:'实在的面点装满一篮鲜蔬' },
   { r:'k4', a:'veg5', b:'d5',   hint:'圆滚滚的甜与丝滑相遇' },
   { r:'k5', a:'bun7', b:'d6',   hint:'笼屉里的拉丝惊喜' },
+  { r:'y1', a:'w1',   b:'a1',   hint:'把布头和香草缠成一团' },
+  { r:'y2', a:'y1',   b:'w2',   hint:'一张软纸，折起来会飞' },
+  { r:'y3', a:'y2',   b:'bun1', hint:'纸折的东西，风一吹就转' },
   { r:'w1', a:'veg2', b:'d1',   hint:'柔软的棉与温热的水' },
   { r:'a1', a:'veg3', b:'d2',   hint:'把草木的香气锁进小瓶子' },
   { r:'r1', a:'f2',   b:'bun2', hint:'河边的小鱼，撒点盐上火烤' },
@@ -1583,9 +1622,15 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V2.5';
+var GAME_VER = 'V3.0';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V3.0', d:'2026-08-08', t:'杂货铺新章', li:[
+    '第三间店：等级 14 开放杂货铺，狸猫掌柜收购玩具',
+    '新增玩具链 7 级，材料来自食堂与汤屋',
+    '跨店联动订单：客人会点名其它店的产物，老棋盘一直有用',
+    '高级玩具卖出额外给贝币，顶级卖 2900 金'
+  ]},
   { v:'V2.5', d:'2026-08-05', t:'四季与祭典', li:[
     '小镇随真实季节换色，春粉夏蓝秋黄冬白',
     '每年四场祭典：春樱祭、夏夜祭、秋灯祭、冬雪祭，各开一周',
@@ -1821,7 +1866,7 @@ function initNew(){
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
-    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, dream:{}, shells:0,
+    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1851,7 +1896,7 @@ function save(){
       story:S.story, met:S.met, thx:S.thx, quest:S.quest, stat:S.stat, fav:S.fav, endless:S.endless, vol:S.vol,
       rod:S.rod, fishCount:S.fishCount,
       pool:S.pool, onsen:S.onsen, rep:S.rep,
-      decoOwn:S.decoOwn, decoMap:S.decoMap, fest:S.fest,
+      decoOwn:S.decoOwn, decoMap:S.decoMap, fest:S.fest, toySold:S.toySold,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -1881,6 +1926,7 @@ function load(){
     decoOwn: Array.isArray(d.decoOwn) ? d.decoOwn : [],
     decoMap: (d.decoMap && typeof d.decoMap === 'object') ? d.decoMap : {},
     fest: (d.fest && typeof d.fest === 'object') ? d.fest : {},
+    toySold: d.toySold || 0,
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -2757,8 +2803,11 @@ function genOrder(slot){
     needs.push([cid, 1]); usedIds.push(cid);
     kinds = 1;
   }
+  var cross = crossChains();
   for(var k=0;k<kinds;k++){
-    var ck = BASECH[Math.floor(Math.random()*BASECH.length)];
+    // 有跨店内容时，三成概率点名其它店的产物
+    var pool2 = (cross.length && Math.random() < .3) ? cross : BASECH;
+    var ck = pool2[Math.floor(Math.random()*pool2.length)];
     var chain = CHAINS[ck].items;
     var tier = 2 + Math.floor(Math.pow(Math.random(), 1.7) * (cap - 1));
     tier = Math.min(tier, chain.length);
@@ -3276,7 +3325,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '27';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '28';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3641,7 +3690,8 @@ var TOWN_SPOTS = [
   { id:'onsen', n:'温泉汤屋', x:17, y:31, sym:'i-onsen', lv:10 },
   { id:'fish',  n:'汐见川',   x:20, y:79, sym:'i-fish',  lv:5 },
   { id:'dream', n:'梦境',     x:76, y:21, sym:'i-moon',  lv:3 },
-  { id:'deco',  n:'造町',     x:86, y:70, sym:'i-house', lv:6 }
+  { id:'deco',  n:'造町',     x:86, y:70, sym:'i-house', lv:6 },
+  { id:'shopn', n:'杂货铺',   x:88, y:88, sym:'i-bag',   lv:14 }
 ];
 function spotBadge(id){
   if(id === 'diner'){
@@ -3655,6 +3705,7 @@ function spotBadge(id){
     return null;
   }
   if(id === 'fish')  return (fishUnlocked() && !S.fishCount) ? { t:'新' } : null;
+  if(id === 'shopn') return (S.level >= 14 && !(S.toySold || 0)) ? { t:'新' } : null;
   if(id === 'dream') return (S.level >= 3 && dreamTotalStars() === 0) ? { t:'新' } : null;
   return null;
 }
@@ -3749,6 +3800,69 @@ function closePage(){
   curPage = null;
 }
 function pageSub(text){ if(el('pgSub')) el('pgSub').textContent = text; }
+
+/* ================= 杂货铺（V3.0） =================
+   狸猫掌柜收玩具，价格随稀有度指数增长。
+   玩具靠配方做，材料来自食堂与汤屋——跨店经济在这里收口。 */
+var TOY_PRICE = [0, 30, 70, 150, 320, 680, 1400, 2900];
+function toyUnlocked(){ return S.level >= 14; }
+function toyPrice(id){
+  var it = ITEMS[id];
+  if(!it || it.chain !== 'toy') return 0;
+  return TOY_PRICE[it.tier] || 0;
+}
+/* 卖一件玩具：从棋盘或储物间扣掉，换金币；五级往上额外给贝币 */
+function sellToy(id){
+  if(!ITEMS[id] || ITEMS[id].chain !== 'toy') return null;
+  if(!consumeItem(id)){ toast('手上没有' + ITEMS[id].n); return null; }
+  var coins = toyPrice(id);
+  var shells = ITEMS[id].tier >= 5 ? Math.floor(ITEMS[id].tier / 2) : 0;
+  S.coins += coins;
+  if(shells) S.shells = (S.shells || 0) + shells;
+  S.toySold = (S.toySold || 0) + 1;
+  checkQuest('toy');
+  rPills(); save();
+  return { coins: coins, shells: shells };
+}
+function openToyPage(){
+  openPage('shopn', '杂货铺', '', '<div id="toyBody"></div>');
+  rToyPage();
+}
+function rToyPage(){
+  var box = el('toyBody'); if(!box) return;
+  pageSub('已售出 ' + (S.toySold || 0) + ' 件');
+  var h = '<div class="tanuki">' + artUse('c-tanuki','','chars') +
+    '<div class="tkw"><b>狸猫掌柜</b><span>做出来的玩具我都收，越稀罕给得越多。' +
+    '五级往上还额外给贝币。</span></div></div>';
+  h += '<div class="dxh" style="margin-top:12px"><i style="background:#E8A87C"></i>手上的玩具</div>';
+  var list = onsenSupplies('toy');
+  if(!list.length){
+    h += '<p class="sethint">还没有玩具。去烹饪台试试——毛线球要用汤屋的手巾和香油，' +
+         '往后还能折出纸鹤和风车。</p>';
+  } else {
+    h += '<div class="dgrid">';
+    list.forEach(function(it){
+      h += '<button class="dcard" data-toy="' + it.id + '">' +
+        '<span class="dimg">' + itemArt(it.id) + '</span>' +
+        '<b>' + ITEMS[it.id].n + ' x' + it.n + '</b>' +
+        '<span class="dcost">' + svgUse('i-coin') + toyPrice(it.id) + '</span>' +
+        (ITEMS[it.id].tier >= 5
+          ? '<span class="dbuff">额外 ' + Math.floor(ITEMS[it.id].tier / 2) + ' 贝币</span>' : '') +
+        '</button>';
+    });
+    h += '</div>';
+  }
+  h += '<div class="dxh" style="margin-top:14px"><i style="background:#C9A063"></i>收购价</div><div class="pricelist">';
+  CHAINS.toy.items.forEach(function(id, i){
+    var known = (S.dex || []).indexOf(id) >= 0;
+    h += '<div class="prow' + (known ? '' : ' unk') + '">' +
+      '<span class="pimg">' + (known ? itemArt(id) : '<i>?</i>') + '</span>' +
+      '<b>' + (known ? ITEMS[id].n : '？？？') + '</b>' +
+      '<span>' + svgUse('i-coin') + TOY_PRICE[i + 1] + '</span></div>';
+  });
+  h += '</div>';
+  box.innerHTML = h;
+}
 
 /* 造町整页：在小镇地图上摆东西。选中一件摆件，再点地图上的空位放下 */
 var decoPick = null;
@@ -4948,6 +5062,17 @@ function bindUi(){
   if(pb && pb.addEventListener) pb.addEventListener('click', function(e){
     var t = e.target && e.target.closest ? e.target.closest('[data-dream]') : null;
     if(t){ audioInit(); openDream(+t.getAttribute('data-dream')); return; }
+    // 杂货铺：点玩具卖给狸猫掌柜
+    var tsell = e.target && e.target.closest ? e.target.closest('[data-toy]') : null;
+    if(tsell){
+      audioInit();
+      var sr = sellToy(tsell.getAttribute('data-toy'));
+      if(sr){
+        toast('卖掉了，+' + sr.coins + ' 金币' + (sr.shells ? '、+' + sr.shells + ' 贝币' : ''));
+        sfx('coin'); rToyPage();
+      }
+      return;
+    }
     // 造町：选摆件（没买的先买）
     var dc = e.target && e.target.closest ? e.target.closest('[data-deco]') : null;
     if(dc){
@@ -5037,6 +5162,7 @@ function bindUi(){
     else if(id === 'dream') openDreamPage();
     else if(id === 'onsen') openOnsenPage();
     else if(id === 'deco')  openDecoPage();
+    else if(id === 'shopn') openToyPage();
   });
   if(el('townBot')) el('townBot').addEventListener('click', function(e){
     var b = e.target && e.target.closest ? e.target.closest('[data-tb]') : null;
@@ -5233,7 +5359,10 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
-  ITEM_NAMES: ITEM_NAMES,
+  genOrder: genOrder, RECIPES: RECIPES,
+  TOY_PRICE: TOY_PRICE, toyPrice: toyPrice, sellToy: sellToy, toyUnlocked: toyUnlocked,
+  openToyPage: openToyPage, rToyPage: rToyPage,
+  ITEM_NAMES: ITEM_NAMES, CROSS_CH: CROSS_CH, crossChains: crossChains,
   SEASONS: SEASONS, FESTIVALS: FESTIVALS, curSeason: curSeason, curFest: curFest,
   festBonus: festBonus, festCheck: festCheck,
   DECOS: DECOS, DECO_POS: DECO_POS, DECO_SLOTS: DECO_SLOTS,
