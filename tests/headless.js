@@ -792,7 +792,9 @@ gT.stopTick();
 // ---------- V2.4 造町布置 ----------
 const gDc = makeEnv(new Map());
 const SDc = gDc.S();
-ok(Object.keys(gDc.DECOS).length === 12, '12 种摆件');
+ok(Object.keys(gDc.DECOS).length === 15, '15 种摆件（含 3 件成就点限定）');
+ok(Object.keys(gDc.DECOS).filter(function(k){ return gDc.DECOS[k].cur === 'pt'; }).length === 3,
+   '有 3 件只能用成就点换');
 ok(gDc.DECO_POS.length === gDc.DECO_SLOTS, '锚点数量与坐标表一致');
 ok(gDc.DECO_POS.every(function(p2){ return p2.x > 0 && p2.x < 100 && p2.y > 0 && p2.y < 100; }),
    '所有锚点都落在地图内');
@@ -960,6 +962,63 @@ gTy2.save();
 const gTy3 = makeEnv(tyStore);
 ok(gTy3.S().toySold === 25, '售出计数可存档恢复');
 gTy2.stopTick(); gTy3.stopTick();
+
+// ---------- V3.1 成就墙 ----------
+const gAc = makeEnv(new Map());
+const SAc = gAc.S();
+ok(gAc.ACHS.length >= 30, '成就至少 30 项');
+ok(gAc.ACHS.every(function(a){ return a.id && a.n && a.d && a.k && a.n2 > 0 && a.p > 0; }),
+   '每项成就都有完整定义');
+const achIds = gAc.ACHS.map(function(a){ return a.id; });
+ok(new Set(achIds).size === achIds.length, '成就 id 不重复');
+// 覆盖所有玩法
+const kinds = new Set(gAc.ACHS.map(function(a){ return a.k; }));
+['merge','deliver','dex','cook','fav','dstar','fish','rep','toy','level'].forEach(function(k){
+  ok(kinds.has(k), '成就覆盖了 ' + k + ' 这条线');
+});
+
+// 达成与发点
+ok(gAc.achCount() === 0, '初始没有成就');
+ok(gAc.achPoints() === 0, '初始没有成就点');
+SAc.stat.merge = 100;
+const acGot = gAc.achCheck();
+ok(acGot.length >= 1, '达到条件后解锁成就');
+ok(gAc.achDone('merge100') === true, '合成 100 次的成就已记录');
+ok(gAc.achPoints() > 0, '解锁后发放成就点');
+const pts1 = gAc.achPoints();
+ok(gAc.achCheck().length === 0, '同一成就不会重复解锁');
+ok(gAc.achPoints() === pts1, '成就点不会重复发放');
+
+// 进度读取
+SAc.stat.deliver = 30;
+ok(gAc.achProgress('deliver') === 30, '进度直接读当前状态');
+ok(gAc.achDone('order50') === false, '没到门槛不算达成');
+SAc.stat.deliver = 50;
+gAc.achCheck();
+ok(gAc.achDone('order50') === true, '到门槛就达成');
+
+// 成就点是独立货币，只用于限定摆件
+const ptDecos = Object.keys(gAc.DECOS).filter(function(k){ return gAc.DECOS[k].cur === 'pt'; });
+ok(ptDecos.length === 3, '有 3 件成就点限定摆件');
+SAc.pts = 100;
+ok(gAc.buyDeco('crane') === true, '成就点够时可以换限定摆件');
+ok(SAc.pts === 100 - gAc.DECOS.crane.cost, '扣的是成就点不是金币');
+SAc.pts = 0;
+ok(gAc.buyDeco('gold') === false, '成就点不够时换不了');
+gAc.stopTick();
+
+// 成就可存档
+const acStore = new Map();
+const gAc2 = makeEnv(acStore);
+gAc2.S().achs = ['merge100', 'order50'];
+gAc2.S().pts = 42;
+gAc2.S().stat.merge = 150;
+gAc2.save();
+const gAc3 = makeEnv(acStore);
+ok(gAc3.achCount() === 2 && gAc3.achPoints() === 42, '成就与成就点可存档恢复');
+ok(gAc3.S().stat.merge === 150, '合成计数可存档');
+ok(gAc3.achDone('merge100') === true, '读档后已达成的仍然算达成');
+gAc2.stopTick(); gAc3.stopTick();
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
