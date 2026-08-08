@@ -270,10 +270,15 @@ ok(dairy4, '奶箱随存档存在（含老档迁移）');
 const S5 = S;
 const n1 = g.spawn('veg3'), s1 = g.spawn('veg3', null, true);
 ok(!!S5.board[s1].s && !S5.board[n1].s, '可分别生成普通与闪光食材');
-ok(g.tryMove(n1, s1) === 'bounce', '普通与闪光不能互相合成');
-const s2 = g.spawn('veg3', null, true);
-ok(g.tryMove(s1, s2) === 'merge', '闪光之间可以合成');
-ok(!!S5.board[s2].s && S5.board[s2].id === 'veg4', '闪光合成产物继承闪光');
+// 闪光掉落率只有 5%，若强制同类才能合，闪光食材会永远卡在低级
+ok(g.tryMove(n1, s1) === 'merge', '普通与闪光可以合成');
+ok(!!S5.board[s1].s && S5.board[s1].id === 'veg4', '混合合成时闪光传给产物');
+const s2 = g.spawn('veg3', null, true), s3 = g.spawn('veg3', null, true);
+ok(g.tryMove(s2, s3) === 'merge', '闪光之间可以合成');
+ok(!!S5.board[s3].s && S5.board[s3].id === 'veg4', '闪光合成产物继承闪光');
+const n2 = g.spawn('veg2'), n3 = g.spawn('veg2');
+g.tryMove(n2, n3);
+ok(!S5.board[n3].s, '两个普通合成的产物不是闪光');
 ok(S5.dexS.indexOf('veg4') >= 0, '闪光图鉴收录产物');
 drain(g);
 
@@ -1019,6 +1024,40 @@ ok(gAc3.achCount() === 2 && gAc3.achPoints() === 42, '成就与成就点可存�
 ok(gAc3.S().stat.merge === 150, '合成计数可存档');
 ok(gAc3.achDone('merge100') === true, '读档后已达成的仍然算达成');
 gAc2.stopTick(); gAc3.stopTick();
+
+// ---------- V3.2 装修二期 ----------
+const gRn = makeEnv(new Map());
+const SRn = gRn.S();
+ok(gRn.RENO.length === 18, '装修共 18 项（一期 9 + 二期 9）');
+const totalStar = gRn.RENO.reduce(function(a, r){ return a + r.star; }, 0);
+ok(totalStar > 600, '全部装修需要 600 星以上（' + totalStar + '）');
+ok(gRn.RENO.every(function(r){ return r.id && r.n && r.star > 0 && r.fx; }), '每项装修定义完整');
+const rnIds = gRn.RENO.map(function(r){ return r.id; });
+ok(new Set(rnIds).size === rnIds.length, '装修 id 不重复');
+// 前置依赖都指向真实存在的项
+ok(gRn.RENO.every(function(r){ return !r.pre || rnIds.indexOf(r.pre) >= 0; }), '前置依赖都有效');
+
+// 金字招牌要求一期做完，温泉祭要求全部做完
+SRn.stars = 9999; SRn.coins = 99999;
+const goldR = gRn.RENO.filter(function(r){ return r.id === 'gold'; })[0];
+ok(gRn.renoCanBuy(goldR) === 'lock', '一期没做完时金字招牌是锁着的');
+SRn.reno = ['sign','lantern','floor1','tables','chime','floor2','photo','floor3'];
+ok(gRn.renoCanBuy(goldR) === 'ok', '一期八项做完后可挂金字招牌');
+const legendR = gRn.RENO.filter(function(r){ return r.id === 'legend'; })[0];
+ok(gRn.renoCanBuy(legendR) === 'lock', '还差项目时点不亮温泉祭');
+SRn.reno = rnIds.filter(function(id){ return id !== 'legend'; });
+ok(gRn.renoCanBuy(legendR) === 'ok', '十七项全做完才能点亮温泉祭');
+
+// 二期增益真的生效
+SRn.reno = [];
+const capBase = gRn.capOf('basket');
+const ivBase = gRn.regenIv('basket');
+const capStore = gRn.storeCap();
+SRn.reno = ['window','lamp','shelf','roof'];
+ok(gRn.capOf('basket') === capBase + 3, '新窗让生成器上限 +3');
+ok(gRn.regenIv('basket') < ivBase, '灯笼串让回充变快');
+ok(gRn.storeCap() === capStore + 4, '料理台与屋顶各给储物间 +2');
+gRn.stopTick();
 
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');

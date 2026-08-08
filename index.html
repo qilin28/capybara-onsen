@@ -423,14 +423,14 @@ body{
 #giftBtn #giftCh{position:absolute; top:-4px; right:-4px;}
 #giftBtn:active{transform:scale(.93);}
 /* 闪光食材：金框必须画在贴图之上（贴图不透明且铺满格子，画在 .cell 上会被盖住） */
-.cell.sh{box-shadow:0 0 9px rgba(242,193,78,.75);}
+.cell.sh{box-shadow:0 0 12px rgba(242,193,78,.9), 0 0 3px rgba(242,193,78,1);}
 .shOv{position:absolute; inset:0; border-radius:12px; pointer-events:none; z-index:2;
-  box-shadow:inset 0 0 0 2.5px #F2C14E;
+  box-shadow:inset 0 0 0 3.5px #F2C14E, inset 0 0 8px rgba(242,193,78,.5);
   background:radial-gradient(circle at 76% 18%, rgba(255,250,224,.95) 0 7%, transparent 24%),
              radial-gradient(circle at 22% 80%, rgba(255,250,224,.85) 0 5%, transparent 20%);
   animation:shGlow 2.2s ease-in-out infinite;}
 /* 右上角小金星：小尺寸下也能一眼认出是闪光 */
-.shOv::after{content:''; position:absolute; top:-3px; right:-3px; width:13px; height:13px;
+.shOv::after{content:''; position:absolute; top:-4px; right:-4px; width:16px; height:16px;
   background:#F2C14E; border:1.5px solid #8A5A1E; border-radius:50%;
   box-shadow:0 0 5px rgba(242,193,78,.9);}
 @keyframes shGlow{0%,100%{opacity:.6;}50%{opacity:1;}}
@@ -473,6 +473,12 @@ body{
 .dmwin .dst i{width:26px; height:26px; display:block;
   background:radial-gradient(circle at 50% 45%, #F5D76E 0 42%, transparent 43%);}
 .dmwin .dst i.on{background:radial-gradient(circle at 50% 45%, #F5B942 0 42%, transparent 43%);}
+
+/* 卡牌稀有度区分 */
+.dxs.ssr{background:linear-gradient(180deg,#FFF6DC,#F8E3A8); border-color:#E0A44A;
+  box-shadow:0 0 0 2px rgba(224,164,74,.3);}
+.dxs.ssr .cnum{color:#C4761F;}
+.dxs.soon{opacity:.4;}
 
 /* ---------- 成就墙 ---------- */
 #achSub{font-style:normal; font-size:10.5px; font-weight:900; color:var(--sub); margin-left:4px;}
@@ -1666,9 +1672,16 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V3.1';
+var GAME_VER = 'V3.2';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V3.2', d:'2026-08-08', t:'装修二期与收集扩充', li:[
+    '闪光食材现在可以和普通的合成，闪光会传给产物',
+    '闪光的金框做得更明显，一眼能认出来',
+    '装修增加二期 9 项：翻新灶台、料理台、新窗、暖帘、后院、长柜台、灯笼串、屋顶、点亮温泉祭',
+    '烹饪台翻新后一次出两份，储物间最多扩到 8 格',
+    '扭蛋卡从 9 张增加到 18 张，等级 12 后开放传说卡'
+  ]},
   { v:'V3.1', d:'2026-08-08', t:'成就墙', li:[
     '新增 30 项成就，覆盖合成、订单、图鉴、烹饪、好感、梦境、钓鱼、汤屋、杂货铺各条线',
     '达成时右上角弹出提示，图鉴里可看全部进度',
@@ -1885,13 +1898,41 @@ var RENO = [
   { id:'gold',    n:'挂上金字招牌',  star:40, coins:400, fx:'汤屋食堂章节完成', preAll:1,
     story:[{c:null, t:'金字招牌挂上的那天，整条巷子的街坊都来道贺。'},
            {c:'capy', t:'这只是开始。听说后山的温泉汤屋，也荒了很久了……'},
-           {c:null, t:'（第二章 温泉汤屋 将在后续版本开放。）'}] }
+           {c:null, t:'（金字招牌之后，还能继续往深里修。）'}] },
+  // ---- 二期：金字招牌之后开放，星星的长期去处 ----
+  { id:'kitchen', n:'翻新灶台',      star:35, coins:300, fx:'烹饪台一次出两份', pre:'gold',
+    story:[{c:'capy', t:'新灶台火力足，一锅能出两份，忙起来轻松多了。'}] },
+  { id:'shelf',   n:'加装料理台',    star:40, coins:350, fx:'储物间 +2 格', pre:'gold',
+    story:[{c:'panda', t:'东西终于有地方放了。你这店，越来越像样。'}] },
+  { id:'window',  n:'换上新窗',      star:45, coins:380, fx:'生成器充能上限 +3', pre:'kitchen',
+    story:[{c:'capy', t:'阳光照进来，食材看着都新鲜。'}] },
+  { id:'noren',   n:'挂起新暖帘',    star:50, coins:420, fx:'订单金币 +12%', pre:'shelf',
+    story:[{c:'rabbit', t:'远远看到这块帘子，就知道今天也开着门。'}] },
+  { id:'garden',  n:'整理后院',      star:55, coins:450, fx:'闪光率 +1.5%', pre:'window',
+    story:[{c:'hedge', t:'后院的草药长起来了，做出来的东西都带着香气。'}] },
+  { id:'counter', n:'打一张长柜台',  star:60, coins:500, fx:'每单星星 +1', pre:'noren',
+    story:[{c:'tanuki', t:'柜台一摆，气派多了。以后进货我给你留最好的。'}] },
+  { id:'lamp',    n:'换成灯笼串',    star:65, coins:520, fx:'生成器回充 +15%', pre:'garden',
+    story:[{c:'capy', t:'一串灯笼挂起来，晚上的巷子亮得像白天。'}] },
+  { id:'roof',    n:'重铺屋顶',      star:70, coins:600, fx:'储物间再 +2 格', pre:'counter',
+    story:[{c:'capy', t:'漏了那么多年的屋顶，终于补好了。'}] },
+  { id:'legend',  n:'点亮温泉祭',    star:100, coins:1000, fx:'汤屋食堂全部完工', pre2:1,
+    story:[{c:null, t:'那一夜，温泉町所有的灯笼一起亮了起来。'},
+           {c:'hamster', t:'孩子……你外婆要是看见今天，会高兴的。'},
+           {c:'capy', t:'从一间蒙尘的小店，到整条街的灯火。'},
+           {c:'capy', t:'谢谢你陪我走到这里。'},
+           {c:null, t:'（往后每天，街坊们还会照常来。）'}] }
 ];
 /* ================= 扭蛋（概率盲盒） ================= */
 var CARDS = {
   lantern:{n:'石灯笼', r:'R'},  crane:{n:'纸鹤',   r:'R'},  pin:{n:'小风车', r:'R'},
   cat:{n:'招财猫',     r:'R'},  geta:{n:'小木屐', r:'R'},  fan:{n:'团扇',   r:'R'},
-  duck:{n:'金鸭子',    r:'SR'}, turtle:{n:'温泉神龟', r:'SR'}, moon:{n:'月见兔', r:'SR'}
+  duck:{n:'金鸭子',    r:'SR'}, turtle:{n:'温泉神龟', r:'SR'}, moon:{n:'月见兔', r:'SR'},
+  // 第二套：等级 12 后进池
+  bucket:{n:'桧木桶',  r:'R'},  towel:{n:'叠好的巾', r:'R'},  wood:{n:'木牌',   r:'R'},
+  balloon:{n:'纸气球', r:'R'},  leaf:{n:'红叶',     r:'R'},  ring:{n:'祈愿绳', r:'R'},
+  bells:{n:'金铃铛',   r:'SR'}, sleepcat:{n:'打盹猫', r:'SR'},
+  crescent:{n:'月牙',  r:'SSR'}
 };
 var GACHA_COST = 100;      // 金币；有扭蛋券时优先用券
 var SHINY_RATE = 0.05;     // 闪光食材掉落概率
@@ -1992,7 +2033,9 @@ function load(){
     dexS: Array.isArray(d.dexS) ? d.dexS : [],
     gift: (d.gift && d.gift.last) ? d.gift : {last:today(), stock:1}
   };
-  while(S.store.length < 4) S.store.push(null);
+  var cap = storeCap();
+  while(S.store.length < cap) S.store.push(null);
+  while(S.store.length > cap) S.store.pop();
   Object.keys(GENS).forEach(function(g){
     if(!S.gens[g]) S.gens[g] = { ch:GENS[g].cap, last:now() };
   });
@@ -2030,9 +2073,16 @@ function load(){
 
 /* ================= 装修效果 ================= */
 function renoHas(id){ return S && S.reno && S.reno.indexOf(id) >= 0; }
-function capOf(gid){ return GENS[gid].cap + (renoHas('chime') ? 2 : 0); }
+function capOf(gid){
+  return GENS[gid].cap + (renoHas('chime') ? 2 : 0) + (renoHas('window') ? 3 : 0);
+}
 function regenIv(gid){
-  return GENS[gid].regen * (renoHas('lantern') ? 0.9 : 1) / (1 + decoBuff('regen'));
+  var mul = (renoHas('lantern') ? 0.9 : 1) * (renoHas('lamp') ? 0.87 : 1);
+  return GENS[gid].regen * mul / (1 + decoBuff('regen'));
+}
+/* 储物间容量：基础 4 格，装修可扩到 8 格 */
+function storeCap(){
+  return 4 + (renoHas('shelf') ? 2 : 0) + (renoHas('roof') ? 2 : 0);
 }
 function openRows(){
   return 6 + (renoHas('floor1')?1:0) + (renoHas('floor2')?1:0) + (renoHas('floor3')?1:0);
@@ -2580,7 +2630,10 @@ function today(){
   var d = new Date();
   return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
 }
-function rollShiny(){ return Math.random() < (SHINY_RATE + decoBuff('shiny')) ? 1 : 0; }
+function rollShiny(){
+  var rate = SHINY_RATE + decoBuff('shiny') + (renoHas('garden') ? .015 : 0);
+  return Math.random() < rate ? 1 : 0;
+}
 function mkItem(id, shiny){
   var c = { t:'i', id:id };
   if(shiny) c.s = 1;
@@ -2597,8 +2650,15 @@ function discoverShiny(id){
 }
 
 /* ================= 扭蛋 ================= */
+/* 第二套卡（等级 12 后进池），避免前期把池子稀释得太薄 */
+var CARDS2 = ['bucket','towel','wood','balloon','leaf','ring','bells','sleepcat','crescent'];
 function cardIds(rarity){
-  return Object.keys(CARDS).filter(function(k){ return CARDS[k].r === rarity; });
+  var lv = S ? S.level : 1;
+  return Object.keys(CARDS).filter(function(k){
+    if(CARDS[k].r !== rarity) return false;
+    if(CARDS2.indexOf(k) >= 0 && lv < 12) return false;
+    return true;
+  });
 }
 function gachaPull(force){
   if(S.tickets <= 0 && S.coins < GACHA_COST){
@@ -2611,7 +2671,9 @@ function gachaPull(force){
   if(!r){
     var x = Math.random();
     var srCut = 0.93 - decoBuff('gacha');   // 招财猫提高 SR 概率
-    r = x < 0.62 ? 'N' : (x < srCut ? 'R' : 'SR');
+    var ssrCut = (S.level >= 12) ? 0.98 : 1.01;   // Lv12 后开 SSR，约 2%
+    r = x < 0.62 ? 'N' : (x < srCut ? 'R' : (x < ssrCut ? 'SR' : 'SSR'));
+    if(r === 'SSR' && !cardIds('SSR').length) r = 'SR';   // 池子空就退回 SR
   }
   var res = { rarity:r, byTicket:byTicket };
   if(r === 'N'){
@@ -2636,7 +2698,7 @@ function gachaPull(force){
     res.dup = (S.cards[id] || 0) > 0;
     S.cards[id] = (S.cards[id] || 0) + 1;
     if(res.dup){
-      res.coins = (r === 'SR') ? 200 : 60;
+      res.coins = (r === 'SSR') ? 500 : (r === 'SR') ? 200 : 60;
       S.coins += res.coins;
       res.text = '重复的' + CARDS[id].n + '，折算 ' + res.coins + ' 金币';
     } else {
@@ -2656,6 +2718,11 @@ function checkCardSets(){
   if(!S.setDone.R && got(cardIds('R'))){
     S.setDone.R = 1; S.coins += 300;
     toast('集齐全部普通卡，奖励 300 金币');
+  }
+  if(!S.setDone.SSR && cardIds('SSR').length && got(cardIds('SSR'))){
+    S.setDone.SSR = 1; S.coins += 1200; S.tickets = (S.tickets || 0) + 3;
+    toast('集齐传说卡，奖励 1200 金币与 3 张扭蛋券');
+    showStory([{c:'capy', t:'月牙静静躺在收藏册里。外婆说过，见过月牙的人，往后的日子都会顺顺当当的。'}]);
   }
   if(!S.setDone.SR && got(cardIds('SR'))){
     S.setDone.SR = 1; S.coins += 500;
@@ -2741,15 +2808,17 @@ function tryMove(a, b){
   if((B.t==='i' || B.t==='b') && B.id===A.id){
     var it = ITEMS[A.id], chain = CHAINS[it.chain].items;
     if(it.tier >= chain.length){ toast('已经是本链最高级啦'); return 'bounce'; }
-    // 闪光与普通不能互合，避免"洗掉"闪光
-    if((A.s?1:0) !== (B.s?1:0)){ toast('闪光食材只能和闪光的合成哦'); return 'bounce'; }
     var nid = chain[it.tier];
-    var shiny = A.s ? 1 : 0;
+    // 闪光可以和普通合成，闪光会传给产物。
+    // 闪光掉落率只有 5%，若强制同类才能合，闪光食材会永远卡在低级、变成负担。
+    var shiny = (A.s || B.s) ? 1 : 0;
+    var mixed = (A.s?1:0) !== (B.s?1:0);
     if(B.t==='b') toast('泡泡破了，救出了里面的食材');
     S.board[a] = null; S.board[b] = mkItem(nid, shiny);
     rCell(a); rCell(b);
     var nt = ITEMS[nid].tier;
     fxMerge(b); floatText(b, '+' + nt);
+    if(mixed) toast('闪光传给了' + ITEMS[nid].n);
     addXp(nt); discover(nid);
     if(shiny) discoverShiny(nid);
     S.stat.merge = (S.stat.merge || 0) + 1;
@@ -2899,13 +2968,14 @@ function orderReward(o){
     xp += ITEMS[nd[0]].val * 3 * nd[1];
   });
   if(renoHas('tables')) coins = Math.round(coins * 1.1);
+  if(renoHas('noren')) coins = Math.round(coins * 1.12);
   coins = Math.round(coins * (1 + decoBuff('order')));   // 告示板等摆件加成
   return { coins:coins, xp:xp };
 }
 function starsOf(o){
   var ts = 0;
   o.needs.forEach(function(nd){ ts += ITEMS[nd[0]].val * nd[1]; });
-  return 1 + (ts>=8?1:0) + (ts>=14?1:0) + (renoHas('sign')?1:0);
+  return 1 + (ts>=8?1:0) + (ts>=14?1:0) + (renoHas('sign')?1:0) + (renoHas('counter')?1:0);
 }
 function canDeliver(o){
   if(!o) return false;
@@ -2980,7 +3050,9 @@ function deliver(slot){
 function renoCanBuy(r){
   if(renoHas(r.id)) return 'done';
   if(r.pre && !renoHas(r.pre)) return 'lock';
-  if(r.preAll && S.reno.length < RENO.length - 1) return 'lock';
+  // 金字招牌要求一期八项做完；点亮温泉祭要求全部十七项做完
+  if(r.preAll && S.reno.length < 8) return 'lock';
+  if(r.pre2 && S.reno.length < RENO.length - 1) return 'lock';
   if(S.stars < r.star || S.coins < r.coins) return 'poor';
   return 'ok';
 }
@@ -3113,12 +3185,18 @@ function doCook(){
   if(idx < 0) idx = ia;
   S.board[idx] = { t:'i', id:r.r };
   rCell(idx); fxMerge(idx);
+  // 翻新灶台：同样的材料能出两份
+  var extra = 0;
+  if(renoHas('kitchen')){
+    var i2 = nearestEmpty(idx);
+    if(i2 >= 0){ S.board[i2] = { t:'i', id:r.r }; rCell(i2); fxMerge(i2); extra = 1; }
+  }
   var isNew = S.dex.indexOf(r.r) < 0;
   discover(r.r);
   addXp(ITEMS[r.r].val);
   S.stat.merge = (S.stat.merge || 0) + 1;
   sfx('merge', ITEMS[r.r].val);
-  toast('烹饪成功：' + ITEMS[r.r].n);
+  toast('烹饪成功：' + ITEMS[r.r].n + (extra ? ' x2（新灶台）' : ''));
   if(isNew){
     showStory([{c:'capy', t:'新菜谱：' + ITEMS[r.r].n + '！快记进外婆的笔记里。'}]);
     checkQuest('cook');
@@ -3382,7 +3460,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '29';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '30';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4681,8 +4759,10 @@ function rCards(){
   var html = '';
   Object.keys(CARDS).forEach(function(id){
     var n = S.cards[id] || 0, c = CARDS[id];
-    html += '<div class="dxs' + (n ? '' : ' no') + '">' + artUse('card-' + id, '', 'cards') +
-      '<span>' + (n ? c.n : '？？？') + '</span>' +
+    var locked = CARDS2.indexOf(id) >= 0 && S.level < 12;   // 还没进池
+    html += '<div class="dxs' + (n ? '' : ' no') + (locked ? ' soon' : '') +
+      (c.r === 'SSR' ? ' ssr' : '') + '">' + artUse('card-' + id, '', 'cards') +
+      '<span>' + (n ? c.n : (locked ? 'Lv12 后' : '？？？')) + '</span>' +
       '<span class="cnum">' + (n ? (c.r + ' x' + n) : c.r) + '</span></div>';
   });
   body.innerHTML = html;
@@ -5563,6 +5643,8 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  CARDS: CARDS, CARDS2: CARDS2, cardIds: cardIds,
+  RENO: RENO, storeCap: storeCap,
   rAchList: rAchList, achPop: achPop,
   ACHS: ACHS, achCheck: achCheck, achProgress: achProgress, achDone: achDone,
   achPoints: achPoints, achCount: achCount,
