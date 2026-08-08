@@ -3075,6 +3075,17 @@ function buyReno(id){
   if(id==='floor2') openRow(7);
   if(id==='floor3') openRow(8);
   if(id==='chime') Object.keys(GENS).forEach(function(g){ S.gens[g].ch = Math.min(S.gens[g].ch + 2, capOf(g)); });
+  if(id==='window' || id==='shelf' || id==='roof'){
+    // 扩容类装修：立刻补满，不用等回充
+    Object.keys(GENS).forEach(function(g){ S.gens[g].ch = capOf(g); });
+  }
+  if(id==='legend'){
+    // 章节完成的纪念：一次性大礼包
+    S.tickets = (S.tickets || 0) + 5;
+    S.shells = (S.shells || 0) + 30;
+    S.pts = (S.pts || 0) + 10;
+    toast('温泉祭点亮！获得 5 张扭蛋券、30 贝币、10 成就点');
+  }
   toast('装修完成：' + r.n);
   sfx('level');
   rAll(); rLockBand(); rReno(); rScene();
@@ -3463,7 +3474,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '31';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '32';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
