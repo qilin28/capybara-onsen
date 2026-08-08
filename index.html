@@ -1680,7 +1680,10 @@ var CHANGELOG = [
     '闪光的金框做得更明显，一眼能认出来',
     '装修增加二期 9 项：翻新灶台、料理台、新窗、暖帘、后院、长柜台、灯笼串、屋顶、点亮温泉祭',
     '烹饪台翻新后一次出两份，储物间最多扩到 8 格',
-    '扭蛋卡从 9 张增加到 18 张，等级 12 后开放传说卡'
+    '扭蛋卡从 9 张增加到 18 张，等级 12 后开放传说卡',
+    '合成音效分层：等级越高层次越厚，顶级合成有专属上行音',
+    '新增闪光、提竿、成就达成的专属音效',
+    '教学剧情与八位客人的答谢都配上了语音'
   ]},
   { v:'V3.1', d:'2026-08-08', t:'成就墙', li:[
     '新增 30 项成就，覆盖合成、订单、图鉴、烹饪、好感、梦境、钓鱼、汤屋、杂货铺各条线',
@@ -1804,12 +1807,12 @@ var STORY_INTRO = [
   {c:'capy', t:'灶台还能用，锅也都在，就是到处都是灰呀。', v:'intro_3'},
   {c:'capy', t:'先把菜篮子和面粉袋摆出来。从今天起，这里就是我的食堂啦！', v:'intro_4'}];
 var STORY_MERGE = [
-  {c:'capy', t:'哇，两份一样的食材合在一起，变成更好的了！'},
-  {c:'capy', t:'外婆的笔记写的是真的……照这个法子，一定能把店重新开起来。'}
+  {c:'capy', t:'哇，两份一样的食材合在一起，变成更好的了！', v:'merge_0'},
+  {c:'capy', t:'外婆的笔记写的是真的……照这个法子，一定能把店重新开起来。', v:'merge_1'}
 ];
 var STORY_DELIVER = [
-  {c:'capy', t:'开张第一单，做成了！'},
-  {c:'capy', t:'客人吃得开心的样子……好像连门口的灯笼都更亮了一点。'}
+  {c:'capy', t:'开张第一单，做成了！', v:'deliver_0'},
+  {c:'capy', t:'客人吃得开心的样子……好像连门口的灯笼都更亮了一点。', v:'deliver_1'}
 ];
 var QUESTS = [
   { t:'掸掸灰：点生成器补充食材（3 次）', type:'gen', n:3, coins:15,
@@ -2350,7 +2353,7 @@ function fishCollect(){
     S.board[idx] = mkItem(f.id, f.shiny);
     rCell(idx); fxPop(idx);
     discover(f.id);
-    if(f.shiny) discoverShiny(f.id);
+    if(f.shiny){ discoverShiny(f.id); sfx('shiny'); }
   } else {
     // 棋盘满了就直接塞储物间（闪光会丢失标记，所以优先放棋盘）
     var slot = -1;
@@ -3036,7 +3039,7 @@ function deliver(slot){
   if(!S.story.deliver){ S.story.deliver = 1; showStory(STORY_DELIVER); }
   if(CUST_LINES[o.c] && S.thx.indexOf(o.c) < 0){
     S.thx.push(o.c);
-    showStory([{c:o.c, t:CUST_LINES[o.c].thanks}]);
+    showStory([{c:o.c, t:CUST_LINES[o.c].thanks, v:'thx_' + o.c}]);
   }
   favGain(o.c);
   S.orders[slot] = genOrder(slot);
@@ -3460,7 +3463,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '30';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '31';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4045,7 +4048,7 @@ function achPop(list){
       d.className = 'achcard';
       d.innerHTML = '<b>达成成就</b><span>' + a.n + '</span><i>' + a.d + ' · +' + a.p + ' 成就点</i>';
       box.appendChild(d);
-      sfx('level');
+      sfx('ach');
       setTimeout(function(){
         if(d.classList) d.classList.add('out');
         setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 400);
@@ -4366,7 +4369,7 @@ function doCast(){
   fishTimer = setTimeout(function(){
     if(!FISH_STATE || FISH_STATE.phase !== 'wait') return;
     if(pond && pond.classList){ pond.classList.remove('wait'); pond.classList.add('bite'); }
-    sfx('tap');
+    sfx('splash');
     // 超时未点算脱钩
     fishTimer = setTimeout(function(){ if(FISH_STATE && FISH_STATE.phase === 'wait') doStrike(); },
                            FISH_STATE.win + 200);
@@ -5157,13 +5160,40 @@ function sfx(kind, tier){
   if(S.mute || !actx || volOf('sfx') <= 0) return;
   if(kind==='tap'){ tone(392, .09, .08, 'triangle'); }
   else if(kind==='merge'){
-    var f = PENT[(tier||1) % PENT.length];
-    tone(f, .16, .12, 'sine'); tone(f*2, .12, .05, 'sine', .06);
+    // 等级越高层次越厚：低级一声脆响，高级叠和弦加尾音，合出好东西要听得出来
+    var t = tier || 1;
+    var f = PENT[t % PENT.length];
+    var oct = Math.min(2, Math.floor(t / 4));           // 每 4 级升一个八度
+    f = f * Math.pow(2, oct * 0.5);
+    tone(f, .16, .12, 'sine');
+    tone(f * 2, .12, .05, 'sine', .06);
+    if(t >= 3) tone(f * 1.5, .14, .06, 'sine', .04);     // 三度和音
+    if(t >= 5) tone(f * 3, .22, .05, 'sine', .12);       // 高层泛音
+    if(t >= 7){                                          // 顶级：上行三连
+      tone(f * 2, .1, .07, 'triangle', .18);
+      tone(f * 2.5, .1, .07, 'triangle', .26);
+      tone(f * 3, .26, .08, 'sine', .34);
+    }
   }
   else if(kind==='coin'){ tone(1318, .09, .09, 'sine'); tone(1568, .12, .09, 'sine', .08); }
   else if(kind==='level'){ tone(523,.12,.1,'sine'); tone(659,.12,.1,'sine',.11); tone(784,.12,.1,'sine',.22); tone(1046,.2,.1,'sine',.33); }
   else if(kind==='sell'){ tone(330, .1, .07, 'triangle'); }
   else if(kind==='err'){ tone(150, .12, .07, 'triangle'); }
+  // 新增几种场景音
+  else if(kind==='shiny'){                               // 掉到闪光
+    tone(1046, .1, .08, 'sine'); tone(1318, .1, .08, 'sine', .07);
+    tone(1568, .18, .09, 'sine', .14); tone(2093, .24, .06, 'sine', .2);
+  }
+  else if(kind==='fish'){                                // 提竿命中
+    tone(880, .08, .1, 'triangle'); tone(1174, .14, .09, 'sine', .06);
+  }
+  else if(kind==='splash'){                              // 浮标入水
+    tone(220, .12, .06, 'sine'); tone(330, .1, .04, 'sine', .05);
+  }
+  else if(kind==='ach'){                                 // 成就达成
+    tone(659, .12, .09, 'sine'); tone(784, .12, .09, 'sine', .1);
+    tone(988, .12, .09, 'sine', .2); tone(1318, .3, .1, 'sine', .3);
+  }
 }
 
 /* ================= 输入 ================= */

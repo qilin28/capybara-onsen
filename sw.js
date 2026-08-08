@@ -1,6 +1,6 @@
 /* 离线缓存：装好后断网也能玩。此文件由 release.py 自动生成，勿手改。
    CACHE 版本号与 index.html 的 ART_VER 一起 +1，旧缓存在 activate 阶段清掉。 */
-const CACHE = 'wonsen-v30';
+const CACHE = 'wonsen-v31';
 const ASSETS = [
   './',
   './index.html',
@@ -109,11 +109,23 @@ const ASSETS = [
   './art/deco/stone.png',
   './art/deco/umbrella.png',
   './audio/bgm.mp3',
+  './audio/voice/deliver_0.mp3',
+  './audio/voice/deliver_1.mp3',
   './audio/voice/intro_0.mp3',
   './audio/voice/intro_1.mp3',
   './audio/voice/intro_2.mp3',
   './audio/voice/intro_3.mp3',
-  './audio/voice/intro_4.mp3'
+  './audio/voice/intro_4.mp3',
+  './audio/voice/merge_0.mp3',
+  './audio/voice/merge_1.mp3',
+  './audio/voice/thx_egret.mp3',
+  './audio/voice/thx_hamster.mp3',
+  './audio/voice/thx_hedge.mp3',
+  './audio/voice/thx_otter.mp3',
+  './audio/voice/thx_panda.mp3',
+  './audio/voice/thx_rabbit.mp3',
+  './audio/voice/thx_shiba.mp3',
+  './audio/voice/thx_tanuki.mp3'
 ];
 
 self.addEventListener('install', function (e) {
