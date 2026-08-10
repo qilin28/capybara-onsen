@@ -492,6 +492,11 @@ body{
 .dxs.ssr .cnum{color:#C4761F;}
 .dxs.soon{opacity:.4;}
 
+/* 生成器等级：越高边框越醒目 */
+.cell.gen2{box-shadow:inset 0 0 0 2px rgba(160,200,120,.9);}
+.cell.gen3{box-shadow:inset 0 0 0 2.5px rgba(120,180,220,.95);}
+.cell.gen4{box-shadow:inset 0 0 0 3px rgba(242,193,78,1), 0 0 8px rgba(242,193,78,.6);}
+
 /* ---------- 成就墙 ---------- */
 #achSub{font-style:normal; font-size:10.5px; font-weight:900; color:var(--sub); margin-left:4px;}
 .achlist{display:flex; flex-direction:column; gap:6px;}
@@ -1684,9 +1689,15 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V3.4';
+var GAME_VER = 'V3.5';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V3.5', d:'2026-08-08', t:'生成器升级', li:[
+    '生成器可以用星星升级，最高 4 级',
+    '每升一级：容量 +4、回充快 12%、掉落品质上移一档',
+    '4 级菜篮子直接掉 4-5 级食材，省去底层重复合成',
+    '等级越高棋盘上的边框越醒目'
+  ]},
   { v:'V3.4', d:'2026-08-08', t:'商店扩充', li:[
     '商店从 3 种增加到 9 种，随等级逐步解锁',
     '新增珍味木箱、上等鱼饵、小扫帚、扭蛋券、贝壳袋、招福香',
@@ -1990,7 +2001,7 @@ function initNew(){
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0, merge:0, coinAll:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
-    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, achs:[], pts:0, weekly:0, bait:0, lucky:0, dream:{}, shells:0,
+    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, achs:[], pts:0, weekly:0, bait:0, lucky:0, genLv:{}, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -2021,7 +2032,7 @@ function save(){
       rod:S.rod, fishCount:S.fishCount,
       pool:S.pool, onsen:S.onsen, rep:S.rep,
       decoOwn:S.decoOwn, decoMap:S.decoMap, fest:S.fest, toySold:S.toySold,
-      achs:S.achs, pts:S.pts, weekly:S.weekly, bait:S.bait, lucky:S.lucky,
+      achs:S.achs, pts:S.pts, weekly:S.weekly, bait:S.bait, lucky:S.lucky, genLv:S.genLv,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -2056,6 +2067,7 @@ function load(){
     pts: d.pts || 0,
     weekly: d.weekly || 0,
     bait: d.bait || 0, lucky: d.lucky || 0,
+    genLv: (d.genLv && typeof d.genLv === 'object') ? d.genLv : {},
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -2109,10 +2121,12 @@ function load(){
 /* ================= 装修效果 ================= */
 function renoHas(id){ return S && S.reno && S.reno.indexOf(id) >= 0; }
 function capOf(gid){
-  return GENS[gid].cap + (renoHas('chime') ? 2 : 0) + (renoHas('window') ? 3 : 0);
+  return GENS[gid].cap + (renoHas('chime') ? 2 : 0) + (renoHas('window') ? 3 : 0)
+    + (genLv(gid) - 1) * 4;
 }
 function regenIv(gid){
-  var mul = (renoHas('lantern') ? 0.9 : 1) * (renoHas('lamp') ? 0.87 : 1);
+  var mul = (renoHas('lantern') ? 0.9 : 1) * (renoHas('lamp') ? 0.87 : 1)
+    * Math.pow(0.88, genLv(gid) - 1);
   return GENS[gid].regen * mul / (1 + decoBuff('regen'));
 }
 /* 储物间容量：基础 4 格，装修可扩到 8 格 */
@@ -2176,7 +2190,7 @@ function tapGen(gid){
   if(idx < 0){ toast('棋盘满了，先合成腾腾地方吧'); shakeBoard(); sfx('err'); return false; }
   var wasFull = st.ch >= capOf(gid);
   st.ch--; if(wasFull) st.last = now();
-  var id = pickDrop(cfg.drops);
+  var id = pickDrop(genDrops(gid));
   var shiny = rollShiny();
   S.board[idx] = mkItem(id, shiny);
   discover(id);
@@ -3647,7 +3661,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '34';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '35';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -3689,7 +3703,8 @@ function rCell(i){
   if(!c){ e.innerHTML = ''; e.className = 'cell'; return; }
   if(c.t === 'g'){
     var st = S.gens[c.gid], cfg = GENS[c.gid];
-    e.className = 'cell' + (st.ch<=0 ? ' genq' : '');
+    var gl = genLv(c.gid);
+    e.className = 'cell' + (st.ch<=0 ? ' genq' : '') + (gl > 1 ? ' gen' + gl : '');
     e.innerHTML = artUse(cfg.sym,'it','chars') + '<span class="chb' + (st.ch<=0?' empty':'') + '">' + st.ch + '</span>';
   } else if(c.t === 'b'){
     e.className = 'cell bub';
@@ -4130,6 +4145,46 @@ function closePage(){
   curPage = null;
 }
 function pageSub(text){ if(el('pgSub')) el('pgSub').textContent = text; }
+
+/* ================= 生成器升级（V3.5） =================
+   给中后期一个持续目标：星星除了装修，还能用来把生成器养大。
+   每升一级：容量 +4、回充快 12%、掉落品质上移一档。 */
+var GEN_MAX = 4;
+var GEN_UP = [
+  null,
+  { star: 20,  coins: 200 },   // 升到 2 级
+  { star: 45,  coins: 500 },   // 升到 3 级
+  { star: 90,  coins: 1200 }   // 升到 4 级
+];
+function genLv(gid){ return (S.genLv && S.genLv[gid]) || 1; }
+function genUpCost(gid){
+  var lv = genLv(gid);
+  return lv >= GEN_MAX ? null : GEN_UP[lv];
+}
+function upgradeGen(gid){
+  var c = genUpCost(gid);
+  if(!c){ toast(GENS[gid].n + '已经是最高级了'); return false; }
+  if(S.stars < c.star || S.coins < c.coins){ toast('星星或金币还不够'); sfx('err'); return false; }
+  S.stars -= c.star; S.coins -= c.coins;
+  if(!S.genLv) S.genLv = {};
+  S.genLv[gid] = genLv(gid) + 1;
+  S.gens[gid].ch = capOf(gid);           // 升级后补满
+  toast(GENS[gid].n + ' 升到 ' + S.genLv[gid] + ' 级！');
+  sfx('level'); rPills(); rAllCells(); save();
+  return true;
+}
+/* 掉落表随等级上移：高级生成器直接掉更高级的食材，省去底层重复合成 */
+function genDrops(gid){
+  var base = GENS[gid].drops, lv = genLv(gid);
+  if(lv <= 1) return base;
+  return base.map(function(d){
+    var id = d[0], it = ITEMS[id];
+    if(!it) return d;
+    var chain = CHAINS[it.chain].items;
+    var t = Math.min(it.tier + lv - 1, chain.length);
+    return [chain[t - 1], d[1]];
+  });
+}
 
 /* ================= 成就墙（V3.1） =================
    把玩家已经在做的事变成看得见的长期目标。成就点是第四种货币，
@@ -5026,7 +5081,7 @@ function showInfo(idx){
   } else if(c.t === 'g'){
     var cfg = GENS[c.gid];
     sym = cfg.sym; dir = 'chars';
-    name = cfg.n;
+    name = cfg.n + ' Lv' + genLv(c.gid);
     desc = cfg.desc + ' · 补货 ' + S.gens[c.gid].ch + '/' + capOf(c.gid);
   } else {
     sym = 's-chest'; dir = 'items';
@@ -5084,11 +5139,22 @@ function openSheet(idx){
     if(el('shBtns')) el('shBtns').innerHTML = '<button class="sbtn" id="shClose">关闭</button>';
   } else {
     var cfg = GENS[c.gid], st = S.gens[c.gid];
+    var glv = genLv(c.gid), up = genUpCost(c.gid);
     setArt(cfg.sym, 'chars');
-    if(el('shName')) el('shName').textContent = cfg.n;
-    if(el('shChain')) el('shChain').textContent = cfg.desc + ' · 补货 ' + st.ch + '/' + capOf(c.gid) + ' · 每 ' + Math.round(regenIv(c.gid)) + ' 秒回 1';
+    if(el('shName')) el('shName').textContent = cfg.n + ' Lv' + glv;
+    if(el('shChain')) el('shChain').textContent = cfg.desc + ' · 补货 ' + st.ch + '/' + capOf(c.gid) +
+      ' · 每 ' + Math.round(regenIv(c.gid)) + ' 秒回 1' +
+      (glv > 1 ? ' · 掉落已提升 ' + (glv - 1) + ' 档' : '');
     if(el('shDots')) el('shDots').innerHTML = '';
-    if(el('shBtns')) el('shBtns').innerHTML = '<button class="sbtn" id="shClose">关闭</button>';
+    if(el('shBtns')){
+      el('shBtns').innerHTML =
+        (up ? '<button class="sbtn" id="shUp">升级（' + up.star + ' 星 + ' + up.coins + ' 金）</button>'
+            : '<span class="rcost">已满级</span>') +
+        '<button class="sbtn" id="shClose">关闭</button>';
+    }
+    if(el('shUp')) el('shUp').onclick = function(){
+      if(upgradeGen(c.gid)){ openSheet(idx); }
+    };
   }
   if(el('shClose')) el('shClose').onclick = closeSheet;
   sh.classList.add('on');
@@ -5876,6 +5942,7 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  GEN_MAX: GEN_MAX, genLv: genLv, genUpCost: genUpCost, upgradeGen: upgradeGen, genDrops: genDrops,
   SHOP: SHOP, shopList: shopList, buyShop: buyShop,
   genWeekly: genWeekly, weeklyLevel: weeklyLevel, isoWeek: isoWeek,
   weeklyDone: weeklyDone, weeklyClaim: weeklyClaim, seedRand: seedRand,

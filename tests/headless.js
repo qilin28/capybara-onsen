@@ -1155,6 +1155,56 @@ const gSh3 = makeEnv(shStore);
 ok(gSh3.S().bait === 3 && gSh3.S().lucky === 12, '鱼饵与招福香的剩余次数可存档');
 gSh2.stopTick(); gSh3.stopTick();
 
+// ---------- V3.5 生成器升级 ----------
+const gGn = makeEnv(new Map());
+const SGn = gGn.S();
+ok(gGn.genLv('basket') === 1, '生成器初始 1 级');
+ok(gGn.GEN_MAX === 4, '最高 4 级');
+const cap0 = gGn.capOf('basket'), iv0 = gGn.regenIv('basket');
+const drop0 = gGn.genDrops('basket').map(function(d){ return d[0]; }).join('/');
+
+SGn.stars = 500; SGn.coins = 9999;
+ok(gGn.upgradeGen('basket') === true, '资源够时可以升级');
+ok(gGn.genLv('basket') === 2, '等级提升');
+ok(gGn.capOf('basket') > cap0, '容量增加');
+ok(gGn.regenIv('basket') < iv0, '回充变快');
+const drop1 = gGn.genDrops('basket').map(function(d){ return d[0]; }).join('/');
+ok(drop1 !== drop0, '掉落品质上移');
+
+// 升到满级
+gGn.upgradeGen('basket'); gGn.upgradeGen('basket');
+ok(gGn.genLv('basket') === 4, '可以升到 4 级');
+ok(gGn.genUpCost('basket') === null, '满级后没有下一档');
+ok(gGn.upgradeGen('basket') === false, '满级后不能再升');
+// 掉落不会超出链的长度
+const topDrops = gGn.genDrops('basket');
+ok(topDrops.every(function(d){
+  const it = gGn.ITEMS[d[0]];
+  return it && it.tier <= gGn.CHAINS[it.chain].items.length;
+}), '掉落品质不会越过链的顶端');
+
+// 资源不足
+SGn.stars = 0; SGn.coins = 0;
+ok(gGn.upgradeGen('flour') === false, '资源不够时升不了');
+ok(gGn.genLv('flour') === 1, '失败时等级不变');
+
+// 升级后补满
+SGn.stars = 500; SGn.coins = 9999;
+SGn.gens.flour.ch = 0;
+gGn.upgradeGen('flour');
+ok(SGn.gens.flour.ch === gGn.capOf('flour'), '升级后补货立刻回满');
+gGn.stopTick();
+
+// 等级可存档
+const gnStore = new Map();
+const gGn2 = makeEnv(gnStore);
+gGn2.S().genLv = { basket: 3, dairy: 2 };
+gGn2.save();
+const gGn3 = makeEnv(gnStore);
+ok(gGn3.genLv('basket') === 3 && gGn3.genLv('dairy') === 2, '生成器等级可存档恢复');
+ok(gGn3.genLv('flour') === 1, '没升过的仍是 1 级');
+gGn2.stopTick(); gGn3.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
