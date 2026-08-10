@@ -1684,9 +1684,15 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V3.3';
+var GAME_VER = 'V3.4';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V3.4', d:'2026-08-08', t:'商店扩充', li:[
+    '商店从 3 种增加到 9 种，随等级逐步解锁',
+    '新增珍味木箱、上等鱼饵、小扫帚、扭蛋券、贝壳袋、招福香',
+    '上等鱼饵让接下来五竿不脱钩，招福香让 20 次合成闪光率翻三倍',
+    '小扫帚一键清掉低级食材换金币，腾出格子'
+  ]},
   { v:'V3.3', d:'2026-08-08', t:'每周谜题', li:[
     '梦境新增每周谜题，全世界同一周是同一道题',
     '每周一自动换题，通关按星数给贝币',
@@ -1958,9 +1964,16 @@ var GACHA_COST = 100;      // 金币；有扭蛋券时优先用券
 var SHINY_RATE = 0.05;     // 闪光食材掉落概率
 
 var SHOP = [
-  { id:'pack1',  n:'食材小推车', coins:60,  d:'随机 3 份 1-2 级食材' },
-  { id:'pack2',  n:'进阶食盒',   coins:150, d:'随机 2 份 3-4 级食材' },
-  { id:'coffee', n:'能量焙茶',   coins:50,  d:'立即回满全部生成器补货' }
+  { id:'pack1',  n:'食材小推车', coins:60,   d:'随机 3 份 1-2 级食材' },
+  { id:'pack2',  n:'进阶食盒',   coins:150,  d:'随机 2 份 3-4 级食材' },
+  { id:'coffee', n:'能量焙茶',   coins:50,   d:'立即回满全部生成器补货' },
+  // 随等级解锁的高阶商品，给中后期金币一个去处
+  { id:'pack3',  n:'珍味木箱',   coins:420,  d:'随机 2 份 5-6 级食材',        lv:8 },
+  { id:'bait',   n:'上等鱼饵',   coins:200,  d:'接下来 5 竿必定不脱钩',        lv:8 },
+  { id:'clean',  n:'小扫帚',     coins:80,   d:'清掉棋盘上的 1-2 级食材，折成金币', lv:6 },
+  { id:'ticket', n:'扭蛋券',     coins:260,  d:'直接换一张扭蛋券',             lv:5 },
+  { id:'shell',  n:'贝壳袋',     coins:600,  d:'换 10 枚贝币',                lv:12 },
+  { id:'lucky',  n:'招福香',     coins:800,  d:'接下来 20 次合成闪光率翻三倍',   lv:14 }
 ];
 
 /* ================= 状态 ================= */
@@ -1977,7 +1990,7 @@ function initNew(){
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0, merge:0, coinAll:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
-    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, achs:[], pts:0, weekly:0, dream:{}, shells:0,
+    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, achs:[], pts:0, weekly:0, bait:0, lucky:0, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -2008,7 +2021,7 @@ function save(){
       rod:S.rod, fishCount:S.fishCount,
       pool:S.pool, onsen:S.onsen, rep:S.rep,
       decoOwn:S.decoOwn, decoMap:S.decoMap, fest:S.fest, toySold:S.toySold,
-      achs:S.achs, pts:S.pts, weekly:S.weekly,
+      achs:S.achs, pts:S.pts, weekly:S.weekly, bait:S.bait, lucky:S.lucky,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -2042,6 +2055,7 @@ function load(){
     achs: Array.isArray(d.achs) ? d.achs : [],
     pts: d.pts || 0,
     weekly: d.weekly || 0,
+    bait: d.bait || 0, lucky: d.lucky || 0,
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -2324,10 +2338,16 @@ function fishStrike(now){
   var t = (now || Date.now()) - st.t0;
   var diff = t - st.biteAt;
   var res;
-  if(diff < -180){
+  var saved = false;
+  if((diff < -180 || diff > st.win) && S.bait > 0){
+    S.bait--; saved = true;                                   // 上等鱼饵兜底
+  }
+  if(diff < -180 && !saved){
     res = { kind:'early', msg:'提早了，鱼被吓跑了' };          // 抢竿
-  } else if(diff > st.win){
+  } else if(diff > st.win && !saved){
     res = { kind:'late', msg:'太慢了，鱼跑掉了' };             // 错过窗口
+  } else if(saved){
+    res = { kind:'ok', msg:'好鱼饵，鱼还是咬住了' };
   } else if(diff >= -180 && diff <= st.win * 0.35){
     res = { kind:'perfect', msg:'完美！' };                    // 前 35% 窗口
   } else {
@@ -2741,6 +2761,7 @@ function today(){
 }
 function rollShiny(){
   var rate = SHINY_RATE + decoBuff('shiny') + (renoHas('garden') ? .015 : 0);
+  if(S.lucky > 0){ rate *= 3; S.lucky--; }      // 招福香：限次数的闪光加成
   return Math.random() < rate ? 1 : 0;
 }
 function mkItem(id, shiny){
@@ -3217,6 +3238,10 @@ function rLockBand(){
   lb.style.display = '';
   lb.style.height = 'calc(' + locked + '/9.05*100% - 8px)';
 }
+/* 商店里能买到什么，随等级解锁 */
+function shopList(){
+  return SHOP.filter(function(it){ return !it.lv || S.level >= it.lv; });
+}
 function buyShop(id){
   var it = null;
   for(var i=0;i<SHOP.length;i++) if(SHOP[i].id===id) it = SHOP[i];
@@ -3228,12 +3253,54 @@ function buyShop(id){
     toast('热茶下肚，生成器补货全部回满'); sfx('level');
     rBadges(); rPills(); save(); return true;
   }
+  if(id==='ticket'){
+    S.coins -= it.coins;
+    S.tickets = (S.tickets || 0) + 1;
+    toast('换到一张扭蛋券'); sfx('coin');
+    rPills(); save(); return true;
+  }
+  if(id==='shell'){
+    S.coins -= it.coins;
+    S.shells = (S.shells || 0) + 10;
+    toast('换到 10 枚贝币'); sfx('coin');
+    rPills(); save(); return true;
+  }
+  if(id==='bait'){
+    S.coins -= it.coins;
+    S.bait = (S.bait || 0) + 5;
+    toast('上等鱼饵 x5，接下来五竿不会脱钩'); sfx('level');
+    rPills(); save(); return true;
+  }
+  if(id==='lucky'){
+    S.coins -= it.coins;
+    S.lucky = (S.lucky || 0) + 20;
+    toast('招福香点上了，接下来 20 次合成闪光率翻三倍'); sfx('level');
+    rPills(); save(); return true;
+  }
+  if(id==='clean'){
+    // 把散落的 1 级食材一次性折成金币，腾格子
+    var got = 0, cnt = 0;
+    for(var ci=0; ci<S.board.length; ci++){
+      var cc = S.board[ci];
+      if(cc && cc.t==='i' && ITEMS[cc.id] && ITEMS[cc.id].tier <= 2 && !cc.s){
+        got += ITEMS[cc.id].val * 10;
+        S.board[ci] = null; rCell(ci); cnt++;
+      }
+    }
+    if(!cnt){ toast('棋盘上没有低级食材'); sfx('err'); return false; }
+    S.coins -= it.coins; S.coins += got;
+    toast('扫走 ' + cnt + ' 份低级食材，换回 ' + got + ' 金币');
+    sfx('sell'); rPills(); rOrders(); save(); return true;
+  }
   var n = id==='pack1' ? 3 : 2;
   var picks = [];
   for(var k=0;k<n;k++){
     var ck = Math.random()<.5 ? 'veg' : 'bun';
-    var tier = id==='pack1' ? 1+Math.floor(Math.random()*2) : 3+Math.floor(Math.random()*2);
-    picks.push(CHAINS[ck].items[tier-1]);
+    var tier = id==='pack1' ? 1+Math.floor(Math.random()*2)
+             : id==='pack2' ? 3+Math.floor(Math.random()*2)
+             : 5+Math.floor(Math.random()*2);
+    var chain2 = CHAINS[ck].items;
+    picks.push(chain2[Math.min(tier, chain2.length)-1]);
   }
   var spots = [];
   for(var k2=0;k2<picks.length;k2++){
@@ -3580,7 +3647,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '33';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '34';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4826,7 +4893,12 @@ function rReno(){
 function rShop(){
   var body = el('shopBody'); if(!body) return;
   var html = '';
-  SHOP.forEach(function(s2){
+  if(S.bait > 0 || S.lucky > 0){
+    html += '<p class="sethint" style="margin:0 2px 8px">生效中：' +
+      (S.bait > 0 ? '上等鱼饵 ' + S.bait + ' 竿　' : '') +
+      (S.lucky > 0 ? '招福香 ' + S.lucky + ' 次' : '') + '</p>';
+  }
+  shopList().forEach(function(s2){
     html += '<div class="rrow"><div class="rinfo"><b>' + s2.n + '</b><span>' + s2.d + '</span></div>' +
       '<span class="rcost">' + svgUse('i-coin') + s2.coins + '</span>' +
       '<button class="dv" data-shop="' + s2.id + '"' + (S.coins < s2.coins ? ' disabled' : '') + '>购买</button></div>';
@@ -5804,6 +5876,7 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  SHOP: SHOP, shopList: shopList, buyShop: buyShop,
   genWeekly: genWeekly, weeklyLevel: weeklyLevel, isoWeek: isoWeek,
   weeklyDone: weeklyDone, weeklyClaim: weeklyClaim, seedRand: seedRand,
   CARDS: CARDS, CARDS2: CARDS2, cardIds: cardIds,

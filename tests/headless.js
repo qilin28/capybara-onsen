@@ -1097,6 +1097,64 @@ const gWk3 = makeEnv(wkStore);
 ok(gWk3.S().weekly === 202632, '周谜题完成记录可存档');
 gWk.stopTick(); gWk2.stopTick(); gWk3.stopTick();
 
+// ---------- V3.4 商店扩充 ----------
+const gSh = makeEnv(new Map());
+const SSh = gSh.S();
+ok(gSh.SHOP.length === 9, '商店共 9 种商品');
+ok(gSh.SHOP.every(function(it){ return it.id && it.n && it.coins > 0 && it.d; }), '每种商品定义完整');
+const shIds = gSh.SHOP.map(function(it){ return it.id; });
+ok(new Set(shIds).size === shIds.length, '商品 id 不重复');
+// 按等级解锁
+SSh.level = 1;
+ok(gSh.shopList().length === 3, 'Lv1 只有最初三种');
+SSh.level = 8;
+ok(gSh.shopList().length > 3, 'Lv8 解锁更多商品');
+SSh.level = 14;
+ok(gSh.shopList().length === 9, 'Lv14 全部解锁');
+
+// 兑换类商品
+SSh.coins = 9999;
+const tk0 = SSh.tickets || 0;
+gSh.buyShop('ticket');
+ok((SSh.tickets || 0) === tk0 + 1, '可以用金币换扭蛋券');
+const sh0 = SSh.shells || 0;
+gSh.buyShop('shell');
+ok((SSh.shells || 0) === sh0 + 10, '可以用金币换贝币');
+
+// 鱼饵：抢竿也不脱钩
+gSh.buyShop('bait');
+ok(SSh.bait === 5, '鱼饵给 5 次');
+SSh.level = 8;
+const bcast = gSh.fishCast();
+const bres = gSh.fishStrike(bcast.t0 + 30);   // 故意抢竿
+ok(bres.kind !== 'early' && !!bres.fish, '有鱼饵时抢竿也能钓到');
+ok(SSh.bait === 4, '鱼饵用掉一次');
+
+// 招福香：限次数的闪光加成
+gSh.buyShop('lucky');
+ok(SSh.lucky === 20, '招福香给 20 次');
+for (let i = 0; i < 5; i++) gSh.rollShiny();
+ok(SSh.lucky === 15, '每次合成消耗一次招福香');
+
+// 小扫帚不该让玩家净亏太多
+const broom = gSh.SHOP.filter(function(it){ return it.id === 'clean'; })[0];
+ok(broom.coins <= 100, '小扫帚定价不贵（' + broom.coins + '）');
+SSh.coins = 9999;
+gSh.spawn('veg1'); gSh.spawn('veg1'); gSh.spawn('bun2');
+const bc0 = SSh.coins;
+ok(gSh.buyShop('clean') === true, '棋盘有低级食材时可以用小扫帚');
+ok(SSh.coins > bc0 - broom.coins, '回收的金币抵掉了一部分成本');
+gSh.stopTick();
+
+// 道具剩余次数可存档
+const shStore = new Map();
+const gSh2 = makeEnv(shStore);
+gSh2.S().bait = 3; gSh2.S().lucky = 12;
+gSh2.save();
+const gSh3 = makeEnv(shStore);
+ok(gSh3.S().bait === 3 && gSh3.S().lucky === 12, '鱼饵与招福香的剩余次数可存档');
+gSh2.stopTick(); gSh3.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);
