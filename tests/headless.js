@@ -1059,6 +1059,44 @@ ok(gRn.regenIv('basket') < ivBase, '灯笼串让回充变快');
 ok(gRn.storeCap() === capStore + 4, '料理台与屋顶各给储物间 +2');
 gRn.stopTick();
 
+// ---------- V3.3 每周谜题 ----------
+const gWk = makeEnv(new Map());
+const SWk = gWk.S();
+ok(typeof gWk.isoWeek() === 'number' && gWk.isoWeek() > 202000, '能算出 ISO 周编号');
+// 同一周必须永远是同一道题（玩家刷新不能换题）
+const w1 = gWk.genWeekly(202632), w1b = gWk.genWeekly(202632);
+ok(JSON.stringify(w1) === JSON.stringify(w1b), '同一周生成的题目完全一致');
+const w2 = gWk.genWeekly(202633);
+ok(JSON.stringify(w1) !== JSON.stringify(w2), '不同周题目不同');
+// 生成的题目必须合法
+ok(w1.init.length > 0 && w1.init.length <= w1.w * w1.h, '材料放得下棋盘');
+ok(w1.opt >= 1 && w1.mv >= w1.opt, '步数上限不低于最优解');
+const wpos = w1.init.map(function(p2){ return p2[0]; });
+ok(new Set(wpos).size === wpos.length, '没有两件材料放在同一格');
+ok(w1.weekly === true, '标记为周谜题');
+
+// 周谜题走独立的奖励通道
+SWk.weekly = 0; SWk.shells = 0;
+ok(gWk.weeklyDone() === false, '本周还没通关');
+const wGain = gWk.weeklyClaim(3);
+ok(wGain > 0, '通关发贝币');
+ok(SWk.shells === wGain, '贝币入账');
+ok(gWk.weeklyDone() === true, '通关后标记本周');
+ok(gWk.weeklyClaim(3) === 0, '同一周不会重复发奖');
+
+// 周谜题不能污染关卡星数
+SWk.dream = { 1: 3, 2: 2, 'w202632': 3 };
+ok(gWk.dreamTotalStars() === 5, '关卡星数只统计正式关卡，不含周谜题');
+
+// 可存档
+const wkStore = new Map();
+const gWk2 = makeEnv(wkStore);
+gWk2.S().weekly = 202632;
+gWk2.save();
+const gWk3 = makeEnv(wkStore);
+ok(gWk3.S().weekly === 202632, '周谜题完成记录可存档');
+gWk.stopTick(); gWk2.stopTick(); gWk3.stopTick();
+
 g.stopTick(); g2.stopTick(); g3.stopTick(); g4.stopTick();
 console.log(fails ? '\n有 ' + fails + ' 项失败' : '\n全部通过');
 process.exit(fails ? 1 : 0);

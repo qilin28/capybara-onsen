@@ -442,6 +442,18 @@ body{
   border-bottom-width:3px; border-radius:13px; padding:8px 4px 6px; cursor:pointer;
   color:#4A3A6B; font-family:inherit; font-weight:900; font-size:11.5px;}
 .dtile:active{transform:translateY(1.5px); border-bottom-width:1.5px;}
+/* 每周谜题：占满一行，与关卡区分开 */
+.dtile.weekly{grid-column:1 / -1; flex-direction:row; align-items:center; gap:9px;
+  justify-content:flex-start; padding:10px 13px;
+  background:linear-gradient(180deg,#FFF4E0,#F7E2B8); border-color:#E0A44A;}
+.dtile.weekly .dno{font-size:11px; opacity:1; color:#B0763A; flex:none;}
+.dtile.weekly > span:nth-child(2){flex:1; text-align:left; font-size:13px; color:#8A5A1E;}
+.wtag{flex:none; font-size:10px; font-weight:900; color:#FFF8EC;
+  background:#E0A44A; border-radius:999px; padding:2px 9px;}
+.dtile.weekly.cleared{background:linear-gradient(180deg,#F0F6EC,#DFEBD6); border-color:#9CC69C;}
+.dtile.weekly.cleared .wtag{background:#7FB84F;}
+.dtile.weekly.cleared .dno,
+.dtile.weekly.cleared > span:nth-child(2){color:#4F7A34;}
 .dtile.lock{background:rgba(120,86,50,.1); border-color:var(--pline); color:var(--sub); cursor:default;}
 .dtile .dno{font-size:9.5px; opacity:.7;}
 .dtile .dst{display:flex; gap:1px; margin-top:2px;}
@@ -1672,9 +1684,14 @@ var CUSTS = {
 };
 var CUST_IDS = Object.keys(CUSTS);
 var SAVE_KEY = 'wonsen1';
-var GAME_VER = 'V3.2';
+var GAME_VER = 'V3.3';
 /* 更新日志：每版一条，玩家可在「设置 - 更新记录」里查看。新版本加在最前面 */
 var CHANGELOG = [
+  { v:'V3.3', d:'2026-08-08', t:'每周谜题', li:[
+    '梦境新增每周谜题，全世界同一周是同一道题',
+    '每周一自动换题，通关按星数给贝币',
+    '30 关打完之后，梦境每周都有新题'
+  ]},
   { v:'V3.2', d:'2026-08-08', t:'装修二期与收集扩充', li:[
     '闪光食材现在可以和普通的合成，闪光会传给产物',
     '闪光的金框做得更明显，一眼能认出来',
@@ -1960,7 +1977,7 @@ function initNew(){
     story:{intro:0, merge:0, deliver:0}, met:[], thx:[], quest:{i:0, p:0}, stat:{deliver:0, merge:0, coinAll:0}, fav:{}, endless:0,
     vol:{ sfx:VOL_DEF.sfx, bgm:VOL_DEF.bgm, voice:VOL_DEF.voice, curve2:1 },
     rod:0, fishCount:0,
-    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, achs:[], pts:0, dream:{}, shells:0,
+    pool:0, onsen:null, rep:0, decoOwn:[], decoMap:{}, fest:{}, toySold:0, achs:[], pts:0, weekly:0, dream:{}, shells:0,
     stars:0, reno:[], store:[null,null,null,null],
     cards:{}, tickets:0, dexS:[], gift:{last:today(), stock:1}
   };
@@ -1991,7 +2008,7 @@ function save(){
       rod:S.rod, fishCount:S.fishCount,
       pool:S.pool, onsen:S.onsen, rep:S.rep,
       decoOwn:S.decoOwn, decoMap:S.decoMap, fest:S.fest, toySold:S.toySold,
-      achs:S.achs, pts:S.pts,
+      achs:S.achs, pts:S.pts, weekly:S.weekly,
       dream:S.dream, shells:S.shells,
       stars:S.stars, reno:S.reno, store:S.store,
       cards:S.cards, tickets:S.tickets, dexS:S.dexS, gift:S.gift
@@ -2024,6 +2041,7 @@ function load(){
     toySold: d.toySold || 0,
     achs: Array.isArray(d.achs) ? d.achs : [],
     pts: d.pts || 0,
+    weekly: d.weekly || 0,
     dream: (d.dream && typeof d.dream === 'object') ? d.dream : {},   // V2.0 关卡星数
     shells: d.shells || 0,
     quest: d.quest || {i:0, p:0},
@@ -2387,9 +2405,93 @@ function buyRod(){
 /* ---------- 梦境运行时 ---------- */
 var DM = null;   // 当前梦境局面，退出即弃，永不写进主存档
 
+/* ================= 每周谜题（V3.3） =================
+   按 ISO 周数做种子生成，全世界同一周拿到同一道题，纯本地算法零联网。
+   30 关手工关卡打完后，这里每周续一道，梦境不会断供。 */
+function isoWeek(d){
+  var t = new Date(Date.UTC((d||new Date()).getFullYear(), (d||new Date()).getMonth(), (d||new Date()).getDate()));
+  var day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);              // 挪到本周四
+  var y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  var wk = Math.ceil(((t - y0) / 86400000 + 1) / 7);
+  return t.getUTCFullYear() * 100 + wk;                 // 例：202632
+}
+/* 确定性随机：同一个种子永远产出同一串数 */
+function seedRand(seed){
+  var a = seed >>> 0;
+  return function(){
+    a += 0x6D2B79F5;
+    var t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+/* 逆向生成：从目标往下拆，保证一定解得开 */
+function genWeekly(week){
+  var rnd = seedRand(week);
+  var pool = ['veg', 'bun', 'dairy'];
+  var ck = pool[Math.floor(rnd() * pool.length)];
+  var chain = CHAINS[ck].items;
+  var goalTier = 4 + Math.floor(rnd() * 2);              // 目标 4-5 级
+  goalTier = Math.min(goalTier, chain.length);
+  // 从目标倒推需要的材料：每层随机决定"直接给"还是"再往下拆"
+  var need = {};
+  need[goalTier] = 1;
+  for(var t = goalTier; t > 1; t--){
+    var cnt = need[t] || 0;
+    if(!cnt) continue;
+    var give = (t <= 2) ? 0 : Math.floor(rnd() * Math.min(cnt, 2));   // 高层偶尔直接给一个
+    need[t] = give;
+    need[t-1] = (need[t-1] || 0) + (cnt - give) * 2;
+  }
+  var items = [];
+  Object.keys(need).forEach(function(t){
+    for(var i = 0; i < need[t]; i++) items.push(chain[+t - 1]);
+  });
+  var w = 5, h = 5;
+  if(items.length > 22){ items = items.slice(0, 22); }
+  // 打乱位置
+  var slots = [];
+  for(var i = 0; i < w * h; i++) slots.push(i);
+  for(var i = slots.length - 1; i > 0; i--){
+    var j = Math.floor(rnd() * (i + 1));
+    var tmp = slots[i]; slots[i] = slots[j]; slots[j] = tmp;
+  }
+  var init = items.map(function(id, i){ return [slots[i], id]; });
+  // 最优步数：把所有材料合到目标需要的合成次数
+  var have = {};
+  items.forEach(function(id){ have[ITEMS[id].tier] = (have[ITEMS[id].tier] || 0) + 1; });
+  var steps = 0, want = {};
+  want[goalTier] = 1;
+  for(var t = goalTier; t > 1; t--){
+    var d = Math.max(0, (want[t] || 0) - (have[t] || 0));
+    steps += d;
+    want[t-1] = (want[t-1] || 0) + d * 2;
+  }
+  return {
+    id: 'w' + week, n: '第 ' + (week % 100) + ' 周', w: w, h: h,
+    mv: steps + 3, opt: steps,
+    goal: { id: chain[goalTier - 1], n: 1 },
+    init: init, weekly: true
+  };
+}
+function weeklyLevel(){ return genWeekly(isoWeek()); }
+function weeklyDone(){ return (S.weekly || 0) === isoWeek(); }
+/* 本周首次通关发贝币，之后再玩不再重复发 */
+function weeklyClaim(stars){
+  if(weeklyDone()) return 0;
+  S.weekly = isoWeek();
+  var gain = 8 + stars * 4;                              // 三星拿 20 枚
+  S.shells = (S.shells || 0) + gain;
+  save();
+  return gain;
+}
+
 function dreamStart(id){
   var lv = null;
-  for(var i=0;i<DREAMS.length;i++) if(DREAMS[i].id === id) lv = DREAMS[i];
+  if(id === 'weekly'){ lv = weeklyLevel(); }
+  else { for(var i=0;i<DREAMS.length;i++) if(DREAMS[i].id === id) lv = DREAMS[i]; }
   if(!lv) return false;
   DM = {
     lv: lv,
@@ -2467,6 +2569,7 @@ function dreamMove(a, b){
 /* 通关结算：记录最好成绩，发放贝币 */
 function dreamFinish(){
   if(!DM || !DM.done) return null;
+  if(DM.lv.weekly) return null;      // 周谜题走 weeklyClaim，不计入关卡星数
   var st = dreamStars(), id = DM.lv.id;
   if(!S.dream) S.dream = {};
   var prev = S.dream[id] || 0;
@@ -2480,8 +2583,11 @@ function dreamFinish(){
 }
 function dreamTotalStars(){
   if(!S.dream) return 0;
+  // 只数正式关卡（数字 id），周谜题的 key 以 w 开头
   var n = 0;
-  Object.keys(S.dream).forEach(function(k){ n += S.dream[k]; });
+  Object.keys(S.dream).forEach(function(k){
+    if(/^\d+$/.test(k)) n += S.dream[k];
+  });
   return n;
 }
 /* 已解锁关卡数：过一关开一关，前 3 关直接开放 */
@@ -3474,7 +3580,7 @@ function meetCheck(){
 
 /* ================= 渲染 ================= */
 function el(id){ return document.getElementById(id); }
-var ART_VER = '32';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
+var ART_VER = '33';  // 换贴图后 +1，绕过浏览器缓存（否则玩家刷新也看不到新图）
 function artSrc(dir, name){ return 'art/' + dir + '/' + name + '.png?v=' + ART_VER; }
 function svgUse(sym, cls){ return '<svg class="' + (cls||'') + '"><use href="#' + sym + '"/></svg>'; }
 /* 贴图优先：art/ 下有 PNG 就盖在矢量图上，缺图自动回退（onerror 隐藏） */
@@ -4458,6 +4564,11 @@ function rDreamList(){
   var box = el('dreamList'); if(!box) return;
   var unlocked = dreamUnlocked();
   var html = '';
+  // 每周谜题：全世界同一道，每周一换
+  var wk = weeklyLevel(), wdone = weeklyDone();
+  html += '<button class="dtile weekly' + (wdone ? ' cleared' : '') + '" data-dream="weekly">' +
+    '<span class="dno">每周谜题</span><span>' + wk.n + '</span>' +
+    '<span class="wtag">' + (wdone ? '本周已通关' : '未通关') + '</span></button>';
   DREAMS.forEach(function(lv, i){
     var st = (S.dream && S.dream[lv.id]) || 0;
     if(i >= unlocked){
@@ -4512,7 +4623,16 @@ function backToDreamList(){
 }
 function showDreamWin(){
   var box = el('dmBoard'); if(!box) return;
-  var res = dreamFinish();
+  var weekly = DM && DM.lv && DM.lv.weekly;
+  var res;
+  if(weekly){
+    var st = dreamStars();
+    var gain = weeklyClaim(st);
+    res = { stars: st, gain: gain };
+    DM.done = true;
+  } else {
+    res = dreamFinish();
+  }
   if(!res) return;
   var stars = '';
   for(var k=1;k<=3;k++) stars += '<i class="' + (k <= res.stars ? 'on' : '') + '"></i>';
@@ -5684,6 +5804,8 @@ if(location.protocol === 'https:' && 'serviceWorker' in navigator){
 
 /* ================= 调试接口（不影响游戏） ================= */
 window.__game = {
+  genWeekly: genWeekly, weeklyLevel: weeklyLevel, isoWeek: isoWeek,
+  weeklyDone: weeklyDone, weeklyClaim: weeklyClaim, seedRand: seedRand,
   CARDS: CARDS, CARDS2: CARDS2, cardIds: cardIds,
   RENO: RENO, storeCap: storeCap,
   rAchList: rAchList, achPop: achPop,
