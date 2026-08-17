@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>叠叠温泉 · 玩法原型</title>
+<style>
+  :root{
+    --sky1:#DCEFC8; --sky2:#C7E39A; --sky3:#B0D97F; --sky4:#9BCB6C;
+    --paper:#FBF3E0; --paper2:#F4E7CD; --pline:#E8D6B2;
+    --ink:#5C4A2E; --sub:#A18A68; --wood:#C4A579; --gold:#F2C14E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%; overflow:hidden;}
+  body{background:linear-gradient(180deg,var(--sky1),var(--sky4));
+    font-family:"PingFang SC","Hiragino Sans GB",system-ui,sans-serif; color:var(--ink);
+    display:flex; justify-content:center;}
+  #app{width:100%; max-width:520px; height:100%; display:flex; flex-direction:column;
+    padding:calc(8px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));}
+
+  .top{flex:0 0 auto; display:flex; align-items:center; gap:6px; margin-bottom:7px;}
+  .pill{display:flex; align-items:center; gap:4px; background:rgba(255,253,246,.96);
+    border:2.5px solid var(--wood); border-bottom-width:3px; border-radius:999px;
+    padding:5px 11px; font-size:13px; font-weight:900; white-space:nowrap;
+    box-shadow:0 2px 0 rgba(140,105,60,.28);}
+  .pill.grow{flex:1; justify-content:center; font-size:12.5px;}
+  .btn{background:linear-gradient(180deg,#FFF3DC,#F2DDB4); border:2.5px solid var(--wood);
+    border-bottom-width:4px; border-radius:12px; padding:6px 12px;
+    font-family:inherit; font-size:12.5px; font-weight:900; color:var(--ink); cursor:pointer;}
+  .btn:active{transform:translateY(2px); border-bottom-width:2px;}
+
+  #stack{flex:1 1 auto; position:relative; min-height:0; margin-bottom:7px;
+    background:radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.45), rgba(255,255,255,.2));
+    border:3px solid rgba(255,255,255,.85); border-radius:20px; overflow:hidden;}
+  .card{position:absolute; border-radius:10px;
+    background:#F7EFDD; border:2px solid #E6D6B4; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .12s, opacity .18s;
+    box-shadow:0 2px 4px rgba(90,70,40,.3);}
+  .card img{width:82%; height:82%; object-fit:contain; pointer-events:none;}
+  /* 被压住：暗下去、点不动，看不清是什么 */
+  .card.cov{cursor:default; filter:brightness(.58) saturate(.45);}
+  .card.cov::after{content:''; position:absolute; inset:0; border-radius:8px;
+    background:rgba(35,45,28,.3);}
+  .card.free{box-shadow:0 3px 7px rgba(90,70,40,.38);}
+  .card.free:active{transform:scale(.88);}
+
+  #slots{flex:0 0 auto; display:flex; gap:4px; justify-content:center; margin-bottom:7px;
+    background:linear-gradient(180deg,var(--paper),var(--paper2));
+    border:3px solid var(--wood); border-radius:16px; padding:7px 6px;
+    box-shadow:0 3px 0 rgba(140,105,60,.32);}
+  .slot{flex:1 1 0; min-width:0; aspect-ratio:1; max-width:46px; border-radius:10px;
+    background:rgba(120,86,50,.09); border:2px dashed rgba(150,120,80,.42);
+    display:flex; align-items:center; justify-content:center;}
+  .slot.on{background:#F7EFDD; border:2px solid #E6D6B4;}
+  .slot img{width:82%; height:82%; object-fit:contain;}
+  .slot.warn{border-color:#E8A33F; background:rgba(232,163,63,.16);}
+  .slot.danger{border-color:#E8563F; background:rgba(232,86,63,.18);
+    animation:blink 1s ease-in-out infinite;}
+  @keyframes blink{50%{opacity:.55;}}
+
+  #tip{position:fixed; left:50%; bottom:118px; transform:translateX(-50%) translateY(8px);
+    background:rgba(48,40,26,.9); color:#FFF8EC; font-size:12.5px; font-weight:900;
+    border-radius:999px; padding:7px 16px; white-space:nowrap; z-index:15;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;}
+  #tip.on{opacity:1; transform:translateX(-50%) translateY(0);}
+  #slots.shake{animation:shk .32s;}
+  @keyframes shk{0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}}
+  #tools{flex:0 0 auto; display:grid; grid-template-columns:repeat(2,1fr); gap:6px;}
+  .tool{display:flex; flex-direction:column; align-items:center; gap:1px;
+    background:linear-gradient(180deg,#FFF6E4,#F3DFB8); border:2.5px solid var(--wood);
+    border-bottom-width:4px; border-radius:13px; padding:8px 4px 7px;
+    font-family:inherit; font-size:12.5px; font-weight:900; color:var(--ink); cursor:pointer;}
+  .tool:active{transform:translateY(2px); border-bottom-width:2px;}
+  .tool:disabled{opacity:.38;}
+  .tool i{font-style:normal; font-size:10px; color:var(--sub);}
+
+  #over{position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(30,40,25,.58); z-index:20;}
+  #over.on{display:flex;}
+  .win{width:min(80%,300px); background:linear-gradient(180deg,#FFFDF6,var(--paper));
+    border:3px solid var(--wood); border-radius:20px; padding:22px 18px; text-align:center;
+    box-shadow:0 8px 24px rgba(30,40,20,.42);}
+  .win b{display:block; font-size:20px; margin-bottom:5px;}
+  .win span{display:block; font-size:12.5px; color:var(--sub); line-height:1.75; margin-bottom:15px;}
+  .win .btn{width:100%; padding:11px;}
+
+  #menu{position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:9px; z-index:30;
+    background:linear-gradient(180deg,var(--sky1),var(--sky4)); padding:20px;}
+  #menu.off{display:none;}
+  #menu h1{font-size:22px; letter-spacing:2px;}
+  #menu p{font-size:12.5px; color:#4F6B32; text-align:center; line-height:1.8;
+    max-width:310px; margin-bottom:8px;}
+  .lvbtn{width:min(88%,320px); display:flex; align-items:center; gap:10px;
+    background:linear-gradient(180deg,#FFFDF6,var(--paper)); border:2.5px solid var(--wood);
+    border-bottom-width:4px; border-radius:15px; padding:11px 15px;
+    font-family:inherit; cursor:pointer; text-align:left; color:var(--ink);}
+  .lvbtn:active{transform:translateY(2px); border-bottom-width:2px;}
+  .lvbtn b{flex:1; font-size:14.5px;}
+  .lvbtn i{font-style:normal; font-size:11px; color:var(--sub); text-align:right; line-height:1.5;}
+  .tip{font-size:11px; color:#4F6B32; margin-top:8px; text-align:center; max-width:310px; line-height:1.75;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top">
+    <button class="btn" id="back">难度</button>
+    <span class="pill grow" id="lvName">叠叠温泉</span>
+    <span class="pill" id="left">剩 0</span>
+  </div>
+
+  <div id="stack">
+    <div id="over"><div class="win">
+      <b id="ovTitle">梦醒了</b>
+      <span id="ovDesc"></span>
+      <button class="btn" id="ovBtn">再来一局</button>
+    </div></div>
+  </div>
+
+  <div id="tip"></div>
+  <div id="slots"></div>
+
+  <div id="tools">
+    <button class="tool" id="tClear">清一种<i id="nClear">x1</i></button>
+    <button class="tool" id="tUndo">撤销<i id="nUndo">x1</i></button>
+  </div>
+</div>
+
+<div id="menu">
+  <h1>叠叠温泉</h1>
+  <p>点最上面的食材放进下面的格子，<b>同样的凑够 3 个就消掉</b>。<br>
+     格子占满又凑不出 3 个，这局就输了。</p>
+  <button class="lvbtn" data-lv="0"><b>试手</b><i>3 层 · 6 种 · 54 张<br>8 格 · 道具 1</i></button>
+  <button class="lvbtn" data-lv="1"><b>入梦</b><i>4 层 · 6 种 · 72 张<br>8 格 · 道具 2</i></button>
+  <button class="lvbtn" data-lv="2"><b>沉梦</b><i>5 层 · 7 种 · 105 张<br>9 格 · 道具 2</i></button>
+  <button class="lvbtn" data-lv="3"><b>深梦</b><i>6 层 · 8 种 · 144 张<br>9 格 · 道具 2</i></button>
+  <p class="tip">这是玩法原型，独立运行，不影响你的存档。<br>
+     被压住的食材看不清也点不了，得先清掉上面的。</p>
+</div>
+
+<script>
+'use strict';
+var ART = ['veg1','veg2','veg3','veg4','bun1','bun2','bun3','d1','d2','f1','f2','w1'];
+
+/* 配置来自参数扫描：一般水平通关率 64-79%，乱点低于 3%。
+   真正的难度旋钮是「种类数 vs 卡槽数」的差值，层数只影响观感与记忆负担。 */
+var LEVELS = [
+  { n:'试手 · 3 层', layers:3, kinds:6, per:9,  cols:5, slots:8, tools:1 },
+  { n:'入梦 · 4 层', layers:4, kinds:6, per:12, cols:5, slots:8, tools:2 },
+  { n:'沉梦 · 5 层', layers:5, kinds:7, per:15, cols:6, slots:9, tools:2 },
+  { n:'深梦 · 6 层', layers:6, kinds:8, per:18, cols:6, slots:9, tools:2 }
+];
+
+var G = null;
+function el(id){ return document.getElementById(id); }
+
+function build(cfg){
+  var deck = [];
+  for(var k=0;k<cfg.kinds;k++){
+    for(var i=0;i<cfg.per;i++) deck.push(ART[k % ART.length]);
+  }
+  for(var i=deck.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+  }
+  var cards = [], di = 0;
+  var perLayer = Math.ceil(deck.length / cfg.layers);
+  for(var L=0; L<cfg.layers && di<deck.length; L++){
+    var rows = Math.ceil(perLayer / cfg.cols);
+    var ox = (L % 2) * 0.5, oy = L * 0.42;
+    for(var r=0; r<rows && di<deck.length; r++){
+      for(var c=0; c<cfg.cols && di<deck.length; c++){
+        cards.push({ id: deck[di++], layer:L, gx: c + ox, gy: r + oy, out:false });
+      }
+    }
+  }
+  return cards;
+}
+
+/* 更高层里有牌与它重叠 = 被压住 */
+function covered(cards, card){
+  for(var i=0;i<cards.length;i++){
+    var o = cards[i];
+    if(o === card || o.out || o.layer <= card.layer) continue;
+    if(Math.abs(o.gx - card.gx) < 0.85 && Math.abs(o.gy - card.gy) < 0.85) return true;
+  }
+  return false;
+}
+
+function start(lvIdx){
+  var cfg = LEVELS[lvIdx];
+  G = {
+    cfg: cfg, lvIdx: lvIdx,
+    cards: build(cfg),
+    slots: [],
+    tools: { clear: cfg.tools, undo: 1 },
+    history: [],
+    picked: 0,
+    done: false
+  };
+  el('menu').classList.add('off');
+  el('lvName').textContent = cfg.n;
+  el('over').classList.remove('on');
+  render();
+}
+
+function render(){
+  var st = el('stack');
+  [].slice.call(st.querySelectorAll('.card')).forEach(function(e){ e.remove(); });
+
+  var alive = G.cards.filter(function(c){ return !c.out; });
+  el('left').textContent = '剩 ' + alive.length;
+
+  // 按实际占用范围算尺寸，并把整堆牌居中——否则牌堆缩在角落、下面空一大片
+  var minGx = 99, minGy = 99, maxGx = 0, maxGy = 0;
+  alive.forEach(function(c){
+    minGx = Math.min(minGx,c.gx); minGy = Math.min(minGy,c.gy);
+    maxGx = Math.max(maxGx,c.gx); maxGy = Math.max(maxGy,c.gy);
+  });
+  var spanX = maxGx - minGx, spanY = maxGy - minGy;
+  var pad = 10;
+  var W = st.clientWidth - pad*2, H = st.clientHeight - pad*2;
+  var size = Math.max(30, Math.min(78, Math.min(W/(spanX+1.15), H/(spanY+1.15))));
+  var stepX = size * 0.94, stepY = size * 0.94;
+  var offX = (st.clientWidth - (spanX * stepX + size)) / 2 - minGx * stepX;
+  var offY = (st.clientHeight - (spanY * stepY + size)) / 2 - minGy * stepY;
+
+  alive.slice().sort(function(a,b){ return a.layer - b.layer; }).forEach(function(c){
+    var cov = covered(G.cards, c);
+    var d = document.createElement('div');
+    d.className = 'card ' + (cov ? 'cov' : 'free');
+    d.style.width = size + 'px';
+    d.style.height = size + 'px';
+    d.style.left = (offX + c.gx * stepX) + 'px';
+    d.style.top = (offY + c.gy * stepY) + 'px';
+    d.style.zIndex = 5 + c.layer;
+    d.innerHTML = '<img src="art/items/' + c.id + '.png" alt="">';
+    if(!cov) d.onclick = function(){ pick(c); };
+    st.appendChild(d);
+  });
+
+  var n = G.cfg.slots, used = G.slots.length;
+  var html = '';
+  for(var i=0;i<n;i++){
+    var s = G.slots[i];
+    var cls = s ? ' on' : (used >= n-1 ? ' danger' : (used >= n-2 ? ' warn' : ''));
+    html += '<div class="slot' + cls + '">' +
+      (s ? '<img src="art/items/' + s + '.png" alt="">' : '') + '</div>';
+  }
+  el('slots').innerHTML = html;
+
+  el('nClear').textContent = 'x' + G.tools.clear;
+  el('nUndo').textContent = 'x' + G.tools.undo;
+  el('tClear').disabled = G.tools.clear <= 0 || !G.slots.length || G.done;
+  el('tUndo').disabled = G.tools.undo <= 0 || !G.history.length || G.done;
+}
+
+/* 卡槽抖一下，配合文字提示 */
+function flashSlots(){
+  var sl = el('slots');
+  if(!sl || !sl.classList) return;
+  sl.classList.remove('shake');
+  void sl.offsetWidth;
+  sl.classList.add('shake');
+}
+var tipTimer = null;
+function tip(msg){
+  var t = el('tip');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(function(){ t.classList.remove('on'); }, 1800);
+}
+function pick(card){
+  if(G.done || card.out) return;
+  if(G.slots.length >= G.cfg.slots){
+    // 静默无响应会让玩家以为卡死，必须给明确提示
+    flashSlots();
+    tip(G.tools.clear > 0 ? '格子满了，用「清一种」腾位置' : '格子满了，只能重来');
+    return;
+  }
+  G.history.push({ card:card, slots:G.slots.slice() });
+  if(G.history.length > 12) G.history.shift();
+  card.out = true;
+  G.picked++;
+  G.slots.push(card.id);
+  G.slots.sort();
+  clearTriples();
+  render();
+  checkEnd();
+}
+
+function clearTriples(){
+  var count = {};
+  G.slots.forEach(function(id){ count[id] = (count[id]||0) + 1; });
+  Object.keys(count).forEach(function(id){
+    while(count[id] >= 3){
+      var n = 0;
+      G.slots = G.slots.filter(function(x){
+        if(x === id && n < 3){ n++; return false; }
+        return true;
+      });
+      count[id] -= 3;
+    }
+  });
+}
+
+function checkEnd(){
+  var alive = G.cards.filter(function(c){ return !c.out; });
+  if(!alive.length && !G.slots.length){ finish(true); return; }
+  if(G.slots.length >= G.cfg.slots){
+    if(G.tools.clear <= 0 && G.tools.undo <= 0) finish(false);
+    else tip(G.tools.clear > 0 ? '格子满了，用「清一种」腾位置' : '格子满了，试试撤销');
+  }
+}
+
+function finish(win){
+  G.done = true;
+  el('ovTitle').textContent = win ? '梦醒了' : '卡住了';
+  el('ovDesc').textContent = win
+    ? '全部消完，用了 ' + G.picked + ' 步。这一档的难度合适吗？'
+    : '格子塞满又凑不出三个，道具也用完了。';
+  el('ovBtn').textContent = win ? '再玩一局' : '重来';
+  el('over').classList.add('on');
+  render();
+}
+
+/* 道具：消掉格子里最多的那一种。
+   比「退回牌堆」有用得多——退回去牌还在，格子照样堵着。 */
+el('tClear').onclick = function(){
+  if(G.tools.clear <= 0 || !G.slots.length) return;
+  G.tools.clear--;
+  var count = {};
+  G.slots.forEach(function(id){ count[id] = (count[id]||0) + 1; });
+  var best = null, bn = 0;
+  Object.keys(count).forEach(function(id){ if(count[id] > bn){ bn = count[id]; best = id; } });
+  G.slots = G.slots.filter(function(x){ return x !== best; });
+  G.done = false;
+  el('over').classList.remove('on');
+  render();
+};
+
+el('tUndo').onclick = function(){
+  if(G.tools.undo <= 0 || !G.history.length) return;
+  G.tools.undo--;
+  var h = G.history.pop();
+  h.card.out = false;
+  G.slots = h.slots;
+  G.picked--;
+  G.done = false;
+  el('over').classList.remove('on');
+  render();
+};
+
+el('ovBtn').onclick = function(){ start(G.lvIdx); };
+el('back').onclick = function(){ el('menu').classList.remove('off'); };
+[].slice.call(document.querySelectorAll('.lvbtn')).forEach(function(b){
+  b.onclick = function(){ start(+b.getAttribute('data-lv')); };
+});
+window.addEventListener('resize', function(){ if(G) render(); });
+</script>
+</body>
+</html>
